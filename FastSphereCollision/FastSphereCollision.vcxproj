@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{8333f003-313e-4c98-80aa-02d65a14e9e7}</ProjectGuid>
-    <RootNamespace>TemplateMetaProgramming</RootNamespace>
+    <ProjectGuid>{79c71225-f05a-4caf-96f0-a936b4b16501}</ProjectGuid>
+    <RootNamespace>FastSphereCollision</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -143,7 +143,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="TemplateMetaProgramming.cpp" />
+    <ClCompile Include="FastSphereCollision.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

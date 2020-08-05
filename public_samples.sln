@@ -11,6 +11,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MostSignificantBit", "MostS
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "StlTypeTest", "StlTypeTest\StlTypeTest.vcxproj", "{72C163F9-B504-4ED0-B20A-18F82C64255A}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FastSphereCollision", "FastSphereCollision\FastSphereCollision.vcxproj", "{79C71225-F05A-4CAF-96F0-A936B4B16501}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -51,6 +53,14 @@ Global
 		{72C163F9-B504-4ED0-B20A-18F82C64255A}.Release|x64.Build.0 = Release|x64
 		{72C163F9-B504-4ED0-B20A-18F82C64255A}.Release|x86.ActiveCfg = Release|Win32
 		{72C163F9-B504-4ED0-B20A-18F82C64255A}.Release|x86.Build.0 = Release|Win32
+		{79C71225-F05A-4CAF-96F0-A936B4B16501}.Debug|x64.ActiveCfg = Debug|x64
+		{79C71225-F05A-4CAF-96F0-A936B4B16501}.Debug|x64.Build.0 = Debug|x64
+		{79C71225-F05A-4CAF-96F0-A936B4B16501}.Debug|x86.ActiveCfg = Debug|Win32
+		{79C71225-F05A-4CAF-96F0-A936B4B16501}.Debug|x86.Build.0 = Debug|Win32
+		{79C71225-F05A-4CAF-96F0-A936B4B16501}.Release|x64.ActiveCfg = Release|x64
+		{79C71225-F05A-4CAF-96F0-A936B4B16501}.Release|x64.Build.0 = Release|x64
+		{79C71225-F05A-4CAF-96F0-A936B4B16501}.Release|x86.ActiveCfg = Release|Win32
+		{79C71225-F05A-4CAF-96F0-A936B4B16501}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
