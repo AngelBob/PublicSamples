@@ -25,6 +25,7 @@ template <unsigned int C>
 struct SpreadSheetColumnNameLength
 {
     static const unsigned int length = 1 + SpreadSheetColumnNameLength<( C - 1 ) / 26>::length;
+    static_assert( length <= ( sizeof( uint64_t ) - 1 ) );
 };
 
 template <>
@@ -38,7 +39,7 @@ struct SpreadSheetColumnName
 {
     static const unsigned int shift = SpreadSheetColumnNameLength<C>::length - 1;
     static const unsigned int temp = ( C - 1 ) % 26;
-    static const uint64_t result = static_cast<uint64_t>( ( temp + 'A' ) << ( 8 * shift ) )
+    static const uint64_t result = ( static_cast<uint64_t>( temp + 'A' ) << ( 8 * shift ) )
                                    | SpreadSheetColumnName<static_cast<unsigned int>( ( C - temp - 1 ) / 26 )>::result;
 };
 
@@ -90,6 +91,32 @@ struct has_thing<T, decltype( ( void ) T::thing, 0 )> : std::true_type {};
 
 #endif
 
+// 4) compile time bitmask builder
+// Sometimes it's necessary to create a range of bits for bit mask operations.
+// This template builds the constant mask value.
+template<unsigned int M>
+struct bit_mask
+{
+    static const uint64_t low_mask = ( 1ull << ( M - 1 ) ) | bit_mask< M - 1>::low_mask;
+    static const uint64_t mask = ( 1ull << M ) | bit_mask< M - 1 >::mask;
+};
+
+template<>
+struct bit_mask<0>
+{
+    static const uint64_t low_mask = 0ull;
+    static const uint64_t mask = 1ull;
+};
+
+template<unsigned int L, unsigned int H>
+struct bit_mask_range
+{
+    static const uint64_t high_mask = bit_mask< H >::mask;
+    static const uint64_t low_mask = bit_mask< L >::low_mask;
+
+    static const uint64_t mask = high_mask ^ low_mask;
+};
+
 //////////////////////////////////////////////////////////////////////////
 /// @brief  Binding table copy is CPU intesive, reduce the amount of data that gets copied
 template <typename T>
@@ -97,11 +124,11 @@ static inline void DoesTHaveThing( T p )
 {
     if constexpr( has_thing<T>::value )
     {
-        std::cout << "Thing was present in type T: " << p.thing << std::endl;
+        std::cout << "Thing was present in type T: " << p.thing << "\n\t";
     }
     else
     {
-        std::cout << "No Thing was present in type T" << std::endl;
+        std::cout << "No Thing was present in type T" << "\n\t";
     }
 }
 
@@ -120,54 +147,89 @@ struct NoThingHere
 int main()
 {
     // Exmaple 1) Factorial meta-programming test
-    std::cout << Factorial<5>::result << "\n";
+    std::cout << "Factorial meta-program test:\n\t";
+    std::cout << "5 Factorial is " << Factorial<5>::result << "\n";
+    std::cout << "\n====\n\n";
 
     // More meta-programming fun!  This time with spreadsheet column letters
     // This meta-program works for columns with up to 7 letters - which is
     // larger than a 32-bit integer, so should be okay for most use cases :-)
 
+    std::cout << "Spreadsheet column number to letter:\n\t";
+
     // Column "A" is the first column
     unsigned int len = SpreadSheetColumnNameLength<1>::length;
     uint64_t result = SpreadSheetColumnName<1>::result;
     char* text = reinterpret_cast<char*>( &result );
-    std::cout << "   1: " << len << ", " << text << "\n";
+    std::cout << "         1: " << len << ", " << text << "\n\t";
 
     // Column "Z" is the 26th
     len = SpreadSheetColumnNameLength<26>::length;
     result = SpreadSheetColumnName<26>::result;
     text = reinterpret_cast<char*>( &result );
-    std::cout << "  26: " << len << ", " << text << "\n";
+    std::cout << "        26: " << len << ", " << text << "\n\t";
 
-    // Column "AA" comes after "Z"
-    len = SpreadSheetColumnNameLength<27>::length;
-    result = SpreadSheetColumnName<27>::result;
+    // Column "AB" is the 28th column
+    len = SpreadSheetColumnNameLength<28>::length;
+    result = SpreadSheetColumnName<28>::result;
     text = reinterpret_cast<char*>( &result );
-    std::cout << "  27: " << len << ", " << text << "\n";
+    std::cout << "        28: " << len << ", " << text << "\n\t";
 
-    // Column "ZZ' is pretty far over there...
+    // Column "ZZ" is pretty far over there...
     len = SpreadSheetColumnNameLength<702>::length;
     result = SpreadSheetColumnName<702>::result;
     text = reinterpret_cast<char*>( &result );
-    std::cout << " 702: " << len << ", " << text << "\n";
+    std::cout << "       702: " << len << ", " << text << "\n\t";
+
+    // Column "AAA" is pretty far over there, too...
+    len = SpreadSheetColumnNameLength<703>::length;
+    result = SpreadSheetColumnName<703>::result;
+    text = reinterpret_cast< char * >( &result );
+    std::cout << "       703: " << len << ", " << text << "\n\t";
 
     // What about "ABC"?
     len = SpreadSheetColumnNameLength<731>::length;
     result = SpreadSheetColumnName<731>::result;
     text = reinterpret_cast<char*>( &result );
-    std::cout << " 731: " << len << ", " << text << "\n";
+    std::cout << "       731: " << len << ", " << text << "\n\t";
 
     // What the heck is way out here? "BBB" is the answer.
     len = SpreadSheetColumnNameLength<1406>::length;
     result = SpreadSheetColumnName<1406>::result;
     text = reinterpret_cast<char*>( &result );
-    std::cout << "1406: " << len << ", " << text << "\n";
+    std::cout << "      1406: " << len << ", " << text << "\n\t";
+
+    // What column is ULONG MAX?
+    len = SpreadSheetColumnNameLength<ULONG_MAX>::length;
+    result = SpreadSheetColumnName<ULONG_MAX>::result;
+    text = reinterpret_cast< char * >( &result );
+    std::cout << ULONG_MAX << ": " << len << ", " << text << "\n";
+    std::cout << "\n====\n\n";
 
     // 3) compile-time structure identification
+    std::cout << "Compile-time structure ID:\n\t";
     IHaveThing a;
     NoThingHere b;
 
     DoesTHaveThing( a );
     DoesTHaveThing( b );
+    std::cout << "\n====\n\n";
+
+    // 4) bit mask and bit mask range test
+    std::cout << "Bit mask and mask range test:\n\t";
+    std::cout << "mask through     0th bit            (0x1): 0x" << std::hex << bit_mask< 0>::mask << "\n\t";
+    std::cout << "                 5th               (0x3F): 0x" << std::hex << bit_mask< 5>::mask << "\n\t";
+    std::cout << "                31st         (0xFFFFFFFF): 0x" << std::hex << bit_mask<31>::mask << "\n\t";
+    std::cout << "                32nd        (0x1FFFFFFFF): 0x" << std::hex << bit_mask<32>::mask << "\n\t";
+    std::cout << "                47th     (0xFFFFFFFFFFFF): 0x" << std::hex << bit_mask<47>::mask << "\n\t";
+    std::cout << "                48th    (0x1FFFFFFFFFFFF): 0x" << std::hex << bit_mask<48>::mask << "\n\t";
+    std::cout << "                63rd (0xFFFFFFFFFFFFFFFF): 0x" << std::hex << bit_mask<63>::mask << "\n\t";
+
+    std::cout << "bit range 0th -  5th               (0x3F): 0x" << std::hex << bit_mask_range< 0, 5>::mask << "\n\t";
+    std::cout << "         22nd - 31st         (0xFFC00000): 0x" << std::hex << bit_mask_range<22,31>::mask << "\n\t";
+    std::cout << "         30th - 47th     (0xFFFFC0000000): 0x" << std::hex << bit_mask_range<30,47>::mask << "\n\t";
+    std::cout << "         46th - 63rd (0xFFFFC00000000000): 0x" << std::hex << bit_mask_range<46,63>::mask << "\n";
+    std::cout << "\n====\n\n";
 
     return 0;
 }
