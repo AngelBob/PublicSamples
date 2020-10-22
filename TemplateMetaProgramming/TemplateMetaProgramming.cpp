@@ -91,6 +91,33 @@ struct has_thing<T, decltype( ( void ) T::thing, 0 )> : std::true_type {};
 
 #endif
 
+template <typename T>
+static inline void DoesTHaveThing( T p )
+{
+    if constexpr( has_thing<T>::value )
+    {
+        std::cout << "Thing was present in type T: " << p.thing << "\n\t";
+    }
+    else
+    {
+        std::cout << "No Thing was present in type T" << "\n\t";
+    }
+}
+
+struct IHaveThing
+{
+    uint64_t thing;
+    IHaveThing() : thing( 16 )
+    {}
+};
+
+struct NoThingHere
+{
+    uint64_t no_thing;
+    NoThingHere() : no_thing( 32 )
+    {}
+};
+
 // 4) compile time bitmask builder
 // Sometimes it's necessary to create a range of bits for bit mask operations.
 // This template builds the constant mask value.
@@ -117,31 +144,37 @@ struct bit_mask_range
     static const uint64_t mask = high_mask ^ low_mask;
 };
 
-//////////////////////////////////////////////////////////////////////////
-/// @brief  Binding table copy is CPU intesive, reduce the amount of data that gets copied
-template <typename T>
-static inline void DoesTHaveThing( T p )
+// 5) build a compile time most-significant-bit finder
+template<unsigned int _Value>
+struct msb
 {
-    if constexpr( has_thing<T>::value )
-    {
-        std::cout << "Thing was present in type T: " << p.thing << "\n\t";
-    }
-    else
-    {
-        std::cout << "No Thing was present in type T" << "\n\t";
-    }
-}
-
-struct IHaveThing
-{
-    uint64_t thing;
-    IHaveThing() : thing( 16 ) {}
+    static const int32_t value = 1 + msb< ( _Value >> 1 ) >::value;
 };
 
-struct NoThingHere
+template<>
+struct msb<1>
 {
-    uint64_t no_thing;
-    NoThingHere() : no_thing( 32 ) {}
+    static const int32_t value = 0;
+};
+
+template<>
+struct msb<0>
+{
+    static const int32_t value = -1;
+};
+
+// 6) build a power-of-two round-up value at compile time
+template<unsigned int _Value>
+struct round_up_pow2
+{
+    static const  int32_t msb   = msb< ( _Value ) >::value;
+    static const uint32_t value = ( _Value & ( _Value - 1 ) ) == 0 ?  1 << msb : 1 << ( msb + 1 );
+};
+
+template<>
+struct round_up_pow2<0>
+{
+    static const uint32_t value = 0;
 };
 
 int main()
@@ -229,6 +262,26 @@ int main()
     std::cout << "         22nd - 31st         (0xFFC00000): 0x" << std::hex << bit_mask_range<22,31>::mask << "\n\t";
     std::cout << "         30th - 47th     (0xFFFFC0000000): 0x" << std::hex << bit_mask_range<30,47>::mask << "\n\t";
     std::cout << "         46th - 63rd (0xFFFFC00000000000): 0x" << std::hex << bit_mask_range<46,63>::mask << "\n";
+    std::cout << "\n====\n\n";
+
+    // 5) find value's most significant bit at compile time
+    std::cout << "Power of 2 round up test:\n\t";
+    std::cout << "0x00: 0x" << std::hex << msb<0>::value << "\n\t";
+    std::cout << "0x01: 0x" << std::hex << msb<1>::value << "\n\t";
+    std::cout << "0x02: 0x" << std::hex << msb<2>::value << "\n\t";
+    std::cout << "0x10: 0x" << std::hex << msb<0x10>::value << "\n\t";
+    std::cout << "0x13: 0x" << std::hex << msb<0x13>::value << "\n\t";
+    std::cout << "127:  0x" << std::hex << msb<127>::value << "\n\t";
+    std::cout << "\n====\n\n";
+
+    // 6) build a power of 2 rounded up value at compile time
+    std::cout << "Power of 2 round up test:\n\t";
+    std::cout << "0x00: 0x" << std::hex << round_up_pow2<0>::value << "\n\t";
+    std::cout << "0x01: 0x" << std::hex << round_up_pow2<1>::value << "\n\t";
+    std::cout << "0x02: 0x" << std::hex << round_up_pow2<2>::value << "\n\t";
+    std::cout << "0x10: 0x" << std::hex << round_up_pow2<0x10>::value << "\n\t";
+    std::cout << "0x13: 0x" << std::hex << round_up_pow2<0x13>::value << "\n\t";
+    std::cout << "127:  0x" << std::hex << round_up_pow2<127>::value << "\n\t";
     std::cout << "\n====\n\n";
 
     return 0;
