@@ -157,24 +157,12 @@ struct msb<1>
     static const int32_t value = 0;
 };
 
-template<>
-struct msb<0>
-{
-    static const int32_t value = -1;
-};
-
 // 6) build a power-of-two round-up value at compile time
 template<unsigned int _Value>
 struct round_up_pow2
 {
     static const  int32_t msb   = msb< ( _Value ) >::value;
     static const uint32_t value = ( _Value & ( _Value - 1 ) ) == 0 ?  1 << msb : 1 << ( msb + 1 );
-};
-
-template<>
-struct round_up_pow2<0>
-{
-    static const uint32_t value = 0;
 };
 
 int main()
@@ -265,8 +253,8 @@ int main()
     std::cout << "\n====\n\n";
 
     // 5) find value's most significant bit at compile time
-    std::cout << "Power of 2 round up test:\n\t";
-    std::cout << "0x00: 0x" << std::hex << msb<0>::value << "\n\t";
+    std::cout << "MSB test:\n\t";
+    //std::cout << "0x00: 0x" << std::hex << msb<0>::value << "\n\t"; // Build error, MSB of 0 is undefined
     std::cout << "0x01: 0x" << std::hex << msb<1>::value << "\n\t";
     std::cout << "0x02: 0x" << std::hex << msb<2>::value << "\n\t";
     std::cout << "0x10: 0x" << std::hex << msb<0x10>::value << "\n\t";
@@ -276,12 +264,14 @@ int main()
 
     // 6) build a power of 2 rounded up value at compile time
     std::cout << "Power of 2 round up test:\n\t";
-    std::cout << "0x00: 0x" << std::hex << round_up_pow2<0>::value << "\n\t";
+    //std::cout << "0x00: 0x" << std::hex << round_up_pow2<0>::value << "\n\t"; // Build error, POW2 round up for 0 is undefined
     std::cout << "0x01: 0x" << std::hex << round_up_pow2<1>::value << "\n\t";
     std::cout << "0x02: 0x" << std::hex << round_up_pow2<2>::value << "\n\t";
     std::cout << "0x10: 0x" << std::hex << round_up_pow2<0x10>::value << "\n\t";
     std::cout << "0x13: 0x" << std::hex << round_up_pow2<0x13>::value << "\n\t";
-    std::cout << "127:  0x" << std::hex << round_up_pow2<127>::value << "\n\t";
+    std::cout << "0x7f: 0x" << std::hex << round_up_pow2<0x7f>::value << "\n\t";
+    std::cout << "0x80: 0x" << std::hex << round_up_pow2<0x80>::value << "\n\t";
+    std::cout << "0x81: 0x" << std::hex << round_up_pow2<0x81>::value << "\n\t";
     std::cout << "\n====\n\n";
 
     return 0;
