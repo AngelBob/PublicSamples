@@ -13,6 +13,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "StlTypeTest", "StlTypeTest\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FastSphereCollision", "FastSphereCollision\FastSphereCollision.vcxproj", "{79C71225-F05A-4CAF-96F0-A936B4B16501}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DiamondPrinter", "DiamondPrinter\DiamondPrinter.vcxproj", "{3F50712A-5483-4BBC-8526-C66A4F08A6DE}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TicTacToe", "TicTacToe\TicTacToe.vcxproj", "{A8E5D372-E8EC-4231-966E-2064FACE860E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -61,6 +65,22 @@ Global
 		{79C71225-F05A-4CAF-96F0-A936B4B16501}.Release|x64.Build.0 = Release|x64
 		{79C71225-F05A-4CAF-96F0-A936B4B16501}.Release|x86.ActiveCfg = Release|Win32
 		{79C71225-F05A-4CAF-96F0-A936B4B16501}.Release|x86.Build.0 = Release|Win32
+		{3F50712A-5483-4BBC-8526-C66A4F08A6DE}.Debug|x64.ActiveCfg = Debug|x64
+		{3F50712A-5483-4BBC-8526-C66A4F08A6DE}.Debug|x64.Build.0 = Debug|x64
+		{3F50712A-5483-4BBC-8526-C66A4F08A6DE}.Debug|x86.ActiveCfg = Debug|Win32
+		{3F50712A-5483-4BBC-8526-C66A4F08A6DE}.Debug|x86.Build.0 = Debug|Win32
+		{3F50712A-5483-4BBC-8526-C66A4F08A6DE}.Release|x64.ActiveCfg = Release|x64
+		{3F50712A-5483-4BBC-8526-C66A4F08A6DE}.Release|x64.Build.0 = Release|x64
+		{3F50712A-5483-4BBC-8526-C66A4F08A6DE}.Release|x86.ActiveCfg = Release|Win32
+		{3F50712A-5483-4BBC-8526-C66A4F08A6DE}.Release|x86.Build.0 = Release|Win32
+		{A8E5D372-E8EC-4231-966E-2064FACE860E}.Debug|x64.ActiveCfg = Debug|x64
+		{A8E5D372-E8EC-4231-966E-2064FACE860E}.Debug|x64.Build.0 = Debug|x64
+		{A8E5D372-E8EC-4231-966E-2064FACE860E}.Debug|x86.ActiveCfg = Debug|Win32
+		{A8E5D372-E8EC-4231-966E-2064FACE860E}.Debug|x86.Build.0 = Debug|Win32
+		{A8E5D372-E8EC-4231-966E-2064FACE860E}.Release|x64.ActiveCfg = Release|x64
+		{A8E5D372-E8EC-4231-966E-2064FACE860E}.Release|x64.Build.0 = Release|x64
+		{A8E5D372-E8EC-4231-966E-2064FACE860E}.Release|x86.ActiveCfg = Release|Win32
+		{A8E5D372-E8EC-4231-966E-2064FACE860E}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
