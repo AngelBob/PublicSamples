@@ -1,121 +1,875 @@
 // TicTacToe.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
-#include <iostream>
-#include <sstream>
+#include <array>
 #include <ctime>
 #include <cassert>
+#include <iostream>
+#include <sstream>
+#include <utility>
+#include <vector>
 
-using namespace std;
-
-static const char EMPTY_SQUARE = ' ';
 static const char FIRST_PLAYER_CHIT = 'X';
 static const char SECOND_PLAYER_CHIT = 'O';
 
-enum _CHECK_WINNER
+class Board
 {
-    NO_WINNER = 0,
-    FIRST_PLAYER_WINS,
-    SECOND_PLAYER_WINS,
-    CAT_GAME,
-};
-
-enum _SQAURES
-{
-    UPPER_LEFT = 0,
-    UPPER_MID,
-    UPPER_RIGHT,
-    CENTER_LEFT,
-    CENTER_MID,
-    CENTER_RIGHT,
-    LOWER_LEFT,
-    LOWER_MID,
-    LOWER_RIGHT,
-    MAX_SQUARE,
-};
-
-// Here's an array of all possible winning square combinations
-// Array is ordered to favor winning combindations that use the center square, and
-// corners taken precidence over edges.
-// Each entry is ordered similarly, with center square in index 0, then corners and edges
-static const int winners[ 8 ][ 3 ] = { { CENTER_MID, UPPER_LEFT, LOWER_RIGHT },
-                                       { CENTER_MID, LOWER_LEFT, UPPER_RIGHT },
-                                       { CENTER_MID, CENTER_LEFT, CENTER_RIGHT },
-                                       { CENTER_MID, UPPER_MID, LOWER_MID },
-                                       { UPPER_LEFT, UPPER_RIGHT, UPPER_MID },
-                                       { UPPER_LEFT, CENTER_LEFT, LOWER_LEFT },
-                                       { UPPER_RIGHT, LOWER_RIGHT, CENTER_RIGHT },
-                                       { LOWER_LEFT, LOWER_RIGHT, LOWER_MID },
-                                     };
-static const int winner_count = sizeof( winners ) / sizeof( winners[ 0 ] );
-
-bool MainMenu( bool playedOnce )
-{
-    bool play = false;
-    char startChoice = '\0';
-    while( startChoice != 'p' && startChoice != 'P' &&
-           startChoice != 'q' && startChoice != 'Q' )
+public:
+    enum _CHECK_WINNER
     {
-        cout << ( startChoice == '\0' ? "What would you like to do:" : "Please choose one of P or Q:" ) << endl;
-        cout << "P)lay" << ( playedOnce ? " again or" : " or" ) << endl;
-        cout << "Q)uit: ";
+        NO_WINNER = 0,
+        FIRST_PLAYER_WINS,
+        SECOND_PLAYER_WINS,
+        CAT_GAME,
+    };
 
-        cin >> startChoice;
-        cin.clear();
-        cin.ignore( 15, '\n' );
+    enum _SQAURES
+    {
+        INVALID_SQUARE = -1,
+        UPPER_LEFT = 0,
+        UPPER_MID,
+        UPPER_RIGHT,
+        CENTER_LEFT,
+        CENTER_MID,
+        CENTER_RIGHT,
+        LOWER_LEFT,
+        LOWER_MID,
+        LOWER_RIGHT,
+        MAX_SQUARE,
+    };
 
-        // Check the choice
-        if( startChoice == 'p' || startChoice == 'P' )
-        {
-            // User wants to play.
-            play = true;
-        }
+    static const int EMPTY_SQUARE = ' ';
 
-        cout << endl;
+    Board()
+    {
+        Reset();
     }
 
-    return play;
-}
-
-void PrintBoard( char ( &gameBoard )[ MAX_SQUARE ] )
-{
-    // Print the column header
-    cout << "   1   2   3\n";
-
-    // Print the board
-    for( int row = 0; row < 3; ++row )
+    void Reset( void )
     {
-        // Print the row header
-        cout << ( row + 1 ) << " ";
-
-        // Print the board
-        for( int col = 0; col < 3; ++col )
+        for( int square = UPPER_LEFT; square < MAX_SQUARE; ++square )
         {
-            cout << " ";
-            cout << gameBoard[ ( row * 3 ) + col ];
-            if( col < 2 )
+            m_Board[ square ] = EMPTY_SQUARE;
+        }
+
+        m_FirstSquare = INVALID_SQUARE;
+        m_SquaresTaken = 0;
+    }
+
+    int GetMoveNumber( void )
+    {
+        // Move number is one more than the current number occupied squares
+        return m_SquaresTaken + 1;
+    }
+
+    int GetFirstMove( void )
+    {
+        return m_FirstSquare;
+    }
+
+    bool IsGoodMove( const int squareId )
+    {
+        bool okay =
+            ( ( UPPER_LEFT <= squareId ) && ( squareId < MAX_SQUARE )
+                && IsSquareEmpty( squareId )
+            );
+
+        return okay;
+    }
+
+    bool IsSquareEmpty( const int squareId )
+    {
+        return GetSquareValue( squareId ) == EMPTY_SQUARE;
+    }
+
+    void SetEmptySquare( const int squareId )
+    {
+        m_Board[ squareId ] = EMPTY_SQUARE;
+        if( m_SquaresTaken > 0 )
+        {
+            // When reseting a square, decrement the taken squares count
+            --m_SquaresTaken;
+        }
+    }
+
+    char GetSquareValue( const int squareId )
+    {
+        return m_Board[ squareId ];
+    }
+
+    void SetSquareValue( const int squareId, const char chit )
+    {
+        m_Board[ squareId ] = chit;
+
+        if( m_SquaresTaken == 0 )
+        {
+            // Store the first square taken
+            m_FirstSquare = squareId;
+        }
+
+        // When setting a square, increment the set squares count
+        ++m_SquaresTaken;
+    }
+
+    int IsGameOver( void )
+    {
+        // Look for winner
+        int whoWon = NO_WINNER;
+        int winningSquare = INVALID_SQUARE;
+
+        // Need to have at least 5 moves before there can be a winner
+        if( m_SquaresTaken >= 5 )
+        {
+            // Just go through the array of winning combinations
+            for( auto &winningCombo : winningCombos )
             {
-                cout << " |";
+                const int a = winningCombo[ 0 ];
+                const int b = winningCombo[ 1 ];
+                const int c = winningCombo[ 2 ];
+
+                if( !IsSquareEmpty( a )
+                    && GetSquareValue( a ) == GetSquareValue( b )
+                    && GetSquareValue( a ) == GetSquareValue( c )
+                    )
+                {
+                    winningSquare = a;
+                    break;
+                }
+            }
+
+            if( winningSquare != INVALID_SQUARE )
+            {
+                // There's a winner!  Figure out which player won.
+                if( FIRST_PLAYER_CHIT == GetSquareValue( winningSquare ) )
+                {
+                    whoWon = FIRST_PLAYER_WINS;
+                }
+                else
+                {
+                    whoWon = SECOND_PLAYER_WINS;
+                }
+            }
+            else
+            {
+                // There's no winner, see if the board is full
+                whoWon = CAT_GAME;
+                for( int square = UPPER_LEFT; square < MAX_SQUARE; ++square )
+                {
+                    if( IsSquareEmpty( square ) )
+                    {
+                        whoWon = NO_WINNER;
+                        break;
+                    }
+                }
             }
         }
-        
-        if( row < 2 )
+
+        return whoWon;
+    }
+
+    const std::array<std::array<int, 3>,8>& GetWinningCombinations( void )
+    {
+        return winningCombos;
+    }
+
+    void PrintBoard( std::ostream &out ) const
+    {
+        // Print the column header
+        out << "   1   2   3\n";
+
+        // Print the board
+        for( long long int row = 0; row < 3; ++row )
         {
-            cout << "\n  ---+---+---\n";
+            // Print the row header
+            out << ( row + 1 ) << " ";
+
+            // Print the board
+            for( long long int col = 0; col < 3; ++col )
+            {
+                out << " ";
+                out << m_Board[ ( row * 3 ) + col ];
+                if( col < 2 )
+                {
+                    out << " |";
+                }
+            }
+
+            if( row < 2 )
+            {
+                out << "\n  ---+---+---\n";
+            }
+        }
+        out << "\n" << std::endl;
+    };
+
+private:
+    // Here's an array of all possible winning square combinations
+    // Array is ordered to favor winning combindations that use the center square, and
+    // corners taken precidence over edges.
+    // Each entry is ordered similarly, with center square in index 0, then corners and edges
+    const std::array< std::array<int, 3>, 8> winningCombos{ {
+        { CENTER_MID,  UPPER_LEFT,  LOWER_RIGHT  },
+        { CENTER_MID,  LOWER_LEFT,  UPPER_RIGHT  },
+        { CENTER_MID,  CENTER_LEFT, CENTER_RIGHT },
+        { CENTER_MID,  UPPER_MID,   LOWER_MID    },
+        { UPPER_LEFT,  UPPER_RIGHT, UPPER_MID    },
+        { UPPER_LEFT,  CENTER_LEFT, LOWER_LEFT   },
+        { UPPER_RIGHT, LOWER_RIGHT, CENTER_RIGHT },
+        { LOWER_LEFT,  LOWER_RIGHT, LOWER_MID    },
+    } };
+
+    std::array<char, 9> m_Board;
+
+    int  m_FirstSquare;
+    int  m_SquaresTaken;
+};
+
+std::ostream &operator<<( std::ostream &out, const Board& board )
+{
+    board.PrintBoard( out );
+
+    return out;
+};
+
+class AI
+{
+public:
+    enum _USER_LEVEL
+    {
+        LEVEL_BEGINNER = 1,
+        LEVEL_INTERMEDIATE,
+        LEVEL_EXPERT,
+    };
+
+    AI( const char chit )
+        : m_Chit( chit )
+    {
+        Reset();
+    }
+
+    int TakeWinningSquare( std::unique_ptr<Board>& board, const float missWinPct, const float missBlockPct )
+    {
+        bool haveMyWinner = false;
+        bool haveTheirWinner = false;
+        int theirWinner = Board::INVALID_SQUARE;
+        int winSquare = Board::INVALID_SQUARE;
+
+        for( auto& winner : board->GetWinningCombinations() )
+        {
+            const int a = winner[ 0 ];
+            const int b = winner[ 1 ];
+            const int c = winner[ 2 ];
+
+            // If all squares are empty, skip it
+            if( board->IsSquareEmpty( a ) && board->IsSquareEmpty( b ) && board->IsSquareEmpty( c ) )
+            {
+                continue;
+            }
+
+            // If any two of the squares on the game board at indices a, b, or c match
+            // and the third is empty, then the third is a winning square.
+            if( board->GetSquareValue( a ) == board->GetSquareValue( b ) && board->IsSquareEmpty( c ) )
+            {
+                haveMyWinner = ( board->GetSquareValue( a ) == m_Chit );
+                winSquare = c;
+            }
+            else if( board->GetSquareValue( a ) == board->GetSquareValue( c ) && board->IsSquareEmpty( b ) )
+            {
+                haveMyWinner = ( board->GetSquareValue( a ) == m_Chit );
+                winSquare = b;
+            }
+            else if( board->GetSquareValue( b ) == board->GetSquareValue( c ) && board->IsSquareEmpty( a ) )
+            {
+                haveMyWinner = ( board->GetSquareValue( b ) == m_Chit );
+                winSquare = a;
+            }
+
+            if( winSquare >= Board::UPPER_LEFT )
+            {
+                haveTheirWinner = !haveMyWinner;
+                if( haveMyWinner )
+                {
+                    break;
+                }
+                else
+                {
+                    theirWinner = winSquare;
+                }
+            }
+        }
+
+        if( haveTheirWinner && !haveMyWinner )
+        {
+            // It's a blocking move
+            winSquare = theirWinner;
+        }
+
+        if( winSquare != Board::INVALID_SQUARE )
+        {
+            // There's a winning or blocking square, does the AI take it or miss it?
+            float percentChance = ( static_cast< float >( rand() ) / static_cast< float >( RAND_MAX ) ) * 100;
+            float compChance;
+            if( haveMyWinner )
+            {
+                // At beginner and intermediate levels, the AI has some chance of missing it's own
+                // winning move.
+                compChance = missWinPct;
+            }
+            else
+            {
+                // If it's not the AI winner, it must be a blocking move
+                assert( haveTheirWinner );
+
+                // At beginner and intermediate levels, the AI has some chance of missing it's own
+                // winning move.
+                compChance = missBlockPct;
+            }
+
+            if( percentChance < compChance )
+            {
+                // AI misses the win or block
+                winSquare = Board::INVALID_SQUARE;
+            }
+        }
+
+        return winSquare;
+    }
+
+    int TakeCornerSquare( std::unique_ptr<Board>& board )
+    {
+        int corner = Board::INVALID_SQUARE;
+
+        // Look at the corners and take one, if available, preferring opposite corners
+        if( !board->IsSquareEmpty( Board::UPPER_LEFT ) && board->IsSquareEmpty( Board::LOWER_RIGHT ) )
+        {
+            corner = Board::LOWER_RIGHT;
+        }
+        else if( board->IsSquareEmpty( Board::UPPER_LEFT ) && !board->IsSquareEmpty( Board::LOWER_RIGHT ) )
+        {
+            corner = Board::UPPER_LEFT;
+        }
+        else if( !board->IsSquareEmpty( Board::LOWER_LEFT ) && board->IsSquareEmpty( Board::UPPER_RIGHT ) )
+        {
+            corner = Board::UPPER_RIGHT;
+        }
+        else if( board->IsSquareEmpty( Board::LOWER_LEFT ) && !board->IsSquareEmpty( Board::UPPER_RIGHT ) )
+        {
+            corner = Board::LOWER_LEFT;
+        }
+        else if( board->IsSquareEmpty( Board::UPPER_LEFT ) )
+        {
+            corner = Board::UPPER_LEFT;
+        }
+        else if( board->IsSquareEmpty( Board::UPPER_RIGHT ) )
+        {
+            corner = Board::UPPER_RIGHT;
+        }
+        else if( board->IsSquareEmpty( Board::LOWER_LEFT ) )
+        {
+            corner = Board::LOWER_LEFT;
+        }
+        else if( board->IsSquareEmpty( Board::LOWER_RIGHT ) )
+        {
+            corner = Board::LOWER_RIGHT;
+        }
+
+        return corner;
+    }
+
+    int TakeAdjacentSquare( std::unique_ptr<Board>& board, int playerSquare )
+    {
+        // This function is called at most 1 time after the player's first turn.
+        // Because there can only ever be a single filled square (the player's
+        // square) it's guaranteed that the adjacent square is open.  Randomly
+        // choose one of the adjacent squares
+        int adjacent = Board::INVALID_SQUARE;
+
+        bool whichAdjacent = static_cast< bool >( rand() & 0x1 );
+
+        // If the player took a adjacent, choose an adjacent edge
+        if( playerSquare == Board::UPPER_LEFT )
+        {
+            // Look at the edges and take and open one
+            if( whichAdjacent )
+            {
+                adjacent = Board::CENTER_LEFT;
+            }
+            else
+            {
+                adjacent = Board::UPPER_MID;
+            }
+        }
+        else if( playerSquare == Board::UPPER_RIGHT )
+        {
+            // Look at the edges and take and open one
+            if( whichAdjacent )
+            {
+                adjacent = Board::UPPER_MID;
+            }
+            else
+            {
+                adjacent = Board::CENTER_RIGHT;
+            }
+        }
+        else if( playerSquare == Board::LOWER_RIGHT )
+        {
+            if( whichAdjacent )
+            {
+                adjacent = Board::CENTER_RIGHT;
+            }
+            else
+            {
+                adjacent = Board::LOWER_MID;
+            }
+        }
+        else if( playerSquare == Board::LOWER_LEFT )
+        {
+            if( whichAdjacent )
+            {
+                adjacent = Board::LOWER_MID;
+            }
+            else
+            {
+                adjacent = Board::CENTER_MID;
+            }
+        }
+
+        return adjacent;
+    }
+
+    int TakeCenterSquare( std::unique_ptr<Board>& board )
+    {
+        int square = Board::INVALID_SQUARE;
+        if( board->IsSquareEmpty( Board::CENTER_MID ) )
+        {
+            square = Board::CENTER_MID;
+        }
+
+        return square;
+    }
+
+    int TakeAnySquare( std::unique_ptr<Board>& board )
+    {
+        // Player is playing randomly or poorly, so just pick any remaining open square
+        int square;
+        for( square = Board::UPPER_LEFT; square < Board::MAX_SQUARE; ++square )
+        {
+            if( board->IsSquareEmpty( square ) )
+            {
+                break;
+            }
+        }
+
+        return square;
+    }
+    int TakeCounteringSquare( std::unique_ptr<Board>& board, int playerSquare )
+    {
+        int square = Board::INVALID_SQUARE;
+
+        // On the first move, the appropriate response is to remove the square that
+        // provides the player with multiple paths to victory; case are:
+        // 1) player takes center - ai wants any corner,
+        // 2) player takes corner - ai wants an adjacent edge,
+        // 3) player takes edge   - ai wants the center square.
+        if( playerSquare == Board::CENTER_MID )
+        {
+            // Player takes the center, AI wants any corner
+            square = TakeCornerSquare( board );
+        }
+        else if( playerSquare == Board::UPPER_LEFT || playerSquare == Board::UPPER_RIGHT || playerSquare == Board::LOWER_RIGHT || playerSquare == Board::LOWER_LEFT )
+        {
+            // Player took a corner, AI wants an adjacent edge
+            square = TakeAdjacentSquare( board, playerSquare );
+        }
+        else
+        {
+            // Player took an edge, center square is the appropriate block
+            square = Board::CENTER_MID;
+        }
+
+        return square;
+    }
+
+    int TakeRandomSquare( std::unique_ptr<Board>& board )
+    {
+        bool IsGoodMove;
+        int isWinner;
+        int square = Board::INVALID_SQUARE;
+        do
+        {
+            isWinner = Board::NO_WINNER;
+
+            square = m_RandomSquares.back();
+            m_RandomSquares.pop_back();
+
+            IsGoodMove = board->IsGoodMove( square );
+            if( IsGoodMove )
+            {
+                // Space is open, check for winner for either player
+                board->SetSquareValue( square, m_Chit );
+                isWinner = board->IsGameOver();
+                if( Board::NO_WINNER == isWinner )
+                {
+                    char playerChit = ( m_Chit == FIRST_PLAYER_CHIT ) ? SECOND_PLAYER_CHIT : FIRST_PLAYER_CHIT;
+                    board->SetSquareValue( square, playerChit );
+                    isWinner = board->IsGameOver();
+                }
+
+                // Reset the board space, the correct chit will be placed after
+                // the square choice is returned.
+                board->SetEmptySquare( square );
+            }
+        } while( !IsGoodMove || ( Board::NO_WINNER != isWinner ) );
+
+        return square;
+    }
+
+    const char GetAIChit( void )
+    {
+        return m_Chit;
+    }
+
+    void Reset( void )
+    {
+        m_MoveNumber = 0;
+        m_PlayersFirstSquare = Board::INVALID_SQUARE;
+
+        // Create the list of random square options
+        if( m_RandomSquares.size() == 0 )
+        {
+            m_RandomSquares.reserve( Board::MAX_SQUARE );
+        }
+        else
+        {
+            m_RandomSquares.clear();
+        }
+
+        std::vector<int> squares;
+        for( int idx = 0; idx < Board::MAX_SQUARE; ++idx )
+        {
+            squares.emplace_back( idx );
+        }
+
+        do
+        {
+            std::vector<int>::iterator iter = squares.begin();
+
+            int index = rand() % squares.size();
+            m_RandomSquares.emplace_back( squares[ index ] );
+
+            iter += index;
+            squares.erase( iter );
+        } while( 0 != squares.size() );
+    }
+
+    virtual int GetAIMove( std::unique_ptr<Board>& Board ) = 0;
+    virtual int GetAILevel( void ) = 0;
+
+protected:
+    char m_Chit;
+    int  m_MoveNumber;
+    int  m_PlayersFirstSquare;
+    std::vector<int> m_RandomSquares;
+};
+
+class AI_Beginner : public AI
+{
+    // Knobs for tuning the AI
+    inline static const float MISS_WIN_PCT = 20.0f;
+    inline static const float MISS_BLOCK_PCT = 50.0f;
+
+public:
+    AI_Beginner( const char chit )
+        : AI( chit )
+    {
+    }
+
+    int GetAIMove( std::unique_ptr<Board>& board )
+    {
+        // AI move percentages are tunable, so the percentages and values here
+        // may not be reflective of the actual AI operation.
+
+        // At beginner level:
+        //     The AI will not see an opponent's winning move 50% of the time, and
+        //     will not see it's own winning move 20% of the time.
+        //     Other AI moves are random.
+
+        // Step 1 - try to win (or block, it's the same logic):
+        int square = Board::INVALID_SQUARE;
+        square = TakeWinningSquare( board, MISS_WIN_PCT, MISS_BLOCK_PCT );
+
+        // Step 2 - take a random square.
+        if( Board::INVALID_SQUARE == square )
+        {
+            square = TakeRandomSquare( board );
+        }
+
+        // User gets a move, then it's AIs turn again
+        m_MoveNumber += 2;
+
+        return square;
+    }
+
+    int GetAILevel( void )
+    {
+        return LEVEL_BEGINNER;
+    }
+};
+
+class AI_Intermediate : public AI
+{
+    // Knobs for tuning the AI
+    inline static const float MISS_WIN_PCT = 5.0f;
+    inline static const float MISS_BLOCK_PCT = 20.0f;
+
+public:
+    AI_Intermediate( const char chit )
+        : AI( chit )
+    {}
+
+    int GetAIMove( std::unique_ptr<Board> &board )
+    {
+        // AI move percentages are tunable, so the percentages and values here
+        // may not be reflective of the actual AI operation.
+
+        // At the intermediate level:
+        //     The AI will not see an opponent's winning move 20% of the time, and
+        //     will not see it's own winning move 5% of the time.
+        //     TODO:  figure out the rest of this level.  Currently it's just "beginner"
+        //            random moves with a better chance of noticing the win/block.
+
+        // Step 1 - try to win (or block, it's the same logic):
+        int square = Board::INVALID_SQUARE;
+        square = TakeWinningSquare( board, MISS_WIN_PCT, MISS_BLOCK_PCT );
+
+        if( Board::INVALID_SQUARE == square )
+        {
+            square = TakeRandomSquare( board );
+        }
+
+        // User gets a move, then it's AIs turn again
+        m_MoveNumber += 2;
+
+        return square;
+    }
+
+    int GetAILevel( void )
+    {
+        return LEVEL_INTERMEDIATE;
+    }
+};
+
+class AI_Expert : public AI
+{
+    // Knobs for tuning the AI
+    inline static const float MISS_WIN_PCT = 0.0f;
+    inline static const float MISS_BLOCK_PCT = 0.0f;
+
+public:
+    AI_Expert( const char chit )
+        : AI( chit )
+    {}
+
+    int GetAIMove( std::unique_ptr<Board> &board )
+    {
+        // AI move percentages are tunable, so the percentages and values here
+        // may not be reflective of the actual AI operation.
+
+        // At expert level:
+        //     The AI will always block an opponent's winning move, and will
+        //     never miss it's own winning move.
+        //
+        //     Other AI moves depend on who went first.
+        //     If the AI goes first then it's move is to take a corner.
+        //     If the AI goes second then it's move depends on what the opponent did:
+        //         a) if the oppenent took a corner, AI picks an edge square
+        //            adjacent to the opponent's move, else
+        //         b) if the oppenent took an edge, AI picks the center, else
+        //         c) the player took the center, then
+        //            ai takes a corner.
+
+        // After the second move, it's either:
+        // a) block or
+        // b) a cat game, so square choice is irrelevant
+
+        // Step 1 - try to win (or block, it's the same logic):
+        int square = Board::INVALID_SQUARE;
+        square = TakeWinningSquare( board, MISS_WIN_PCT, MISS_BLOCK_PCT );
+
+        // Step 2 - take a corner or an edge, depending on who goes first
+        // First move response is the critical one, if it's not a response
+        // to the first move, then just try taking a corner (or use a
+        // corner as the opening salvo.
+
+        if( Board::INVALID_SQUARE == square )
+        {
+            int moveNumber = board->GetMoveNumber();
+            if( 2 == moveNumber )
+            {
+                // Player moved first, make the correct countering move
+                square = TakeCounteringSquare( board, board->GetFirstMove() );
+            }
+            else if( 4 == moveNumber )
+            {
+                // AI's second move should be to take the center square
+                // if it's available, otherwise take a corner
+                square = TakeCenterSquare( board );
+            }
+        }
+
+        if( Board::INVALID_SQUARE == square )
+        {
+            // By default, the AI wants a corner square
+            square = TakeCornerSquare( board );
+        }
+
+        // If the player is not trying to win, we could end up here.
+        if( Board::INVALID_SQUARE == square )
+        {
+            // On the way to a cat game, pick any open space
+            square = TakeAnySquare( board );
+            assert( ( Board::UPPER_LEFT <= square ) && ( square < Board::MAX_SQUARE ) );
+        }
+
+        return square;
+    }
+
+    int GetAILevel( void )
+    {
+        return LEVEL_EXPERT;
+    }
+};
+
+class Menu
+{
+public:
+    static void PrintHeader( void )
+    {
+        std::cout << "Let's play Tic-Tac-Toe\n";
+        std::cout << "The first to get three in a row horizontally, vertically, or diagonaly is the winner\n";
+        std::cout << std::endl;
+    }
+
+    static bool DoMainMenu( bool playedOnce )
+    {
+        char startChoice = '\0';
+        do
+        {
+            std::cout << ( startChoice == '\0' ? "What would you like to do:" : "Please choose one of P or Q:" ) << std::endl;
+            std::cout << "P)lay" << ( playedOnce ? " again or" : " or" ) << std::endl;
+            std::cout << "Q)uit: ";
+
+            std::cin >> startChoice;
+            std::cin.clear();
+            std::cin.ignore( 15, '\n' );
+
+            std::cout << std::endl;
+        } while( startChoice != 'p' && startChoice != 'P' &&
+            startChoice != 'q' && startChoice != 'Q' );
+
+        // Check the choice
+        bool play = ( startChoice == 'p' || startChoice == 'P' );
+
+        return play;
+    }
+
+    static int DoUserLevelMenu( void )
+    {
+        char playerLevel = '\0';
+        do
+        {
+            std::cout << ( playerLevel == '\0' ? "Choose your Tic-Tac-Toe knowledge level:\n" : "Please choose one of B, I, or E:\n" );
+            std::cout << "B)eginner\n";
+            std::cout << "I)ntermediate\n";
+            std::cout << "E)xpert: ";
+
+            std::cin >> playerLevel;
+            std::cin.clear();
+            std::cin.ignore( 15, '\n' );
+
+            std::cout << std::endl;
+        } while( playerLevel != 'b' && playerLevel != 'B' &&
+            playerLevel != 'i' && playerLevel != 'I' &&
+            playerLevel != 'e' && playerLevel != 'E' );
+
+        // Have a valid player level choice
+        int aiLevel = AI::LEVEL_BEGINNER;
+        switch( playerLevel )
+        {
+        case 'b':
+        case 'B':
+            aiLevel = AI::LEVEL_BEGINNER;
+            break;
+        case 'i':
+        case 'I':
+            aiLevel = AI::LEVEL_INTERMEDIATE;
+            break;
+        case 'e':
+        case 'E':
+            aiLevel = AI::LEVEL_EXPERT;
+            break;
+        default:
+            assert( !"Shouldn't ever get here... has there been another player level added? " );
+            break;
+        }
+
+        return aiLevel;
+    }
+
+    static void PrintPlayOrder( bool playerFirst )
+    {
+        std::cout << ( playerFirst ? "You go" : "The computer goes" ) << " first\n";
+        if( playerFirst )
+        {
+            std::cout << "You play " << FIRST_PLAYER_CHIT << " and the computer plays " << SECOND_PLAYER_CHIT << "\n";
+        }
+        else
+        {
+            std::cout << "The computer plays " << FIRST_PLAYER_CHIT << " and you play " << SECOND_PLAYER_CHIT << "\n";
+        }
+        std::cout << std::endl;
+    }
+
+    static void PrintWrapUp( std::unique_ptr<Board>& board, int whoWon, char aiChit )
+    {
+        switch( whoWon )
+        {
+        case Board::FIRST_PLAYER_WINS:
+            if( aiChit == FIRST_PLAYER_CHIT )
+            {
+                std::cout << "Computer wins, but I got to go first.\n";
+            }
+            else
+            {
+                std::cout << "Player wins!  Congratulations, well played.\n";
+            }
+            std::cout << std::endl;
+            break;
+
+        case Board::SECOND_PLAYER_WINS:
+            if( aiChit == SECOND_PLAYER_CHIT )
+            {
+                std::cout << "Computer wins!  Phew, it's a lot harder to win going second.\n";
+            }
+            else
+            {
+                std::cout << "Player wins!  You came from behind.\n";
+            }
+            std::cout << std::endl;
+            break;
+
+        case Board::CAT_GAME:
+            std::cout << "Wow!  Great game, nobody was able to come out on top.\n";
+            std::cout << std::endl;
+            break;
+
+        default:
+            break;
         }
     }
-    cout << "\n" << endl;
-}
+};
 
-bool GoodMove( char( &gameBoard )[ MAX_SQUARE ], int squareId )
-{
-    bool goodMove = (   ( UPPER_LEFT <= squareId )
-                     && ( squareId < MAX_SQUARE )
-                     && ( gameBoard[ squareId ] == EMPTY_SQUARE ) );
-    return goodMove;
-}
-
-int ParseUserInput( stringstream &userInput )
+int ParseUserInput( std::stringstream &userInput )
 {
     // Parse it out and validate, start by assuming the input is bad...
     // Should have the format ( x , y ) or x , y; spaces and parenthesis are optional, the comma is required.
@@ -228,7 +982,7 @@ int ParseUserInput( stringstream &userInput )
     }
 
     // If the parse was valid, then set the square
-    int square = -1;
+    int square = Board::INVALID_SQUARE;
     if( COMPLETE_PARSE == state )
     {
         square = ( row * 3 ) + col;
@@ -239,428 +993,50 @@ int ParseUserInput( stringstream &userInput )
 
 int GetPlayerMove( char playerChit )
 {
-    string input;
+    std::string input;
 
     bool haveGoodInput = false;
     int square = 0;
     do
     {
         // Prompt the player for a selection
-        cout << "You're playing " << playerChit << "\n";
+        std::cout << "You're playing " << playerChit << "\n";
 
         if( 0 == square )
         {
-            cout << "Please enter your choice in ";
+            std::cout << "Please enter your choice in ";
         }
         else
         {
-            cout << "Rember to use ";
+            std::cout << "Rember to use ";
         }
-        cout << "(row, column) format (e.g., 2,3)\n";
-        cout << "Which square would you like? ";
+        std::cout << "(row, column) format (e.g., 2,3)\n";
+        std::cout << "Which square would you like? ";
 
         // Get the user input
-        getline( cin, input );
+        getline( std::cin, input );
 
-        stringstream userInput( input );
+        std::stringstream userInput( input );
 
-        // Sqaure will either be set to a valid index or left as -1 on input parse
+        // Sqaure will either be set to a valid index or left as Board::INVALID_SQUARE on input parse
         square = ParseUserInput( userInput );
-        if( -1 == square )
+        if( Board::INVALID_SQUARE == square )
         {
-            cout << "\nI'm sorry, I didn't understand that.  Please try again.\n" << endl;
+            std::cout << "\nI'm sorry, I didn't understand that.  Please try again.\n" << std::endl;
         }
-    } while( -1 == square );
+    } while( Board::INVALID_SQUARE == square );
 
     return square;
 }
 
-int TakeWinningSquare( char( &gameBoard )[ MAX_SQUARE ], char aiChit )
+void DoMove( std::unique_ptr<Board>& board, std::unique_ptr<AI>& ai, bool playerTurn )
 {
-    bool haveMyWinner = false;
-    bool haveTheirWinner = false;
-    int theirWinner = -1;
-    int winner = -1;
-
-    for( int idx = 0; idx < winner_count; ++idx )
-    {
-        const int a = winners[ idx ][ 0 ];
-        const int b = winners[ idx ][ 1 ];
-        const int c = winners[ idx ][ 2 ];
-
-        // If all squares are empty, skip it
-        if( gameBoard[ a ] == EMPTY_SQUARE && gameBoard[ b ] == EMPTY_SQUARE && gameBoard[ c ] == EMPTY_SQUARE )
-        {
-            continue;
-        }
-
-        // If any two of the squares on the game board at indices a, b, or c match
-        // and the third is empty, then the third is a winning square.
-        if( gameBoard[ a ] == gameBoard[ b ] && gameBoard[ c ] == EMPTY_SQUARE )
-        {
-            haveMyWinner = ( gameBoard[ a ] == aiChit );
-            winner = c;
-        }
-        else if( gameBoard[ a ] == gameBoard[ c ] && gameBoard[ b ] == EMPTY_SQUARE )
-        {
-            haveMyWinner = ( gameBoard[ a ] == aiChit );
-            winner = b;
-        }
-        else if( gameBoard[ b ] == gameBoard[ c ] && gameBoard[ a ] == EMPTY_SQUARE )
-        {
-            haveMyWinner = ( gameBoard[ b ] == aiChit );
-            winner = a;
-        }
-
-        if( winner >= 0 )
-        {
-            haveTheirWinner = !haveMyWinner;
-            if( haveMyWinner )
-            {
-                break;
-            }
-            else
-            {
-                theirWinner = winner;
-            }
-        }
-    }
-
-    if( haveTheirWinner && !haveMyWinner )
-    {
-        // It's a blocking move
-        winner = theirWinner;
-    }
-
-    return winner;
-}
-
-int TakeCornerSquare( char( &gameBoard )[ MAX_SQUARE ] )
-{
-    int corner = -1;
-
-    // Look at the corners and take one, if available, preferring opposite corners
-    if( gameBoard[ UPPER_LEFT ] != EMPTY_SQUARE && gameBoard[ LOWER_RIGHT ] == EMPTY_SQUARE )
-    {
-        corner = LOWER_RIGHT;
-    }
-    else if( gameBoard[ UPPER_LEFT ] == EMPTY_SQUARE &&  gameBoard[ LOWER_RIGHT ] != EMPTY_SQUARE )
-    {
-        corner = UPPER_LEFT;
-    }
-    else if( gameBoard[ LOWER_LEFT ] != EMPTY_SQUARE && gameBoard[ UPPER_RIGHT ] == EMPTY_SQUARE )
-    {
-        corner = UPPER_RIGHT;
-    }
-    else if( gameBoard[ LOWER_LEFT ] == EMPTY_SQUARE && gameBoard[ UPPER_RIGHT ] != EMPTY_SQUARE )
-    {
-        corner = LOWER_LEFT;
-    }
-    else if( gameBoard[ UPPER_LEFT ] == EMPTY_SQUARE )
-    {
-        corner = UPPER_LEFT;
-    }
-    else if( gameBoard[ UPPER_RIGHT ] == EMPTY_SQUARE )
-    {
-        corner = UPPER_RIGHT;
-    }
-    else if( gameBoard[ LOWER_LEFT ] == EMPTY_SQUARE )
-    {
-        corner = LOWER_LEFT;
-    }
-    else if( gameBoard[ LOWER_RIGHT ] == EMPTY_SQUARE )
-    {
-        corner = LOWER_RIGHT;
-    }
-
-    return corner;
-}
-
-int TakeAdjacentSquare( char( &gameBoard )[ MAX_SQUARE ], int playerSquare )
-{
-    // This function is called at most 1 time after the player's first turn.
-    // Because there can only ever be a single filled square (the player's
-    // square) it's guaranteed that the adjacent square is open.  Randomly
-    // choose one of the adjacent squares
-    int adjacent = -1;
-
-    bool whichAdjacent = static_cast< bool >( rand() & 0x1 );
-
-    // If the player took a adjacent, choose an adjacent edge
-    if( playerSquare == UPPER_LEFT )
-    {
-        // Look at the edges and take and open one
-        if( whichAdjacent )
-        {
-            adjacent = CENTER_LEFT;
-        }
-        else
-        {
-            adjacent = UPPER_MID;
-        }
-    }
-    else if( playerSquare == UPPER_RIGHT )
-    {
-        // Look at the edges and take and open one
-        if( whichAdjacent )
-        {
-            adjacent = UPPER_MID;
-        }
-        else
-        {
-            adjacent = CENTER_RIGHT;
-        }
-    }
-    else if( playerSquare == LOWER_RIGHT )
-    {
-        if( whichAdjacent )
-        {
-            adjacent = CENTER_RIGHT;
-        }
-        else
-        {
-            adjacent = LOWER_MID;
-        }
-    }
-    else if( playerSquare == LOWER_LEFT )
-    {
-        if( whichAdjacent )
-        {
-            adjacent = LOWER_MID;
-        }
-        else
-        {
-            adjacent = CENTER_MID;
-        }
-    }
-
-    return adjacent;
-}
-
-int TakeCenterSquare( char( &gameBoard )[ MAX_SQUARE ] )
-{
-    int square = -1;
-    if( gameBoard[ CENTER_MID ] == EMPTY_SQUARE )
-    {
-        square = CENTER_MID;
-    }
-
-    return square;
-}
-
-int TakeAnySquare( char( &gameBoard )[ MAX_SQUARE ] )
-{
-    // Player is playing randomly or poorly, so just pick any remaining open square
-    int square;
-    for( square = UPPER_LEFT; square < MAX_SQUARE; ++square )
-    {
-        if( gameBoard[ square ] == EMPTY_SQUARE )
-        {
-            break;
-        }
-    }
-
-    return square;
-}
-
-int IsFirstMove( char( &gameBoard )[ MAX_SQUARE ], int &playerSquare, bool &aiGoesFirst )
-{
-    // Examine the board, if the board is empty, AI goes first
-    // Otherwise, if there's exactly one filled square, player
-    // went first.
-    int firstSquare = -1;
-    int filledSquares = 0;
-    for( int square = UPPER_LEFT; square < MAX_SQUARE; ++square )
-    {
-        if( gameBoard[ square ] != EMPTY_SQUARE )
-        {
-            // Let the AI know which square the player chose
-            firstSquare = square;
-        }
-
-        filledSquares += ( gameBoard[ square ] != EMPTY_SQUARE ) ? 1 : 0;
-        if( filledSquares > 1 )
-        {
-            // Not the first move, so clear the player square value
-            firstSquare = -1;
-            break;
-        }
-    }
-
-    // Only set the aiGoesFirst value on the opening move.
-    if( 0 == filledSquares )
-    {
-        aiGoesFirst = true;
-    }
-    else if( 1 == filledSquares )
-    {
-        aiGoesFirst = false;
-        playerSquare = firstSquare;
-    }
-
-    return( filledSquares <= 1 );
-}
-
-int TakeCounteringSquare( char( &gameBoard )[ MAX_SQUARE ], int playerSquare )
-{
-    int square = -1;
-
-    // On the first move, the appropriate response is to remove the square that
-    // provides the player with multiple paths to victory; case are:
-    // 1) player takes center - ai wants any corner,
-    // 2) player takes corner - ai wants an adjacent edge,
-    // 3) player takes edge   - ai wants the center square.
-    if( playerSquare == CENTER_MID )
-    {
-        // Player takes the center, AI wants any corner
-        square = TakeCornerSquare( gameBoard );
-    }
-    else if( playerSquare == UPPER_LEFT || playerSquare == UPPER_RIGHT || playerSquare == LOWER_RIGHT || playerSquare == LOWER_LEFT )
-    {
-        // Player took a corner, AI wants an adjacent edge
-        square = TakeAdjacentSquare( gameBoard, playerSquare );
-    }
-    else
-    {
-        // Player took an edge, center square is the appropriate block
-        square = CENTER_MID;
-    }
-
-    return square;
-}
-
-int GetAIMove( char (&gameBoard)[ MAX_SQUARE ], char aiChit )
-{
-    // The AI _always_ wants to win (or block) first.
-    // After that, the order in which AI wants squares
-    // is dependant on who went first.
-
-    // If the AI goes first then it's move is to take a corner
-    // If the AI goes second then it's move depends on what the
-    // opponent did:
-    // a) if the oppenent took a corner, AI picks an edge square
-    //    adjacent to the opponent's move, else
-    // b) if the oppenent took an edge, AI picks the center, else
-    // c) the player took the center, then
-    //   ai takes a corner.
-
-    // After the second move, it's either:
-    // a) block or
-    // b) a cat game, so square choice is irrelevant
-
-    // Step 1 - try to win (or block, it's the same logic):
-    int square = -1;
-    square = TakeWinningSquare( gameBoard, aiChit );
-
-    // Step 2 - take a corner or an edge, depending on who goes first
-    // First move response is the critical one, if it's not a response
-    // to the first move, then just try tacking a corner (or use a
-    // corner as the opening salvo.
-    static int moveNumber = 0;
-    static int playersFirstSquare = -1;
-    bool aiGoesFirst = false;
-    bool isFirstMove = IsFirstMove( gameBoard, playersFirstSquare, aiGoesFirst );
-    if( isFirstMove )
-    {
-        // It's either the first or second move of the match
-        moveNumber = aiGoesFirst ? 1 : 2;
-    }
-
-    if( square < UPPER_LEFT )
-    {
-        switch( moveNumber )
-        {
-        case 2:
-            // Player moved first, make the correct countering move
-            square = TakeCounteringSquare( gameBoard, playersFirstSquare );
-            break;
-        case 4:
-            // AI's second move should be to take the center square
-            // if it's available, otherwise take a corner
-            square = TakeCenterSquare( gameBoard );
-            break;
-        default:
-            break;
-        }
-    }
-
-    if( square < UPPER_LEFT )
-    {
-        // By default, the AI wants a corner square
-        square = TakeCornerSquare( gameBoard );
-    }
-    // If the player is not trying to win, we could end up here.
-    if( square < UPPER_LEFT )
-    {
-        // On the way to a cat game, pick any open space
-        square = TakeAnySquare( gameBoard );
-        assert( ( UPPER_LEFT <= square ) && ( square < MAX_SQUARE ) );
-    }
-
-    // User gets a move, then it's AIs turn again
-    moveNumber += 2;
-
-    return square;
-}
-
-int IsGameOver( char( &gameBoard )[ MAX_SQUARE ] )
-{
-    // Look for winner
-    int winner = NO_WINNER;
-
-    // Just go through the array of winning combinations
-    bool haveWinner = false;
-    int idx;
-    for( idx = 0; idx < winner_count; ++idx )
-    {
-        const int a = winners[ idx ][ 0 ];
-        const int b = winners[ idx ][ 1 ];
-        const int c = winners[ idx ][ 2 ];
-
-        if(    gameBoard[ a ] != EMPTY_SQUARE
-            && gameBoard[ a ] == gameBoard[ b ]
-            && gameBoard[ a ] == gameBoard[ c ] )
-        {
-            haveWinner = true;
-            break;
-        }
-    }
-
-    if( haveWinner )
-    {
-        // There's a winner!  Figure out which player won.
-        const int square = winners[ idx ][ 0 ];
-        if( FIRST_PLAYER_CHIT == gameBoard[ square ] )
-        {
-            winner = FIRST_PLAYER_WINS;
-        }
-        else
-        {
-            winner = SECOND_PLAYER_WINS;
-        }
-    }
-    else
-    {
-        // There's no winner, see if the board is full
-        winner = CAT_GAME;
-        for( int square = UPPER_LEFT; square < MAX_SQUARE; ++square )
-        {
-            if( gameBoard[ square ] == EMPTY_SQUARE )
-            {
-                winner = NO_WINNER;
-                break;
-            }
-        }
-    }
-
-    return winner;
-}
-
-void DoMove( char( &gameBoard )[ MAX_SQUARE ], bool playerTurn, char playerChit, char aiChit )
-{
-    bool goodMove;
+    bool IsGoodMove;
     do
     {
+        const char aiChit = ai->GetAIChit();
+        const char playerChit = aiChit == SECOND_PLAYER_CHIT ? FIRST_PLAYER_CHIT : SECOND_PLAYER_CHIT;
+
         int square;
         if( playerTurn )
         {
@@ -668,121 +1044,81 @@ void DoMove( char( &gameBoard )[ MAX_SQUARE ], bool playerTurn, char playerChit,
         }
         else
         {
-            square = GetAIMove( gameBoard, aiChit );
+            square = ai->GetAIMove( board );
         }
 
-        goodMove = GoodMove( gameBoard, square );
-        if( goodMove )
+        IsGoodMove = board->IsGoodMove( square );
+        if( IsGoodMove )
         {
-            gameBoard[ square ] = playerTurn ? playerChit : aiChit;
+            board->SetSquareValue( square, playerTurn ? playerChit : aiChit );
             if( !playerTurn )
             {
                 int row = ( square / 3 ) + 1;
                 int col = ( square % 3 ) + 1;
 
-                cout << "Computer's turn.\nComputer chooses: ";
-                cout << "(" << row << "," << col << ")" << endl;
+                std::cout << "Computer's turn.\nComputer chooses: ";
+                std::cout << "(" << row << "," << col << ")" << std::endl;
             }
         }
         else if( playerTurn )
         {
-            cout << "That square is already taken, please pick a different square" << endl;
-            PrintBoard( gameBoard );
+            std::cout << "That square is already taken, please pick a different square" << std::endl;
+            std::cout << ( *board );
         }
-    } while( !goodMove );
+    } while( !IsGoodMove );
 }
 
-void PrintWrapUp( char( &gameBoard )[ MAX_SQUARE ], int whoWon, char playerChit )
-{
-    // Print the final board layout
-    PrintBoard( gameBoard );
-
-    switch( whoWon )
-    {
-    case FIRST_PLAYER_WINS:
-        if( playerChit == FIRST_PLAYER_CHIT )
-        {
-            cout << "Player wins!  Congratulations, well played.\n";
-        }
-        else
-        {
-            cout << "Computer wins, but I got to go first.\n";
-        }
-        cout << endl;
-        break;
-
-    case SECOND_PLAYER_WINS:
-        if( playerChit == SECOND_PLAYER_CHIT )
-        {
-            cout << "Player wins!  You came from behind.\n";
-        }
-        else
-        {
-            cout << "Computer wins!  Phew, it's a lot harder to win going second.\n";
-        }
-        cout << endl;
-        break;
-
-    case CAT_GAME:
-        cout << "Wow!  Great game, nobody was able to come out on top.\n";
-        cout << endl;
-        break;
-
-    default:
-        break;
-    }
-}
-
-void GameLoop( bool playerFirst, char playerChit, char aiChit )
+void GameLoop( std::unique_ptr<AI>& ai, bool playerFirst )
 {
     // Reset the game board
-    char gameBoard[ MAX_SQUARE ];
-    for( int square = UPPER_LEFT; square < MAX_SQUARE; ++square )
-    {
-        gameBoard[ square ] = EMPTY_SQUARE;
-    }
+    std::unique_ptr<Board> board = std::make_unique<Board>();
 
     bool playerTurn = playerFirst;
     bool oneTurn = false;
-    int whoWon = NO_WINNER;
+    int whoWon = Board::NO_WINNER;
 
     do
     {
-        // If the computer goes first, skip the drawing of the empty board
+        // If the computer goes first, skip the drawing of the empty board.
         // Once a move has been made, draw the board prior to each move.
         if( oneTurn || playerFirst )
         {
-            PrintBoard( gameBoard );
+            std::cout << ( *board );
         }
         oneTurn = true;
 
-        DoMove( gameBoard, playerTurn, playerChit, aiChit );
+        DoMove( board, ai, playerTurn );
 
         // Switch players
         playerTurn = !playerTurn;
 
         // Is the game over?
-        whoWon = IsGameOver( gameBoard );
-        if( NO_WINNER != whoWon )
+        whoWon = board->IsGameOver();
+        if( Board::NO_WINNER != whoWon )
         {
-            PrintWrapUp( gameBoard, whoWon, playerChit );
+            std::cout << ( *board );
+            Menu::PrintWrapUp( board, whoWon, ai->GetAIChit() );
         }
-    } while( NO_WINNER == whoWon );
+    } while( Board::NO_WINNER == whoWon );
 }
 
 int main()
 {
-    cout << "Let's play Tic-Tac-Toe\n";
-    cout << "The first to get three in a row horizontally, vertically, or diagonaly is the winner\n";
-    cout << endl;
+    // Init the randomizer
+    srand( static_cast< unsigned int >( time( nullptr ) ) );
+
+    Menu::PrintHeader();
 
     // Play again loop
-    bool playerFirst = false;
+    int  playerLevel = AI::LEVEL_BEGINNER;
+    bool playerFirst = true;
     bool playedOnce = false;
+
+    std::unique_ptr<AI> ai = nullptr;
     do
     {
         // See if the user wants to play or not
-        if( !MainMenu( playedOnce ) )
+        if( !Menu::DoMainMenu( playedOnce ) )
         {
             // User wants out.
             break;
@@ -791,46 +1127,66 @@ int main()
         // We have a player!
         if( !playedOnce )
         {
-            // For the first time randomly choose who goes first.
-            srand( static_cast< unsigned int >( time( nullptr ) ) );
-            playerFirst = ( rand() & 0x1 ) == 0;
+            playerLevel = Menu::DoUserLevelMenu();
+            if( AI::LEVEL_BEGINNER == playerLevel )
+            {
+                playerFirst = true;
+            }
+            else
+            {
+                playerFirst = ( rand() & 0x1 ) == 0;
+            }
         }
-        else
+        else if( AI::LEVEL_BEGINNER != playerLevel )
         {
-            // After the first game, alternate who goes first.
+            // After the first game, alternate who goes first
+            // unless the player is a beginner.  Beginners always
+            // get to go first.
             playerFirst = !playerFirst;
         }
 
         // Whoever goes first plays 'X', second plays 'O'
-        char playerChit;
         char aiChit;
         if( playerFirst )
         {
-            playerChit = FIRST_PLAYER_CHIT;
             aiChit = SECOND_PLAYER_CHIT;
         }
         else
         {
-            playerChit = SECOND_PLAYER_CHIT;
             aiChit = FIRST_PLAYER_CHIT;
         }
 
         // Tell the player the order
-        cout << ( playerFirst ? "You go" : "The computer goes" ) << " first\n";
-        if( playerFirst )
-        { 
-            cout << "You play " << playerChit << " and the computer plays " << aiChit << "\n";
-        }
-        else
+        Menu::PrintPlayOrder( playerFirst );
+
+        // Create the AI
+        if( !playedOnce )
         {
-            cout << "The computer plays " << aiChit << " and you play " << playerChit << "\n";
+            switch( playerLevel )
+            {
+            case AI::LEVEL_BEGINNER:
+                ai = std::unique_ptr<AI>( new AI_Beginner( aiChit ) );
+                break;
+
+            case AI::LEVEL_INTERMEDIATE:
+                ai = std::unique_ptr<AI>( new AI_Intermediate( aiChit ) );
+                break;
+
+            case AI::LEVEL_EXPERT:
+                ai = std::unique_ptr<AI>( new AI_Expert( aiChit ) );
+                break;
+            }
         }
-        cout << endl;
 
         // Play a game of tic-tac-toe
-        GameLoop( playerFirst, playerChit, aiChit );
+        GameLoop( ai, playerFirst );
 
-        // Signal that the game has been played at least one time.
+        // Signal complete game
         playedOnce = true;
+
+        // Reset the AI
+        ai->Reset();
     } while( 1 );
+
+    ai = nullptr;
 }
