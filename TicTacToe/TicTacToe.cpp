@@ -82,6 +82,27 @@ public:
         return GetSquareValue( squareId ) == EMPTY_SQUARE;
     }
 
+    int IsWinner( const int squareId )
+    {
+        // square must be in range and empty to start with
+        assert( IsGoodMove( squareId ) );
+
+        int isWinner = NO_WINNER;
+
+        SetSquareValue( squareId, FIRST_PLAYER_CHIT );
+        isWinner = IsGameOver();
+        SetEmptySquare( squareId );
+
+        if( NO_WINNER == isWinner )
+        {
+            SetSquareValue( squareId, SECOND_PLAYER_CHIT );
+            isWinner = IsGameOver();
+            SetEmptySquare( squareId );
+        }
+
+        return isWinner;
+    }
+
     void SetEmptySquare( const int squareId )
     {
         m_Board[ squareId ] = EMPTY_SQUARE;
@@ -260,8 +281,11 @@ public:
             const int b = winner[ 1 ];
             const int c = winner[ 2 ];
 
-            // If all squares are empty, skip it
-            if( board->IsSquareEmpty( a ) && board->IsSquareEmpty( b ) && board->IsSquareEmpty( c ) )
+            // If any two squares are empty there's no winner
+            if(    ( board->IsSquareEmpty( a ) && board->IsSquareEmpty( b ) )
+                || ( board->IsSquareEmpty( a ) && board->IsSquareEmpty( c ) )
+                || ( board->IsSquareEmpty( b ) && board->IsSquareEmpty( c ) )
+              )
             {
                 continue;
             }
@@ -284,7 +308,7 @@ public:
                 winSquare = a;
             }
 
-            if( winSquare >= Board::UPPER_LEFT )
+            if( winSquare != Board::INVALID_SQUARE )
             {
                 haveTheirWinner = !haveMyWinner;
                 if( haveMyWinner )
@@ -506,18 +530,7 @@ public:
             if( IsGoodMove )
             {
                 // Space is open, check for winner for either player
-                board->SetSquareValue( square, m_Chit );
-                isWinner = board->IsGameOver();
-                if( Board::NO_WINNER == isWinner )
-                {
-                    char playerChit = ( m_Chit == FIRST_PLAYER_CHIT ) ? SECOND_PLAYER_CHIT : FIRST_PLAYER_CHIT;
-                    board->SetSquareValue( square, playerChit );
-                    isWinner = board->IsGameOver();
-                }
-
-                // Reset the board space, the correct chit will be placed after
-                // the square choice is returned.
-                board->SetEmptySquare( square );
+                isWinner = board->IsWinner( square );
             }
         } while( !IsGoodMove || ( Board::NO_WINNER != isWinner ) );
 
