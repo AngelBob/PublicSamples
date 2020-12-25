@@ -1,0 +1,77 @@
+﻿[
+  {
+    "Id": 1,
+    "Name": "49er",
+    "Location": 1,
+    "Responses": [
+      "Feeling better?  You were pretty drunk last night.",
+      "The camp looked like this when we got back yesterday.",
+      "Try retracing your steps, maybe you just left the bag somewhere.",
+      "You were at the saloon, and didn't get back here until nearly sun-up.",
+      "Uh huh."
+    ]
+  },
+  {
+    "Id": 2,
+    "Name": "Blacksmith",
+    "Location": 12,
+    "Responses": [
+      "Ugh, my head hurts, and I really don't want to be here today.",
+      "I am really tired of that guy.",
+      "One day he'll get his.",
+      "Damn Sherriff."
+    ]
+  },
+  {
+    "Id": 3,
+    "Name": "Shop keeper",
+    "Location": 13,
+    "Responses": [
+      "Howdy!  Come back for more supplies today?",
+      "You didn't have quite enough money for everything yesterday.",
+      "Why don't you wait until after the Sherriff stops by.",
+      "Have a look around."
+    ]
+  },
+  {
+    "Id": 4,
+    "Name": "Assayer",
+    "Location": 14,
+    "Responses": [
+      "Back to trade out the rest of your gold?",
+      "You didn't trade it all yesterday, the bag was still half full.",
+      "I see.  Sorry, I can't help with that."
+    ]
+  },
+  {
+    "Id": 5,
+    "Name": "Barkeep",
+    "Location": 15,
+    "Responses": [
+      "In for some hair of the dog?",
+      "You got pretty far into your cups last night.",
+      "Was just you for a while.",
+      "About 10, Smithy joined you.",
+      "I had to kick you out at closing.",
+      "Ready for another?"
+    ]
+  },
+  {
+    "Id": 6,
+    "Name": "Sherriff",
+    "Location": 16,
+    "Responses": [
+      "Yep",
+      "Nope"
+    ]
+  },
+  {
+    "Id": 7,
+    "Name": "Teller",
+    "Location": 17,
+    "Responses": [
+      "Deposit or withdrawal?",
+      "I can only do a deposit or withdrawal."
+    ]
+  }
+]

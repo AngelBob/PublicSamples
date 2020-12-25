@@ -1,0 +1,286 @@
+[
+	{
+		"Id": 1,
+		"Name": "49er Camp",
+		"ShortDesc": "Your camp.  It's a  mess.",
+		"LongDesc": "Your camp.  Your stuff is spread all over, like someone was looking for something.",
+		"AsSeenDesc": "your camp.",
+		"Neighbors": [
+			{ "South": 2 }
+		]
+	},
+	{
+		"Id": 2,
+		"Name": "Camp Trail",
+		"ShortDesc": "A trail leading to your camp.",
+		"LongDesc": "A well-worn pathway leading from the road to town north into the bush, ending at your mining camp.",
+		"AsSeenDesc": "a well-worn pathway leads into the bush.",
+		"Neighbors": [
+			{ "North": 1 },
+			{ "South": 3 }
+		]
+	},
+	{
+		"Id": 3,
+		"Name": "The Road Out of Town",
+		"ShortDesc": "On the road heading east out of town.",
+		"LongDesc": "The main road running through town.  You are out of town to the east.",
+		"AsSeenDesc": "the main road through town.",
+		"Neighbors": [
+			{ "North": 2 },
+			{ "East": 4 },
+			{ "West": 5 }
+		]
+	},
+	{
+		"Id": 4,
+		"Name": "The Road",
+		"ShortDesc": "On the road heading out of town.",
+		"LongDesc": "The road continues to the east, toward the sunrise.",
+		"AsSeenDesc": "a rutted road stretches through the sage and dust as far as you can see.",
+		"Neighbors": [
+			{ "East": 4 },
+			{ "West": 3 }
+		]
+	},
+	{
+		"Id": 5,
+		"Name": "The Road East Of Town",
+		"ShortDesc": "The main road just east of town.",
+		"LongDesc": "The main road running through town.  You can see the town to the west.",
+		"AsSeenDesc": "the main road outside of town.",
+		"Neighbors": [
+			{ "East": 3 },
+			{ "West": 6 },
+			{ "South": 11 }
+		]
+	},
+	{
+		"Id": 6,
+		"Name": "The Road At the East End of Town",
+		"ShortDesc": "The main road at the east end of town",
+		"LongDesc": "The main road running through town.  You are at the very eastern edge of the town.",
+		"AsSeenDesc": "the east end of town.",
+		"Neighbors": [
+			{ "North": 15 },
+			{ "East": 5 },
+			{ "West": 7 },
+			{ "South": 12 }
+		]
+	},
+	{
+		"Id": 7,
+		"Name": "The Road In the Middle of Town",
+		"ShortDesc": "The main road in the middle of town.",
+		"LongDesc": "The main road running through town.  You are in the middle of town.",
+		"AsSeenDesc": "the middle of town.",
+		"Neighbors": [
+			{ "North": 16 },
+			{ "East": 6 },
+			{ "West": 8 },
+			{ "South": 13 }
+		]
+	},
+	{
+		"Id": 8,
+		"Name": "The Road At the West End of Town",
+		"ShortDesc": "The main road at the west end of town",
+		"LongDesc": "The main road running through town.  You are at the very western edge of the town.",
+		"AsSeenDesc": "the west end of town.",
+		"Neighbors": [
+			{ "North": 17 },
+			{ "East": 7 },
+			{ "West": 9 },
+			{ "South": 14 }
+		]
+	},
+	{
+		"Id": 9,
+		"Name": "The Road West Of Town",
+		"ShortDesc": "The main road just west of town.",
+		"LongDesc": "The main road running through town.  You can see the town to the east.",
+		"AsSeenDesc": "the main road outside of town.",
+		"Neighbors": [
+			{ "East": 8 },
+			{ "West": 10 }
+		]
+	},
+	{
+		"Id": 10,
+		"Name": "The Road",
+		"ShortDesc": "You are riding off into the sunset.",
+		"LongDesc": "The road continues to the west, into the sunset.",
+		"AsSeenDesc": "a rutted road stretches through the sage and dust and disappears in the sunset.",
+		"Neighbors": [
+			{ "East": 9 },
+			{ "West": 10 }
+		]
+	},
+	{
+		"Id": 11,
+		"Name": "Hanging Tree",
+		"ShortDesc": "A well-worn grassy area with a tree.  There's a noose attached to a branch of the tree.",
+		"LongDesc": "A well-worn grassy area with a tree.  The tree has a noose hanging from one of the branches.  This is where the townfolk extract justice.",
+		"AsSeenDesc": "the gallows tree.",
+		"Neighbors": [
+			{ "North": 5 }
+		]
+	},
+	{
+		"Id": 12,
+		"Name": "The Blacksmith",
+		"ShortDesc": "A hot, loud, dirty forge.",
+		"LongDesc": "The blacksmith shop has been keeping the local horses in shoes for 20 years.",
+		"AsSeenDesc": "the blacksmith shop.",
+		"IsStartPosition": true,
+		"Neighbors": [
+			{ "North": 6 }
+		]
+	},
+	{
+		"Id": 13,
+		"Name": "The General Store",
+		"ShortDesc": "A store with everything the townsfolk require.",
+		"LongDesc": "The general store contains isles, bins, and bags filled to overflowing with everything the townsfolk, ranchers, and miners could ever need.",
+		"AsSeenDesc": "the general store.",
+		"Neighbors": [
+			{ "North": 7 }
+		]
+	},
+	{
+		"Id": 14,
+		"Name": "The Assay Office",
+		"ShortDesc": "A small, stuffy office with a single desk and large safe.",
+		"LongDesc": "The assay office is well known to you, you've exchanged your gold for cash here on many occassions.",
+		"AsSeenDesc": "the assay office.",
+		"Neighbors": [
+			{ "North": 8 }
+		]
+	},
+	{
+		"Id": 15,
+		"Name": "Saloon and Hotel",
+		"ShortDesc": "The bar is dimly lit and dusty.  There are stairs leading up.  The bartender is here.",
+		"LongDesc": "Dimly lit, and a little dusty, in the past this barroom saw a lot of action.  There are rooms available at the top of the stairs.  The bartender asks if you need anything.",
+		"AsSeenDesc": "the saloon.",
+		"Neighbors": [
+			{ "South": 6 },
+			{ "Up": 18 }
+		]
+	},
+	{
+		"Id": 16,
+		"Name": "Sherrif's Office",
+		"ShortDesc": "The local sherrif's office, with a single desk.",
+		"LongDesc": "The sherrif's office is well kept and nicely furnished.  The single desk is made of expensive imported wood and looks almost new.",
+		"AsSeenDesc": "the sherrif's office.",
+		"Neighbors": [
+			{ "South": 7 }
+		]
+	},
+	{
+		"Id": 17,
+		"Name": "Bank",
+		"ShortDesc": "The single table is available and the tellers' window is open.",
+		"LongDesc": "The bank is sparsely furnished with a single table but no chairs.  There is a single tellers' window set in a heavy wooden wall.",
+		"AsSeenDesc": "the bank.",
+		"Neighbors": [
+			{ "South": 8 }
+		]
+	},
+	{
+		"Id": 18,
+		"Name": "Top of the Stairs",
+		"ShortDesc": "The top of the stairs leading to the hotel rooms.",
+		"LongDesc": "The landing at the top of the stairs overlooks the nearly empty barroom below.",
+		"AsSeenDesc": "the landing at the top of the stairs.",
+		"Neighbors": [
+			{ "Down": 15 },
+			{ "East": 19 }
+		]
+	},
+	{
+		"Id": 19,
+		"Name": "Middle of the Balcony",
+		"ShortDesc": "The balcony above the barroom.",
+		"LongDesc": "The middle of the balcony overlooking the barroom below.",
+		"AsSeenDesc": "the balcony leading to the rooms.",
+		"Neighbors": [
+			{ "North": 21 },
+			{ "West": 18 },
+			{ "East": 20 }
+		]
+	},
+	{
+		"Id": 20,
+		"Name": "End of the Balcony",
+		"ShortDesc": "The end of the balcony above the barroom.",
+		"LongDesc": "The end of the balcony.  There is a window overlooking the back of the saloon out into the desert.",
+		"AsSeenDesc": "the balcony ends.",
+		"Neighbors": [
+			{ "North": 22 },
+			{ "West": 19 }
+		]
+	},
+	{
+		"Id": 21,
+		"Name": "Hotel Room",
+		"ShortDesc": "A dingy hotel room.",
+		"LongDesc": "The room is decorated in a red velvet and roses motif.  The gas lamp is lit, casting a dirty light across the room.  The window at the back looks out over the desert.",
+		"AsSeenDesc": "a door.",
+		"Neighbors": [
+			{ "South": 19 }
+		]
+	},
+	{
+		"Id": 22,
+		"Name": "Hotel Room",
+		"ShortDesc": "A dingy hotel room.",
+		"LongDesc": "The room is decorated in a blue velvet and violets motif.  The gas lamp is lit, casting a dirty light across the room.  The window at the back looks out over the desert.",
+		"AsSeenDesc": "a door.",
+		"Neighbors": [
+			{ "South": 20 }
+		]
+	},
+	{
+		"Id": 23,
+		"Name": "Cellblock Hallway",
+		"ShortDesc": "The cellblock hallway allows access to both cells.",
+		"LongDesc": "The cellblock hallway is the main passageway between the two cells in the sheriff's office.",
+		"AsSeenDesc": "the hallway.",
+		"Neighbors": [
+			{ "South": 16 },
+			{ "West": 24 }
+		]
+	},
+	{
+		"Id": 24,
+		"Name": "Cellblock Hallway",
+		"ShortDesc": "The cellblock hallway allows access to both cells.",
+		"LongDesc": "The cellblock hallway is the main passageway between the two cells in the sheriff's office.",
+		"AsSeenDesc": "the hallway.",
+		"Neighbors": [
+			{ "East": 23 }
+		]
+	},
+	{
+		"Id": 25,
+		"Name": "Jail Cell",
+		"ShortDesc": "The jail cell is very dirty.",
+		"LongDesc": "The jail cell is not as nice as the sheriff's office.  There is dirt everywhere, small piles of what one can only assume is human feces, and the mattress on the single cot is covered in stains of unknown origin.",
+		"AsSeenDesc": "a jail cell.",
+		"Neighbors": [
+			{ "South": 23 }
+		]
+	},
+	{
+		"Id": 26,
+		"Name": "Jail Cell",
+		"ShortDesc": "The jail cell is very dirty.",
+		"LongDesc": "The jail cell is not as nice as the sheriff's office.  There is dirt everywhere, small piles of what one can only assume is human feces, and the mattress on the single cot is covered in stains of unknown origin.",
+		"AsSeenDesc": "a jail cell.",
+		"Neighbors": [
+			{ "South": 24 }
+		]
+	}
+]

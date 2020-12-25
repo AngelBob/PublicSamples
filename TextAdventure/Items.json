@@ -1,0 +1,33 @@
+[
+  {
+    "Id": 1,
+    "Name": "Noose",
+    "Location": 11,
+    "Description": "There is a noose hanging from one of the branches of the tree",
+    "Examination": "It's a nice piece of hemp, tied to form a noose."
+  },
+  {
+    "Id": 2,
+    "Name": "Iron bar",
+    "Location": 12,
+    "Description": "bar of iron lying on the floor",
+    "Examination": "It looks to be a good, solid piece of iron.",
+    "Moveable": true
+  },
+  {
+    "Id": 3,
+    "Name": "Hot, loud, dirty forge",
+    "Location": 12,
+    "Description": "hot, loud, dirty forge",
+    "Examination": "Looking more closely, you recognize the bag as the one that previously contained your gold.  The bag is empty.",
+    "Moveable": false
+  },
+  {
+    "Id": 4,
+    "Name": "Empty bag",
+    "Location": 14,
+    "Description": "empty bag lying on the floor",
+    "Examination": "Looking more closely, you recognize the bag as the one that previously contained your gold.  The bag is empty.",
+    "Moveable": true
+  }
+]
