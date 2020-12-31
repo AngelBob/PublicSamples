@@ -60,5 +60,7 @@ private:
     void SetLocation( int32_t newLocation );
 
     int32_t                                 m_CurLocation;
+
+    std::map<std::string, int32_t, StringCompareT> m_LocationNameToIdMap;
     std::vector<std::unique_ptr<Location>>  m_Locations;
 };

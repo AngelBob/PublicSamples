@@ -3,13 +3,6 @@
 enum class MoveDirection;
 class Map;
 
-enum class LocationDesc
-{
-	DESCRIPTION_LONG,
-	DESCRIPTION_SHORT,
-	DESCRIPTION_ASSEEN,
-};
-
 class Location : public InGameObject
 {
 public:
@@ -33,16 +26,16 @@ public:
 	const std::map<MoveDirection, int32_t> &GetNeighbors( void ) const;
 
 	void SetShownOnce( void );
+	bool GetShownOnce( void ) const;
 
-	LocationDesc LongOrShortDescription( void ) const;
-	std::ostream &PrintDescription( std::ostream &os, LocationDesc which ) const;
+	const std::string& GetAsSeenDescription( void ) const;
 
 private:
+	// Members specific to the location class
 	bool        m_IsStartPosition;
 	bool		m_ShownOnce;
-	std::string m_ShortDesc;
-	std::string m_LongDesc;
 	std::string m_AsSeenDesc;
+
 	std::map<MoveDirection, int32_t> m_Neighbors;
 
 	std::list<int32_t> m_Characters;

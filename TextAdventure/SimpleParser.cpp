@@ -1,20 +1,12 @@
 #include "stdafx.h"
 
 #include "ResourceLoader.hpp"
-
-#include "Parser.h"
+#include "SimpleParser.h"
 
 namespace Parser
 {
 	SimpleParser::SimpleParser( void )
-		: m_LastType( ParsedType::PARSED_TYPE_INVALID )
 	{
-		// Load name to type enum map
-		for( int32_t idx = 0; idx < static_cast< int32_t >( ParsedType::PARSED_TYPE_MAX_TYPES ); ++idx )
-		{
-			m_NameToTypeMap.insert( std::make_pair( m_TypeToNameMap[ idx ].name, m_TypeToNameMap[ idx ].type ) );
-		}
-
 		LoadJSONResources();
 	}
 
@@ -74,7 +66,7 @@ namespace Parser
 				else if( isPreposition )
 				{
 					// Preposition on the direct object is only acceptible for interactive types
-					if( ParsedType::PARSED_TYPE_INTERACTION == m_LastType )
+					if( IsInteractiveType() )
 					{
 						m_LastPreposition = token;
 						state = ParseState::STATE_HAVE_PREPOSITION;
@@ -154,8 +146,8 @@ namespace Parser
 				}
 				else
 				{
-					// Preposition on the direct object must be interactive type
-					assert( ParsedType::PARSED_TYPE_INTERACTION == m_LastType );
+					// Preposition on the direct object must be interaction type
+					assert( IsInteractiveType() );
 					m_LastObject = token;
 					haveDirectObject = true;
 					state = ParseState::STATE_HAVE_DIRECT_OBJECT;
@@ -164,50 +156,6 @@ namespace Parser
 		}
 
 		return status;
-	}
-
-	ParsedType SimpleParser::GetLastVerbType( void ) const
-	{
-		return m_LastType;
-	}
-
-	const std::string &SimpleParser::GetLastVerb( void ) const
-	{
-		return m_LastVerb;
-	}
-
-	const std::string &SimpleParser::GetLastObject( void ) const
-	{
-		return m_LastObject;
-	}
-
-	const std::string &SimpleParser::GetLastIndirectObject( void ) const
-	{
-		return m_LastIndirectObject;
-	}
-
-	const std::string& SimpleParser::GetVerbTypeName( ParsedType type )
-	{
-		assert( type >= ParsedType::PARSED_TYPE_INVALID && type < ParsedType::PARSED_TYPE_MAX_TYPES );
-		if(    type <  ParsedType::PARSED_TYPE_INVALID
-			|| type >= ParsedType::PARSED_TYPE_MAX_TYPES )
-		{
-			type = ParsedType::PARSED_TYPE_INVALID;
-		}
-
-		return m_TypeToNameMap[ static_cast<int32_t>( type ) ].name;
-	}
-
-	ParsedType SimpleParser::GetVerbTypeEnum( std::string &name )
-	{
-		ParsedType type = ParsedType::PARSED_TYPE_INVALID;
-		auto found = m_NameToTypeMap.find( name );
-		if( found != m_NameToTypeMap.end() )
-		{
-			type = found->second;
-		}
-
-		return type;
 	}
 
 	//private:
@@ -232,42 +180,13 @@ namespace Parser
 		}
 	}
 
-	void SimpleParser::ClearLastEntries( void )
+	bool SimpleParser::IsPreposition( const std::string &word ) const
 	{
-		m_LastType = ParsedType::PARSED_TYPE_INVALID;
-		m_LastVerb.clear();
-		m_LastObject.clear();
-		m_LastPreposition.clear();
-		m_LastIndirectObject.clear();
-	}
-
-	bool SimpleParser::IsArticle( std::string &word )
-	{
-		bool isArticle = false;
-
-		StringCompareNoCase comparitor;
-		if(    0 == comparitor.compare( word, "the" )
-			|| 0 == comparitor.compare( word, "a" ) 
-			|| 0 == comparitor.compare( word, "an" ) )
+		static const std::vector<std::string> prepositions =
 		{
-			isArticle = true;
-		}
+			"on", "to", "at", "upon"
+		};
 
-		return isArticle;
-	}
-
-	bool SimpleParser::IsPreposition( std::string &word )
-	{
-		bool isArticle = false;
-
-		StringCompareNoCase comparitor;
-		if(    0 == comparitor.compare( word, "on" )
-			|| 0 == comparitor.compare( word, "to" )
-			|| 0 == comparitor.compare( word, "at" ) )
-		{
-			isArticle = true;
-		}
-
-		return isArticle;
+		return IsInWordList( prepositions, word );
 	}
 }

@@ -152,8 +152,8 @@
     <ClCompile Include="Item.cpp" />
     <ClCompile Include="Location.cpp" />
     <ClCompile Include="Map.cpp" />
+    <ClCompile Include="Parser.cpp" />
     <ClCompile Include="SimpleParser.cpp" />
-    <ClCompile Include="StringCompare.cpp" />
     <ClCompile Include="TextAdventure.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -168,7 +168,9 @@
     <ClInclude Include="Parser.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="ResourceLoader.hpp" />
+    <ClInclude Include="SimpleParser.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="StringCompareNoCase.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Characters.json" />

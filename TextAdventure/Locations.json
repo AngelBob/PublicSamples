@@ -3,10 +3,13 @@
     "Id": 1,
     "IsStartPosition": true,
     "Name": "49er Camp",
-    "ShortDesc": "Your camp.  It's a  mess.",
-    "LongDesc": "Your camp.  Your stuff is spread all over, like someone was looking for something.",
+    "Description": "Your camp.  It's a  mess.",
     "AsSeenDesc": "your camp.",
     "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "Your camp.  Your stuff is spread all over, like someone was looking for something."
+      },
       {
         "Type": "Movement",
         "Direction": "south west",
@@ -17,10 +20,13 @@
   {
     "Id": 2,
     "Name": "Camp Trail",
-    "ShortDesc": "A trail leading to your camp.",
-    "LongDesc": "A well-worn pathway leading from the road to town north into the bush, ending at your mining camp.",
+    "Description": "A trail leading to your camp.",
     "AsSeenDesc": "a well-worn pathway leading into the bush.",
     "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "A well-worn pathway leading from the road to town north into the bush, ending at your mining camp."
+      },
       {
         "Type": "Movement",
         "Direction": "north east",
@@ -36,10 +42,13 @@
   {
     "Id": 3,
     "Name": "The Road Out of Town",
-    "ShortDesc": "On the road heading east out of town.",
-    "LongDesc": "The main road running through town.  You are out of town to the east.",
+    "Description": "On the road heading east out of town.",
     "AsSeenDesc": "the main road through town.",
     "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The main road running through town.  You are out of town to the east."
+      },
       {
         "Type": "Movement",
         "Direction": "north west",
@@ -60,10 +69,13 @@
   {
     "Id": 4,
     "Name": "The Road",
-    "ShortDesc": "On the road heading out of town.",
-    "LongDesc": "The road continues to the east, toward the sunrise.",
+    "Description": "On the road heading out of town.",
     "AsSeenDesc": "a rutted road stretching through the sage and dust as far as you can see.",
     "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The road continues to the east, toward the sunrise."
+      },
       {
         "Type": "Movement",
         "Direction": "east",
@@ -79,10 +91,13 @@
   {
     "Id": 5,
     "Name": "The Road east Of Town",
-    "ShortDesc": "The main road just east of town.",
-    "LongDesc": "The main road running through town.  You can see the town to the west.",
+    "Description": "The main road just east of town.",
     "AsSeenDesc": "the main road outside of town.",
     "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The main road running through town.  You can see the town to the west."
+      },
       {
         "Type": "Movement",
         "Direction": "east",
@@ -103,10 +118,13 @@
   {
     "Id": 6,
     "Name": "The Road At the east End of Town",
-    "ShortDesc": "The main road at the east end of town",
-    "LongDesc": "The main road running through town.  You are at the very eastern edge of the town.",
+    "Description": "The main road at the east end of town",
     "AsSeenDesc": "the east end of town.",
     "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The main road running through town.  You are at the very eastern edge of the town."
+      },
       {
         "Type": "Movement",
         "Direction": "north",
@@ -132,10 +150,13 @@
   {
     "Id": 7,
     "Name": "The Road In the Middle of Town",
-    "ShortDesc": "The main road in the middle of town.",
-    "LongDesc": "The main road running through town.  You are in the middle of town.",
+    "Description": "The main road in the middle of town.",
     "AsSeenDesc": "the middle of town.",
     "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The main road running through town.  You are in the middle of town."
+      },
       {
         "Type": "Movement",
         "Direction": "north",
@@ -161,10 +182,13 @@
   {
     "Id": 8,
     "Name": "The Road At the west End of Town",
-    "ShortDesc": "The main road at the west end of town",
-    "LongDesc": "The main road running through town.  You are at the very western edge of the town.",
+    "Description": "The main road at the west end of town",
     "AsSeenDesc": "the west end of town.",
     "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The main road running through town.  You are at the very western edge of the town."
+      },
       {
         "Type": "Movement",
         "Direction": "north",
@@ -190,10 +214,13 @@
   {
     "Id": 9,
     "Name": "The Road west Of Town",
-    "ShortDesc": "The main road just west of town.",
-    "LongDesc": "The main road running through town.  You can see the town to the east.",
+    "Description": "The main road just west of town.",
     "AsSeenDesc": "the main road outside of town.",
     "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The main road running through town.  You can see the town to the east."
+      },
       {
         "Type": "Movement",
         "Direction": "east",
@@ -209,10 +236,13 @@
   {
     "Id": 10,
     "Name": "The Road",
-    "ShortDesc": "You are riding off into the sunset.",
-    "LongDesc": "The road continues to the west, into the sunset.",
+    "Description": "You are riding off into the sunset.",
     "AsSeenDesc": "a rutted road stretching through the sage and dust, disappearing into the sunset.",
     "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The road continues to the west, into the sunset."
+      },
       {
         "Type": "Movement",
         "Direction": "east",
@@ -227,11 +257,14 @@
   },
   {
     "Id": 11,
-    "Name": "Hanging Tree",
-    "ShortDesc": "A well-worn grassy area with a tree.  There's a noose attached to a branch of the tree.",
-    "LongDesc": "A well-worn grassy area with a tree.  The tree has a noose hanging from one of the branches.  This is where the townfolk extract justice.",
+    "Name": "Meadow",
+    "Description": "A grassy area with a tree in the middle.",
     "AsSeenDesc": "a meadow with a tree standing in the middle.",
     "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "A well-worn grassy area with a large tree growing in the middle"
+      },
       {
         "Type": "Movement",
         "Direction": "north east",
@@ -242,10 +275,13 @@
   {
     "Id": 12,
     "Name": "The Blacksmith",
-    "ShortDesc": "A hot, loud, dirty forge.",
-    "LongDesc": "The blacksmith shop has been keeping the local horses in shoes for 20 years.",
+    "Description": "A blacksmith shop, with all the required tools and materials.",
     "AsSeenDesc": "the blacksmith shop.",
     "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The blacksmith shop is hot and loud.  The tools and materials are all arranged, the sign of a quality craftsman.  A posting says the smithy has been keeping the local horses in shoes for 20 years."
+      },
       {
         "Type": "Movement",
         "Direction": "north",
@@ -256,10 +292,13 @@
   {
     "Id": 13,
     "Name": "The General Store",
-    "ShortDesc": "A store with everything the townsfolk require.",
-    "LongDesc": "The general store contains isles, bins, and bags filled to overflowing with everything the townsfolk, ranchers, and miners could ever need.",
+    "Description": "A store with everything the townsfolk require.",
     "AsSeenDesc": "the general store.",
     "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The general store contains isles, bins, and bags filled to overflowing with everything the townsfolk, ranchers, and miners could ever need."
+      },
       {
         "Type": "Movement",
         "Direction": "north",
@@ -270,10 +309,13 @@
   {
     "Id": 14,
     "Name": "The Assay Office",
-    "ShortDesc": "A small, stuffy office with a single desk and large safe.",
-    "LongDesc": "The assay office is well known to you, you've exchanged your gold for cash here on many occassions.",
+    "Description": "A small, stuffy office with a single desk and large safe.",
     "AsSeenDesc": "the assay office.",
     "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The assay office is well known to you, you've exchanged your gold for cash here on many occassions."
+      },
       {
         "Type": "Movement",
         "Direction": "north",
@@ -284,10 +326,13 @@
   {
     "Id": 15,
     "Name": "Saloon and Hotel",
-    "ShortDesc": "The bar is dimly lit and dusty.  There are stairs leading up.  The bartender is here.",
-    "LongDesc": "Dimly lit, and a little dusty, in the past this barroom saw a lot of action.  There are rooms available at the top of the stairs.  The bartender asks if you need anything.",
+    "Description": "The bar is dimly lit and dusty.  There are stairs leading up.  The bartender is here.",
     "AsSeenDesc": "the saloon.",
     "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "Dimly lit, and a little dusty, in the past this barroom saw a lot of action.  There are rooms available at the top of the stairs.  The bartender asks if you need anything."
+      },
       {
         "Type": "Movement",
         "Direction": "south",
@@ -303,10 +348,13 @@
   {
     "Id": 16,
     "Name": "Sheriff's Office",
-    "ShortDesc": "The local sherrif's office, with a single desk.",
-    "LongDesc": "The sherrif's office is well kept and nicely furnished.  The single desk is made of expensive imported wood and looks almost new.",
+    "Description": "The local sherrif's office, with a single desk.",
     "AsSeenDesc": "the sherrif's office.",
     "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The sherrif's office is well kept and nicely furnished.  The single desk is made of expensive imported wood and looks almost new."
+      },
       {
         "Type": "Movement",
         "Direction": "north",
@@ -322,10 +370,13 @@
   {
     "Id": 17,
     "Name": "Bank",
-    "ShortDesc": "The single table is available and the tellers' window is open.",
-    "LongDesc": "The bank is sparsely furnished with a single table but no chairs.  There is a single tellers' window set in a heavy wooden wall.",
+    "Description": "The single table is available and the tellers' window is open.",
     "AsSeenDesc": "the bank.",
     "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The bank is sparsely furnished with a single table but no chairs.  There is a single tellers' window set in a heavy wooden wall."
+      },
       {
         "Type": "Movement",
         "Direction": "south",
@@ -336,10 +387,13 @@
   {
     "Id": 18,
     "Name": "Top of the Stairs",
-    "ShortDesc": "The top of the stairs leading to the hotel rooms.",
-    "LongDesc": "The landing at the top of the stairs overlooks the nearly empty barroom down.",
+    "Description": "The top of the stairs leading to the hotel rooms.",
     "AsSeenDesc": "the landing at the top of the stairs.",
     "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The landing at the top of the stairs overlooks the nearly empty barroom down."
+      },
       {
         "Type": "Movement",
         "Direction": "down",
@@ -355,10 +409,13 @@
   {
     "Id": 19,
     "Name": "Middle of the Balcony",
-    "ShortDesc": "The balcony above the barroom.",
-    "LongDesc": "The middle of the balcony overlooking the barroom down.",
+    "Description": "The balcony above the barroom.",
     "AsSeenDesc": "the balcony leading to the rooms.",
     "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The middle of the balcony overlooking the barroom down."
+      },
       {
         "Type": "Movement",
         "Direction": "north",
@@ -379,10 +436,13 @@
   {
     "Id": 20,
     "Name": "End of the Balcony",
-    "ShortDesc": "The end of the balcony above the barroom.",
-    "LongDesc": "The end of the balcony.  There is a window overlooking the back of the saloon out into the desert.",
+    "Description": "The end of the balcony above the barroom.",
     "AsSeenDesc": "the balcony ends.",
     "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The end of the balcony.  There is a window overlooking the back of the saloon out into the desert."
+      },
       {
         "Type": "Movement",
         "Direction": "north",
@@ -398,10 +458,13 @@
   {
     "Id": 21,
     "Name": "Hotel Room 1",
-    "ShortDesc": "A dingy hotel room.",
-    "LongDesc": "The room is decorated in a red velvet and roses motif.  The gas lamp is lit, casting a dirty light across the room.  The window at the back looks out over the desert.",
+    "Description": "A dingy hotel room.",
     "AsSeenDesc": "a door with the number 1.",
     "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The room is decorated in a red velvet and roses motif.  The gas lamp is lit, casting a dirty light across the room.  The window at the back looks out over the desert."
+      },
       {
         "Type": "Movement",
         "Direction": "south",
@@ -412,10 +475,13 @@
   {
     "Id": 22,
     "Name": "Hotel Room 2",
-    "ShortDesc": "A dingy hotel room.",
-    "LongDesc": "The room is decorated in a blue velvet and violets motif.  The gas lamp is lit, casting a dirty light across the room.  The window at the back looks out over the desert.",
+    "Description": "A dingy hotel room.",
     "AsSeenDesc": "a door with the number 2.",
     "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The room is decorated in a blue velvet and violets motif.  The gas lamp is lit, casting a dirty light across the room.  The window at the back looks out over the desert."
+      },
       {
         "Type": "Movement",
         "Direction": "south",
@@ -426,10 +492,13 @@
   {
     "Id": 23,
     "Name": "Cellblock Hallway",
-    "ShortDesc": "The cellblock hallway allows access to both cells.",
-    "LongDesc": "The cellblock hallway is the main passageway between the two cells in the sheriff's office.",
+    "Description": "The cellblock hallway allows access to both cells.",
     "AsSeenDesc": "the hallway.",
     "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The cellblock hallway is the main passageway between the two cells in the sheriff's office."
+      },
       {
         "Type": "Movement",
         "Direction": "north",
@@ -451,10 +520,13 @@
   {
     "Id": 24,
     "Name": "Cellblock Hallway",
-    "ShortDesc": "The cellblock hallway allows access to both cells.",
-    "LongDesc": "The cellblock hallway is the main passageway between the two cells in the sheriff's office.",
+    "Description": "The cellblock hallway allows access to both cells.",
     "AsSeenDesc": "the hallway.",
     "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The cellblock hallway is the main passageway between the two cells in the sheriff's office."
+      },
       {
         "Type": "Movement",
         "Direction": "north",
@@ -471,10 +543,13 @@
   {
     "Id": 25,
     "Name": "Jail Cell",
-    "ShortDesc": "The jail cell is very dirty.",
-    "LongDesc": "The jail cell is not as nice as the sheriff's office.  There is dirt everywhere, small piles of what one can only assume is human feces, and the mattress on the single cot is covered in stains of unknown origin.",
+    "Description": "The jail cell is very dirty.",
     "AsSeenDesc": "a jail cell.",
     "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The jail cell is not as nice as the sheriff's office.  There is dirt everywhere, small piles of what one can only assume is human feces, and the mattress on the single cot is covered in stains of unknown origin."
+      },
       {
         "Type": "Movement",
         "Direction": "south",
@@ -486,10 +561,13 @@
   {
     "Id": 26,
     "Name": "Jail Cell",
-    "ShortDesc": "The jail cell is very dirty.",
-    "LongDesc": "The jail cell is not as nice as the sheriff's office.  There is dirt everywhere, small piles of what one can only assume is human feces, and the mattress on the single cot is covered in stains of unknown origin.",
+    "Description": "The jail cell is very dirty.",
     "AsSeenDesc": "a jail cell.",
     "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The jail cell is not as nice as the sheriff's office.  There is dirt everywhere, small piles of what one can only assume is human feces, and the mattress on the single cot is covered in stains of unknown origin."
+      },
       {
         "Type": "Movement",
         "Direction": "south",

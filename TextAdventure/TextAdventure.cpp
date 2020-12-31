@@ -6,10 +6,10 @@
 void GameLoop( Game& game )
 {
     // Need a string comparitor for doing case insensitive compares
-    typename Parser::StringCompareNoCase comparitor;
+    typename StringCompareT comparitor;
 
     // Initialize the parser from the game resources
-    std::shared_ptr<Parser::SimpleParser> parser = std::make_shared<Parser::SimpleParser>();
+    std::shared_ptr<ParserT> parser = std::make_shared<ParserT>();
 
     // First, display a description of the location
     game.DescribeScene();
@@ -24,7 +24,7 @@ void GameLoop( Game& game )
 
         // Parse the player input
         std::stringstream ui( userInput );
-        if( Parser::ParserStatus::STATUS_PARSE_OK != parser->ParsePhrase( ui ) )
+        if( ParserStatusT::STATUS_PARSE_OK != parser->ParsePhrase( ui ) )
         {
             // TODO: insert smart mouthed responses here...
             std::cout << "I didn't understand that, please try again." << std::endl;
@@ -40,6 +40,7 @@ void GameLoop( Game& game )
         case Parser::ParsedType::PARSED_TYPE_TAKE:
             break;
         case Parser::ParsedType::PARSED_TYPE_EXAMINE:
+            game.OnExamine( *parser );
             break;
         case Parser::ParsedType::PARSED_TYPE_DISCARD:
             break;

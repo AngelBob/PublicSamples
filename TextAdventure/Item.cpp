@@ -10,9 +10,11 @@ Item::Item( const json &item )
         return;
     }
 
-    // These entries are required
-    m_LongDescription = item.at( "Description" );
-    m_Examination = item.at( "Examination" );
+    // Build the response lists
+    auto &responses = item.at( "Responses" );
+    for( auto it = responses.begin(); it != responses.end(); ++it )
+    {
+    }
 
     // These items are optional
     try
@@ -23,11 +25,4 @@ Item::Item( const json &item )
     {
         m_IsMovable = false;
     }
-}
-
-std::ostream &Item::PrintDescription( std::ostream &os )
-{
-    os << m_LongDescription;
-
-    return os;
 }

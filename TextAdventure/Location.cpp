@@ -11,34 +11,17 @@ Location::Location( const json &location )
 		return;
 	}
 
-	// These entries are required
-	m_ShortDesc = location.at( "ShortDesc" );
-	m_LongDesc = location.at( "LongDesc" );
+	// The as seen description is required
+	m_AsSeenDesc = location.at( "AsSeenDesc" );
 
-	// These entries are optional
-	try
-	{
-		m_AsSeenDesc = location.at( "AsSeenDesc" );
-	}
-	catch( json::out_of_range )
-	{
-		m_AsSeenDesc = "";
-	}
-
-	try
-	{
-		m_IsStartPosition = location.at( "IsStartPosition" );
-	}
-	catch( json::out_of_range )
-	{
-		m_IsStartPosition = false;
-	}
+	// Start position will only be set for one location
+	m_IsStartPosition = location.value( "IsStartPosition", false );
 }
 
 #pragma region Event handlers
 int32_t Location::OnMove( MoveDirection direction )
 {
-	int32_t nextLocation = -1;
+	int32_t nextLocation = INVALID_OBJECT;
 
 	std::map<MoveDirection, int32_t>::const_iterator found = m_Neighbors.find( direction );
 	if( found != m_Neighbors.end() )
@@ -66,7 +49,7 @@ void Location::RemoveCharacter( int32_t characterId )
 	m_Characters.remove_if( [ characterId ]( int n ) { return n == characterId; } );
 }
 
-const std::list<int32_t> &Location::GetCharacters( void ) const
+const std::list<int32_t>& Location::GetCharacters( void ) const
 {
 	return m_Characters;
 }
@@ -101,34 +84,16 @@ void Location::SetShownOnce( void )
 	m_ShownOnce = true;
 }
 
-LocationDesc Location::LongOrShortDescription( void ) const
+bool Location::GetShownOnce( void ) const
 {
-	LocationDesc descType = LocationDesc::DESCRIPTION_SHORT;
-	if( !m_ShownOnce )
-	{
-		descType = LocationDesc::DESCRIPTION_LONG;
-	}
-
-	return descType;
+	return m_ShownOnce;
 }
 
-std::ostream& Location::PrintDescription( std::ostream &os, LocationDesc which ) const
+const std::string& Location::GetAsSeenDescription( void ) const
 {
-	switch( which )
-	{
-	case LocationDesc::DESCRIPTION_LONG:
-		os << m_LongDesc;
-		break;
-	case LocationDesc::DESCRIPTION_SHORT:
-		os << m_ShortDesc;
-		break;
-	case LocationDesc::DESCRIPTION_ASSEEN:
-		os << m_AsSeenDesc;
-		break;
-	}
-
-	return os;
+	return m_AsSeenDesc;
 }
+
 #pragma endregion Accessors
 
 #pragma region Privates

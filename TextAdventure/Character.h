@@ -9,8 +9,6 @@ public:
 	std::ostream& OnInteraction( std::ostream& os );
 
 private:
-	int32_t					 m_CurLocationId;
-	int32_t					 m_CurResponse;
-
-	std::vector<std::string> m_InteractionResponses;
+	// Members specific to the character class
+	int32_t m_CurResponse;
 };

@@ -5,6 +5,10 @@
     "Location": 1,
     "Responses": [
       {
+        "Type": "Examine",
+        "Text": "The 49er is a leather skinned, grizzled old bear of a man.  He looks like he's been in the bush since birth."
+      },
+      {
         "Type": "Interaction",
         "Text": [
           "Feeling better?  You were pretty drunk last night.",
@@ -21,6 +25,10 @@
     "Name": "Blacksmith",
     "Location": 12,
     "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The smithy is a musclular man, possibly in his mid-30s."
+      },
       {
         "Type": "Interaction",
         "Text": [
@@ -68,6 +76,10 @@
     "Location": 13,
     "Responses": [
       {
+        "Type": "Examine",
+        "Text": "The shop keeper is a jovial fellow; his green apron is spotless, and his cap sits just so on his head."
+      },
+      {
         "Type": "Interaction",
         "Text": [
           "Howdy!  Come back for more supplies today?",
@@ -96,6 +108,10 @@
     "Location": 14,
     "Responses": [
       {
+        "Type": "Examine",
+        "Text": "The assayer is a slight mouse of a man, with round rimmed spectacles and a rumpled linen shirt."
+      },
+      {
         "Type": "Interaction",
         "Text": [
           "Back to trade out the rest of your gold?",
@@ -112,6 +128,10 @@
     "Name": "Barkeep",
     "Location": 15,
     "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The barkeep is a friendly man of medium build.  His salted hair belies his age, and the wrinkles around his eyes say he's been behind that bar a while."
+      },
       {
         "Type": "Interaction",
         "Text": [
@@ -137,6 +157,10 @@
     "Location": 16,
     "Responses": [
       {
+        "Type": "Examine",
+        "Text": "The sheriff sees you looking at him."
+      },
+      {
         "Type": "Interaction",
         "Text": [
           "Yep",
@@ -155,6 +179,10 @@
     "Location": 17,
     "Responses": [
       {
+        "Type": "Examine",
+        "Text": "The bank teller is a young woman with flowing dark hair.  She is dressed in a slightly out of date manner, and her feathered hat is showing signs of wear."
+      },
+      {
         "Type": "Interaction",
         "Text": [
           "Deposit or withdrawal?",
@@ -166,12 +194,16 @@
   {
     "Id": 8,
     "Name": "Lady",
-    "Location": 17,
+    "Location": 15,
     "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The lady has curling locks of red hair and bright green eyes.  She is dressed at the height of fashion, but the fit isn't quite right and some of the laces are untied."
+      },
       {
         "Type": "Interaction",
         "Text": [
-          "Couldn't resist me, hey?",
+          "Couldn't resist me, had to come back the next day, yeah?",
           "Last night was such fun, can't we go again?",
           "Are you sure?"
         ]

@@ -5,10 +5,32 @@
 class InGameObject
 {
 public:
+	static const int32_t INVALID_OBJECT = 0;
+
 	InGameObject( const json& objectJson )
 	{
 		m_Id = objectJson.at( "Id" );
 		m_Name = objectJson.at( "Name" );
+
+		// Locations and items have descriptions
+		m_Description = objectJson.value( "Description", "" );
+
+		// Every item has an "Examine" response
+		auto &responses = objectJson.at( "Responses" );
+		for( auto it = responses.begin(); it != responses.end(); ++it )
+		{
+			if( it->at( "Type" ) == "Examine" )
+			{
+				m_ExaminationResponse = it->at( "Text" );
+
+				bool requiresPossession = it->value( "RequiresPossession", false );
+				m_IsEnvironmentExaminable = !requiresPossession;
+
+				break;
+			}
+		}
+
+
 		try
 		{
 			m_Location = objectJson.at( "Location" );
@@ -20,33 +42,55 @@ public:
 		}
 	}
 
-	__inline bool IsInvalid( const json& objectJson ) const
+	inline bool IsInvalid( const json& objectJson ) const
 	{
 		return( objectJson.at( "Id" ) == 0 && objectJson.at( "Name" ) == "invalid" );
 	}
 
-	__inline int32_t GetObjectId( void ) const
+	inline bool AllowsEnvironmentExamination( void )
+	{
+		return m_IsEnvironmentExaminable;
+	}
+
+	inline int32_t GetObjectId( void ) const
 	{
 		return m_Id;
 	}
 
-	__inline int32_t GetLocation( void ) const
+	inline int32_t GetLocation( void ) const
 	{
 		return m_Location;
 	}
 
-	__inline void SetLocation( int32_t location )
+	inline void SetLocation( int32_t location )
 	{
 		m_Location = location;
 	}
 
-	__inline const std::string& GetName( void ) const
+	inline const std::string& GetName( void ) const
 	{
 		return m_Name;
 	}
 
+	inline const std::string& GetDescription( void ) const
+	{
+		return m_Description;
+	}
+
+	inline const std::string& GetExaminationResponse( void ) const
+	{
+		return m_ExaminationResponse;
+	}
+
 protected:
-	int32_t					m_Id;
-	int32_t					m_Location;
-	std::string				m_Name;
+	int32_t		m_Id;
+	std::string m_Name;
+	int32_t		m_Location;
+
+	// Response strings
+	std::string m_Description;
+	std::vector<std::string> m_InteractionResponses;
+	std::string m_ExaminationResponse;
+
+	bool m_IsEnvironmentExaminable;
 };

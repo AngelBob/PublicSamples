@@ -2,13 +2,6 @@
 
 namespace Parser
 {
-	class StringCompareNoCase
-	{
-	public:
-		bool operator()( const std::string &lhs, const std::string &rhs ) const;
-		int  compare( const std::string &a, const std::string &b ) const;
-	};
-
 	enum class ParsedType
 	{
 		PARSED_TYPE_INVALID = 0,
@@ -46,9 +39,9 @@ namespace Parser
 		STATE_END
 	};
 
-	class SimpleParser
+	class ParserBase
 	{
-		using ParserMap = std::map<std::string, ParsedType, StringCompareNoCase>;
+		using ParserMap = std::map<std::string, ParsedType, StringCompareT>;
 		struct ParsedTypeToNameMap
 		{
 			ParsedType	type;
@@ -56,18 +49,20 @@ namespace Parser
 		};
 
 	public:
-		SimpleParser( void );
-		ParserStatus ParsePhrase( std::stringstream &phrase );
+		ParserBase( void );
+		
+		virtual ParserStatus ParsePhrase( std::stringstream &phrase ) = 0;
 
 		ParsedType GetLastVerbType( void ) const;
-		const std::string& GetLastVerb( void ) const;
+		const std::string &GetLastVerb( void ) const;
 		const std::string &GetLastObject( void ) const;
 		const std::string &GetLastIndirectObject( void ) const;
 
-		const std::string& GetVerbTypeName( ParsedType type );
-		ParsedType GetVerbTypeEnum( std::string& type );
+		const std::string& GetVerbTypeName( ParsedType type ) const;
+		ParsedType GetVerbTypeEnum( std::string& type ) const;
 
-	private:
+	protected:
+		// This needs to stay in sync with the ParsedType enum class and the object JSON inputs
 		inline static const ParsedTypeToNameMap m_TypeToNameMap[ 10 ] = {
 			{ ParsedType::PARSED_TYPE_INVALID, "Invalid" },
 			{ ParsedType::PARSED_TYPE_MOVE, "Move" },
@@ -82,10 +77,12 @@ namespace Parser
 		};
 		std::map<std::string, ParsedType> m_NameToTypeMap;
 
-		void LoadJSONResources( void );
 		void ClearLastEntries( void );
-		bool IsArticle( std::string& word );
-		bool IsPreposition( std::string& word );
+		bool IsArticle( const std::string& word ) const;
+		bool IsInWordList( const std::vector<std::string> &list, const std::string &word ) const;
+		bool IsInteractiveType( void );
+
+		virtual bool IsPreposition( const std::string &word ) const = 0;
 
 		ParserMap   m_VerbList;
 		ParsedType  m_LastType;

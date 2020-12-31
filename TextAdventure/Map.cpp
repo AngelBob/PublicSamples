@@ -14,9 +14,9 @@ void Map::OnLoad( void )
 	LoadLocationResources( jsonLocations );
 
 	// Build the map by linking all of the locations to their neighbors
-	auto location = m_Locations.begin();
-	++location; // Skip the first invalid location
-	for( auto loc = jsonLocations.begin(); loc != jsonLocations.end() && location != m_Locations.end(); ++loc, ++location )
+	auto mlocIter = m_Locations.begin();
+	++mlocIter; // Skip the first invalid location
+	for( auto loc = jsonLocations.begin(); loc != jsonLocations.end() && mlocIter != m_Locations.end(); ++loc, ++mlocIter )
 	{
 		auto &responses = loc->at( "Responses" );
 		for( auto it = responses.begin(); it != responses.end(); ++it )
@@ -28,18 +28,21 @@ void Map::OnLoad( void )
 				int32_t destinationId = it->at( "DestinationId" );
 
 				MoveDirection directionId = GetDirectionEnum( direction );
-				( *location )->SetNeighbor( directionId, destinationId );
+				( *mlocIter )->SetNeighbor( directionId, destinationId );
 			}
 		}
 	}
 	
-	// Set the starting location
-	// Go through the list of locations and find the starting point
-	for( auto &iter : m_Locations )
+	// Go through the list of locations and do additional setup
+	for( auto& location : m_Locations )
 	{
-		if( iter->IsStartPosition() )
+		// Add the map entry
+		m_LocationNameToIdMap.insert( std::make_pair( location->GetName(), location->GetObjectId() ) );
+
+		// Set the starting location, if appropriate
+		if( location->IsStartPosition() )
 		{
-			SetLocation( iter->GetLocation() );
+			SetLocation( location->GetLocation() );
 		}
 	}
 }
@@ -52,7 +55,7 @@ bool Map::OnMove( const std::string &direction )
 	Location& loc = GetLocation();
 
 	int32_t newLoc = loc.OnMove( dir );
-	if( newLoc > 0 )
+	if( InGameObject::INVALID_OBJECT != newLoc )
 	{
 		// Valid move
 		IsMoveValid = true;
@@ -97,7 +100,7 @@ MoveDirection Map::GetDirectionEnum( const std::string &name )
 	{
 		// Full string not found, look for shortcuts
 		// Need a case insensitive comparitor
-		typename Parser::StringCompareNoCase comparitor;
+		typename StringCompareT comparitor;
 		if( 0 == comparitor.compare( name, "n" ) )
 		{
 			direction = MoveDirection::MOVE_NORTH;

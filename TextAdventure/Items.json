@@ -1,9 +1,9 @@
 [
   {
     "Id": 1,
-    "Name": "Noose",
+    "Name": "Rope",
     "Location": 11,
-    "Description": "There is a rope hanging from one of the branches of the tree",
+    "Description": "a rope hanging from one of the branches of the tree",
     "Responses": [
       {
         "Type": "Discard",
@@ -13,7 +13,7 @@
       },
       {
         "Type": "Examine",
-        "Text": [ "It's a sturdy piece of hemp, tied to form a noose." ]
+        "Text": "It's a sturdy piece of hemp, tied to form a noose."
       }
     ]
   },
@@ -21,7 +21,7 @@
     "Id": 2,
     "Name": "Iron bar",
     "Location": 12,
-    "Description": "bar of iron lying on the floor",
+    "Description": "a bar of iron in a pile of dust on the floor",
     "Responses": [
       { "Type": "Take" },
       { "Type": "Discard" },
@@ -39,7 +39,7 @@
       {
         "Type": "Examine",
         "RequiresPossession": true,
-        "Text": [ "It looks to be a good, solid piece of iron." ]
+        "Text": "It looks to be a good, solid piece of iron."
       }
     ]
   },
@@ -47,11 +47,11 @@
     "Id": 3,
     "Name": "Hot, loud, dirty forge",
     "Location": 12,
-    "Description": "hot, loud, dirty forge",
+    "Description": "a hot, loud, dirty forge",
     "Responses": [
       {
         "Type": "Examine",
-        "Text": [ "It's just a forge.  It's hot.  It's loud.  It's covered in soot." ]
+        "Text": "It's just a forge.  It's hot.  It's loud.  It's covered in soot."
       },
       {
         "Type": "Attack",
@@ -70,7 +70,7 @@
     "Id": 4,
     "Name": "Empty bag",
     "Location": 14,
-    "Description": "empty bag lying on the floor",
+    "Description": "an empty bag lying on the floor",
     "Responses": [
       {
         "Type": "Take",
@@ -79,8 +79,8 @@
       {
         "Type": "Examine",
         "RequiresPossession": true,
-        "Text": [ "Looking more closely, you recognize the bag as the one that previously contained your gold.  The bag is empty." ]
-      }
+        "Text": "Looking more closely, you recognize the bag as the one that previously contained your gold.  The bag is empty."
+      },
       { "Type": "Discard" }
     ]
   },
@@ -88,28 +88,24 @@
     "Id": 5,
     "Name": "Cabinet",
     "Location": 22,
-    "Description": "A cabinet with a blue velvet runner with a vase of violets sitting on top.",
+    "Description": "a cabinet with a blue velvet runner with a vase of violets sitting on top",
     "Responses": [
       {
         "Type": "Examine",
-        "Text": [
-          "The runner is quite worn and wrinkled, and the glass vase is yellowed and cracked."
-        ]
+        "Text": "The runner is quite worn and wrinkled, and the glass vase is yellowed and cracked."
       },
       {
         "Type": "Examine",
-        "Text": [
-          "A closer look reveals a key hidden under one of the wrinkles in the velvet runner."
-        ],
+        "Text": "A closer look reveals a key hidden under one of the wrinkles in the velvet runner.",
         "RequiresTrigger": "HotelRoom2_OnCabinetKeyVisible"
-      },
+      }
     ]
   },
   {
     "Id": 6,
     "Name": "Key",
     "Location": 22,
-    "Description": "A key.",
+    "Description": "a key",
     "Responses": [
       {
         "Type": "Take",
@@ -117,9 +113,7 @@
       },
       {
         "Type": "Examine",
-        "Text": [
-          "A closer look reveals no markings, and no indication of what the key may be for."
-        ]
+        "Text":  "A closer look reveals no markings, and no indication of what the key may be for."
       },
       { "Type": "Discard" }
     ]

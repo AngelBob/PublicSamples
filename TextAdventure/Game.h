@@ -26,6 +26,7 @@ public:
 
 	void OnMove( const ParserT& parser );
 	void OnInteraction( const ParserT& parser );
+	void OnExamine( const ParserT& parser );
 
 	// Accessors
 	const Map& GetMap( void );
@@ -40,10 +41,20 @@ private:
 	std::ostream &PrintCharacters( std::ostream &os, size_t &numCharacters ) const;
 	std::ostream &PrintItems( std::ostream &os, size_t &numItems ) const;
 
+	void DoItemExamination( const std::string &name, int32_t itemId, bool isInInventory ) const;
+	void DoCharacterExamination( const std::string &name, int32_t characterId, bool isInPosse ) const;
+
 	// Map contains a list of locations
 	std::unique_ptr<Map>	m_Map;
 
 	// Characters and Items are stand-alone things, but relate to the locations
+	std::map<std::string, int32_t, typename StringCompareT> m_CharacterNameToIdMap;
 	std::vector<std::unique_ptr<Character>> m_Characters;
+
+	std::map<std::string, int32_t, StringCompareT>	m_ItemNameToIdMap;
 	std::vector<std::unique_ptr<Item>>      m_Items;
+
+	// The user inventory
+	std::list<int32_t> m_Inventory; // It's possible to collect items
+	std::list<int32_t> m_Posse;     // It's possible to collect characters
 };

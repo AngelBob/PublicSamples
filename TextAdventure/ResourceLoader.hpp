@@ -37,7 +37,7 @@ namespace ResourceLoader
         // item in the vector.
         list.reserve( objJson.size() + 1 );
 
-        json badObj = "{ \"Id\": 0, \"Name\": \"invalid\" }"_json;
+        json badObj = "{ \"Id\": 0, \"Name\": \"invalid\", \"Responses\": [ { \"Type\": \"Examine\", \"Text\": \"invalid object\" } ] }"_json;
         list.emplace_back( std::make_unique<GameObjectT>( badObj ) );
 
         int32_t counter = 1;

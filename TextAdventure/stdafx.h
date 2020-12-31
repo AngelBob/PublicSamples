@@ -16,3 +16,13 @@
 
 #include "json.hpp"
 using json = nlohmann::json;
+
+// String compare traits
+#include "StringCompareNoCase.hpp"
+using StringCompareT = StringComparitors::StringCompareNoCase;
+
+// Parser traits
+#include "SimpleParser.h"
+using ParserT = typename Parser::SimpleParser;
+using ParserStatusT = typename Parser::ParserStatus;
+using ParserStateT = typename Parser::ParseState;
