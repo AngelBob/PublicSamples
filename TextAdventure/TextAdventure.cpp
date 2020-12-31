@@ -46,6 +46,7 @@ void GameLoop( Game& game )
         case Parser::ParsedType::PARSED_TYPE_THROW:
             break;
         case Parser::ParsedType::PARSED_TYPE_INTERACTION:
+            game.OnInteraction( *parser );
             break;
         case Parser::ParsedType::PARSED_TYPE_ATTACK:
             break;

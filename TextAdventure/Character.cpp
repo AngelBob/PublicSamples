@@ -11,19 +11,31 @@ Character::Character( const json &character )
 		return;
 	}
 
-	// The response list is required
-	std::vector<std::string> responses = character.at( "Responses" );
-	m_Responses = responses;
+	// Build the response lists
+	auto& responses = character.at( "Responses" );
+	for( auto it = responses.begin(); it != responses.end(); ++it )
+	{
+		if( it->at( "Type" ) == "Interaction" )
+		{
+			// These are all of the things a character will say when spoken to.
+			auto &sayings = it->at( "Text" );
+			for( auto says = sayings.begin(); says != sayings.end(); ++says )
+			{
+				m_InteractionResponses.emplace_back( *says );
+			}
+		}
+	}
+
 	m_CurResponse = 0;
 }
 
-std::string &Character::GetResponse( void )
+std::ostream& Character::OnInteraction( std::ostream& os )
 {
-	std::string &response = m_Responses[ m_CurResponse ];
-	if( m_CurResponse < m_Responses.size() - 1 )
+	os << m_InteractionResponses[ m_CurResponse++ ];
+	if( m_CurResponse >= m_InteractionResponses.size() )
 	{
-		++m_CurResponse;
+		--m_CurResponse;
 	}
 
-	return response;
+	return os;
 }

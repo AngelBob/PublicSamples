@@ -40,11 +40,9 @@ public:
 		m_Location = location;
 	}
 
-	__inline std::ostream& PrintName( std::ostream &os ) const
+	__inline const std::string& GetName( void ) const
 	{
-		os << m_Name;
-
-		return os;
+		return m_Name;
 	}
 
 protected:

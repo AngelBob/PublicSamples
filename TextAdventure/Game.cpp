@@ -20,6 +20,7 @@ void Game::OnLoad( void )
     // Cycle through all of the characters fisrt.
     for( auto& character : m_Characters )
     {
+        // The first "character" is the invalid character, and it gets placed into the invalid location
         Location &location = m_Map->GetLocation( character->GetLocation() );
         location.AddCharacter( character->GetObjectId() );
     }
@@ -27,6 +28,7 @@ void Game::OnLoad( void )
     // Cycle through all of the items next.
     for( auto &item : m_Items )
     {
+        // The first "item" is the invalid item, and it gets placed into the invalid location.
         Location &location = m_Map->GetLocation( item->GetLocation() );
         location.AddItem( item->GetObjectId() );
     }
@@ -64,12 +66,43 @@ void Game::OnMove( const ParserT& parser )
     }
 }
 
+void Game::OnInteraction( const ParserT& parser )
+{
+    // Get the character(s) from the current location.
+    // If there is more than one, need to tell the user to be more specific.
+    const std::list<int32_t>& characterIds = m_Map->GetLocation().GetCharacters();
+    if( characterIds.size() == 0 )
+    {
+        std::cout << "Who are you talking to?  There's no one here" << std::endl;
+    }
+    else if( characterIds.size() > 1 )
+    {
+        std::cout << "Who are you talking to?  There are several people present" << std::endl;
+    }
+    else
+    {
+        // The intereseting bit.. have the character respond (assuming the user is
+        // wanting to talk to someone that's actually present).
+        const std::unique_ptr<Character>& character = m_Characters[ characterIds.front() ];
+        const std::string& name = parser.GetLastObject();
+
+        if( name.empty() || name == character->GetName() )
+        {
+            character->OnInteraction( std::cout ) << std::endl;
+        }
+        else
+        {
+            std::cout << character->GetName() << " isn't here." << std::endl;
+        }
+    }
+}
+
 void Game::DescribeScene( void )
 {
     std::stringstream ss;
 
     const Location& curLocation = m_Map->GetLocation();
-    curLocation.PrintName( ss );
+    ss << curLocation.GetName();
     ss << "\n";
     curLocation.PrintDescription( ss, curLocation.LongOrShortDescription() );
 
@@ -105,11 +138,10 @@ void Game::DescribeScene( void )
 //private:
 void Game::LoadGameResources()
 {
-#if 0 // not quite ready to load up the items and characters
     // Need to load up the character and item resources
     static const ResourceList resources[ 2 ] = {
         { L"CHARACTERS", IDR_CHARACTERS1 },
-        { L"ITEMS", IDR_ITEMS1 },
+        //{ L"ITEMS", IDR_ITEMS1 },
     };
 
     for( int32_t idx = 0; idx < _countof( resources); ++idx )
@@ -117,7 +149,7 @@ void Game::LoadGameResources()
         json items;
         ResourceLoader::LoadStringResource( items, resources[ idx ].name, resources[ idx ].id );
 
-        switch( idx )
+        switch( resources[ idx ].id )
         {
 	        case IDR_CHARACTERS1:
                 // Building character objects
@@ -130,7 +162,6 @@ void Game::LoadGameResources()
                 break;
         }
     }
-#endif
 }
 
 std::ostream &Game::PrintDirectionsAsSeen( std::ostream &os, size_t &numNeighbors ) const
@@ -177,10 +208,11 @@ std::ostream& Game::PrintCharacters( std::ostream &os, size_t &numCharacters ) c
         std::list<int32_t>::const_iterator stop = characters.end();
         --stop;
 
-        os << "  The ";
+        // Character printing starts on a new line, so no space before.
+        os << "The ";
         while( cur != stop )
         {
-            m_Characters.at( *cur )->PrintName( os );
+            os << m_Characters.at( *cur )->GetName();
             if( 2 != characters.size() )
             {
                 os << ", ";
@@ -192,7 +224,7 @@ std::ostream& Game::PrintCharacters( std::ostream &os, size_t &numCharacters ) c
         {
             os << " and ";
         }
-        m_Characters.at( *cur )->PrintName( os );
+        os << m_Characters.at( *cur )->GetName();
 
         if( characters.size() == 1 )
         {
@@ -220,7 +252,7 @@ std::ostream& Game::PrintItems( std::ostream &os, size_t &numItems ) const
         std::list<int32_t>::const_iterator stop = items.end();
         --stop;
 
-        os << "  ";
+        // Item printing starts on a new line, so no space before.
         if( items.size() > 1 )
         {
             os << "There are ";

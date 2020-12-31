@@ -82,7 +82,6 @@
         "Text": [
           "I'm afraid you still don't have any money."
         ]
-
       },
       {
         "Type": "Take",
@@ -95,15 +94,15 @@
     "Id": 4,
     "Name": "Assayer",
     "Location": 14,
-    "InteractionResponses": [
-      "Back to trade out the rest of your gold?",
-      "You didn't trade it all yesterday, the bag was still half full.",
-      "I see.  Sorry, I can't help with that.",
-      "I see.  Sorry, I can't help with that."
-    ],
     "Responses": [
       {
         "Type": "Interaction",
+        "Text": [
+          "Back to trade out the rest of your gold?",
+          "You didn't trade it all yesterday, the bag was still half full.",
+          "I see.  Sorry, I can't help with that.",
+          "I see.  Sorry, I can't help with that."
+        ],
         "Triggers": "Assayer_OnOutOfOffice"
       }
     ]
@@ -112,16 +111,18 @@
     "Id": 5,
     "Name": "Barkeep",
     "Location": 15,
-    "InteractionResponses": [
-      "In for some hair of the dog?",
-      "You got pretty far into your cups last night.",
-      "Was just you for a while.",
-      "About 10, Smithy joined you.",
-      "I had to kick you out at closing.",
-      "Ready for another?"
-    ],
     "Responses": [
-      { "Type": "Interaction" },
+      {
+        "Type": "Interaction",
+        "Text": [
+          "In for some hair of the dog?",
+          "You got pretty far into your cups last night.",
+          "Was just you for a while.",
+          "About 10, Smithy joined you.",
+          "I had to kick you out at closing.",
+          "Ready for another?"
+        ]
+      },
       { "Type": "Transact" },
       {
         "Type": "Take",
@@ -174,7 +175,7 @@
           "Last night was such fun, can't we go again?",
           "Are you sure?"
         ]
-      }
+      },
       {
         "Type": "Transact",
         "SpecificVerb": "pay",

@@ -73,8 +73,16 @@ namespace Parser
 				}
 				else if( isPreposition )
 				{
-					// Preposition on the direct object are a parser error
-					status = ParserStatus::STATUS_EXPECTING_DIRECT_OBJECT;
+					// Preposition on the direct object is only acceptible for interactive types
+					if( ParsedType::PARSED_TYPE_INTERACTION == m_LastType )
+					{
+						m_LastPreposition = token;
+						state = ParseState::STATE_HAVE_PREPOSITION;
+					}
+					else
+					{
+						status = ParserStatus::STATUS_EXPECTING_DIRECT_OBJECT;
+					}
 				}
 				else
 				{
@@ -137,12 +145,20 @@ namespace Parser
 					// Preposition following the previous preposition is a parser error
 					status = ParserStatus::STATUS_EXPECING_INDIRECT_OBJECT;
 				}
-				else
+				else if( haveDirectObject )
 				{
 					// Have an indirect object.  That's all we can handle, so any other
 					// text is dropped on the floor
 					m_LastIndirectObject = token;
 					state = ParseState::STATE_END;
+				}
+				else
+				{
+					// Preposition on the direct object must be interactive type
+					assert( ParsedType::PARSED_TYPE_INTERACTION == m_LastType );
+					m_LastObject = token;
+					haveDirectObject = true;
+					state = ParseState::STATE_HAVE_DIRECT_OBJECT;
 				}
 			}
 		}

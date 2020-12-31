@@ -25,6 +25,7 @@ public:
 	void OnUnload( void );
 
 	void OnMove( const ParserT& parser );
+	void OnInteraction( const ParserT& parser );
 
 	// Accessors
 	const Map& GetMap( void );
