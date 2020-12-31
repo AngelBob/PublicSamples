@@ -3,16 +3,16 @@
 #include <array>
 #include <cassert>
 #include <iostream>
+#include <list>
+#include <map>
 #include <memory>
 #include <string>
 #include <sstream>
 #include <vector>
 
+#define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
 #include "windows.h"
-//#include "winbase.h" // for resource handling
-//#include "winuser.h" // for resource handling
-
 #include "resource.h" // for resource definition
 
-#include "json.hpp"  // for the json handling
+#include "json.hpp"
 using json = nlohmann::json;

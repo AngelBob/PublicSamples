@@ -1,10 +1,15 @@
 #include "stdafx.h"
+#include "Objects.h"
 
-#include "Item.h"
-
-Item::Item( const json &item, std::weak_ptr<Map> map )
-	: GameObject( item, map )
+Item::Item( const json &item )
+	: InGameObject( item )
 {
+    // Bail early on invalid object
+    if( IsInvalid( item ) )
+    {
+        return;
+    }
+
     // These entries are required
     m_LongDescription = item.at( "Description" );
     m_Examination = item.at( "Examination" );

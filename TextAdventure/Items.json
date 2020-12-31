@@ -3,31 +3,125 @@
     "Id": 1,
     "Name": "Noose",
     "Location": 11,
-    "Description": "There is a noose hanging from one of the branches of the tree",
-    "Examination": "It's a nice piece of hemp, tied to form a noose."
+    "Description": "There is a rope hanging from one of the branches of the tree",
+    "Responses": [
+      {
+        "Type": "Discard",
+        "SpecificVerb": "put",
+        "RequiresItem": "Sheriff",
+        "Triggers": "EndGame"
+      },
+      {
+        "Type": "Examine",
+        "Text": [ "It's a sturdy piece of hemp, tied to form a noose." ]
+      }
+    ]
   },
   {
     "Id": 2,
     "Name": "Iron bar",
     "Location": 12,
     "Description": "bar of iron lying on the floor",
-    "Examination": "It looks to be a good, solid piece of iron.",
-    "Moveable": true
+    "Responses": [
+      { "Type": "Take" },
+      { "Type": "Discard" },
+      {
+        "Type": "Throw",
+        "SpecificVerb": "throw",
+        "RequiresPossession": true,
+        "RequiresLocation": "The Blacksmith",
+        "Triggers": "Blacksmith_OnAttack"
+      },
+      {
+        "Type": "Throw",
+        "RequiresPossession": true
+      },
+      {
+        "Type": "Examine",
+        "RequiresPossession": true,
+        "Text": [ "It looks to be a good, solid piece of iron." ]
+      }
+    ]
   },
   {
     "Id": 3,
     "Name": "Hot, loud, dirty forge",
     "Location": 12,
     "Description": "hot, loud, dirty forge",
-    "Examination": "Looking more closely, you recognize the bag as the one that previously contained your gold.  The bag is empty.",
-    "Moveable": false
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": [ "It's just a forge.  It's hot.  It's loud.  It's covered in soot." ]
+      },
+      {
+        "Type": "Attack",
+        "Text": [
+          "Why are you attacking the forge?",
+          "It really doesn't have much effect.",
+          "The forge is undamaged by your flailing.",
+          "The small beginning of a scratch might be appearing under the soot.",
+          "No, it's not a scratch after all",
+          "The forge remains undamaged.  Perhaps a different course of action?"
+        ]
+      }
+    ]
   },
   {
     "Id": 4,
     "Name": "Empty bag",
     "Location": 14,
     "Description": "empty bag lying on the floor",
-    "Examination": "Looking more closely, you recognize the bag as the one that previously contained your gold.  The bag is empty.",
-    "Moveable": true
+    "Responses": [
+      {
+        "Type": "Take",
+        "RequiresTrigger": "Assayer_OnOutOfOffice"
+      },
+      {
+        "Type": "Examine",
+        "RequiresPossession": true,
+        "Text": [ "Looking more closely, you recognize the bag as the one that previously contained your gold.  The bag is empty." ]
+      }
+      { "Type": "Discard" }
+    ]
+  },
+  {
+    "Id": 5,
+    "Name": "Cabinet",
+    "Location": 22,
+    "Description": "A cabinet with a blue velvet runner with a vase of violets sitting on top.",
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": [
+          "The runner is quite worn and wrinkled, and the glass vase is yellowed and cracked."
+        ]
+      },
+      {
+        "Type": "Examine",
+        "Text": [
+          "A closer look reveals a key hidden under one of the wrinkles in the velvet runner."
+        ],
+        "RequiresTrigger": "HotelRoom2_OnCabinetKeyVisible"
+      },
+    ]
+  },
+  {
+    "Id": 6,
+    "Name": "Key",
+    "Location": 22,
+    "Description": "A key.",
+    "Responses": [
+      {
+        "Type": "Take",
+        "RequiresTrigger": "HotelRoom2_OnCabinetKeyVisible"
+      },
+      {
+        "Type": "Examine",
+        "Text": [
+          "A closer look reveals no markings, and no indication of what the key may be for."
+        ]
+      },
+      { "Type": "Discard" }
+    ]
   }
 ]

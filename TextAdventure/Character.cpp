@@ -1,11 +1,16 @@
 #include "stdafx.h"
+#include "Objects.h"
 
-#include "Character.h"
-
-Character::Character( const json &character, std::weak_ptr<Map> map )
-	: GameObject( character, map )
+Character::Character( const json &character )
+	: InGameObject( character )
 	, m_CurResponse( 0 )
 {
+	// Bail on invalid object creation
+	if( IsInvalid( character ) )
+	{
+		return;
+	}
+
 	// The response list is required
 	std::vector<std::string> responses = character.at( "Responses" );
 	m_Responses = responses;

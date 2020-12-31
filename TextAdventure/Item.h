@@ -1,13 +1,9 @@
 #pragma once
 
-#include "GameObject.h"
-
-class Map;
-
-class Item : public GameObject
+class Item : public InGameObject
 {
 public:
-    Item( const json &item, std::weak_ptr<Map> map );
+    Item( const json &item );
 
     std::ostream &PrintDescription( std::ostream &os );
 

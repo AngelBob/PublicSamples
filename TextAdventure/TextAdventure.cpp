@@ -1,43 +1,75 @@
 // TextAdventure.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 #include "stdafx.h"
+#include "Objects.h"
 
-#include "Location.h"
-#include "Map.h"
-
-void GameLoop( std::shared_ptr<Map> map )
+void GameLoop( Game& game )
 {
+    // Need a string comparitor for doing case insensitive compares
+    typename Parser::StringCompareNoCase comparitor;
+
+    // Initialize the parser from the game resources
+    std::shared_ptr<Parser::SimpleParser> parser = std::make_shared<Parser::SimpleParser>();
+
+    // First, display a description of the location
+    game.DescribeScene();
+
     bool quit = false;
-    do
+    while( !quit )
     {
-        // First, display a description of the location
-        std::stringstream ss;
+        // Write the cursor and get the player input
+        std::cout << ">> ";
+        std::string userInput;
+        std::getline( std::cin, userInput );
 
-        std::shared_ptr<Location>& curLocation = map->GetLocation();
-        curLocation->PrintName( ss );
-        ss << "\n";
-        curLocation->PrintDescription( ss );
-        curLocation->PrintCharacters( ss );
-        curLocation->PrintItems( ss );
-        ss << "\n";
+        // Parse the player input
+        std::stringstream ui( userInput );
+        if( Parser::ParserStatus::STATUS_PARSE_OK != parser->ParsePhrase( ui ) )
+        {
+            // TODO: insert smart mouthed responses here...
+            std::cout << "I didn't understand that, please try again." << std::endl;
+            continue;
+        }
 
-        std::string message( ss.str() );
-        std::cout << message;
-
-        // Next, get the player's action
-
-        quit = true;
-    } while( !quit );
+        // Have a good parse, let's see what the user wants to do
+        switch( parser->GetLastVerbType() )
+        {
+        case Parser::ParsedType::PARSED_TYPE_MOVE:
+            game.OnMove( *parser );
+            break;
+        case Parser::ParsedType::PARSED_TYPE_TAKE:
+            break;
+        case Parser::ParsedType::PARSED_TYPE_EXAMINE:
+            break;
+        case Parser::ParsedType::PARSED_TYPE_DISCARD:
+            break;
+        case Parser::ParsedType::PARSED_TYPE_THROW:
+            break;
+        case Parser::ParsedType::PARSED_TYPE_INTERACTION:
+            break;
+        case Parser::ParsedType::PARSED_TYPE_ATTACK:
+            break;
+        case Parser::ParsedType::PARSED_TYPE_TRANSACT:
+            break;
+        case Parser::ParsedType::PARSED_TYPE_GAME:
+            // Game directive is to do one of:
+            // quit, save, or load (currently only quit is supported)
+            if( 0 == comparitor.compare( parser->GetLastVerb(), "quit" ) )
+            {
+                quit = true;
+            }
+            break;
+        }
+    };
 }
 
 int main()
 {
-    std::shared_ptr<Map> map = std::make_shared<Map>();
-    std::weak_ptr<Map> weakMap = map;
-    map->LoadMap( weakMap );
+    std::shared_ptr<Game> game = std::make_shared<Game>();
+    game->OnLoad();
 
     // Map is all loaded up.  Start the game.
-    GameLoop( map );
+    GameLoop( *game );
 
     // Exiting the game loop means quitting the game.
 }

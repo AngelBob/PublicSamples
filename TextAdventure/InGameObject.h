@@ -1,13 +1,11 @@
 #pragma once
 #include "stdafx.h"
+#include "Objects.h"
 
-class Map;
-
-class GameObject
+class InGameObject
 {
 public:
-	GameObject( const json &objectJson, std::weak_ptr<Map> map )
-		: m_Map( map )
+	InGameObject( const json& objectJson )
 	{
 		m_Id = objectJson.at( "Id" );
 		m_Name = objectJson.at( "Name" );
@@ -22,35 +20,35 @@ public:
 		}
 	}
 
-	int32_t GetObjectId( void )
+	__inline bool IsInvalid( const json& objectJson ) const
+	{
+		return( objectJson.at( "Id" ) == 0 && objectJson.at( "Name" ) == "invalid" );
+	}
+
+	__inline int32_t GetObjectId( void ) const
 	{
 		return m_Id;
 	}
 
-	int32_t GetLocation( void )
+	__inline int32_t GetLocation( void ) const
 	{
 		return m_Location;
 	}
 
-	void SetLocation( int32_t location )
+	__inline void SetLocation( int32_t location )
 	{
 		m_Location = location;
 	}
 
-	std::ostream& PrintName( std::ostream &os )
+	__inline std::ostream& PrintName( std::ostream &os ) const
 	{
 		os << m_Name;
 
 		return os;
 	}
 
-	static void from_json( const json &objectJson, GameObject &go )
-	{
-	}
 protected:
 	int32_t					m_Id;
 	int32_t					m_Location;
 	std::string				m_Name;
-
-	std::weak_ptr<Map>      m_Map;
 };

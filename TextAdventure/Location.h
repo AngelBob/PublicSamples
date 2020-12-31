@@ -1,33 +1,49 @@
 #pragma once
 
-#include "GameObject.h"
-#include "Map.h"
+enum class MoveDirection;
+class Map;
 
-class Location : public GameObject
+enum class LocationDesc
+{
+	DESCRIPTION_LONG,
+	DESCRIPTION_SHORT,
+	DESCRIPTION_ASSEEN,
+};
+
+class Location : public InGameObject
 {
 public:
-	Location( const json &location, std::weak_ptr<Map> map );
+	Location( const json &location );
+
+	// Event handlers
+	int32_t OnMove( MoveDirection direction );
+
+	// Accessors
 	bool IsStartPosition( void );
-	int32_t NextLocation( const Map::MoveDirection direction );
 
 	void AddCharacter( int32_t characterId );
-	std::ostream &PrintCharacters( std::ostream &os );
+	void RemoveCharacter( int32_t characterId );
+	const std::list<int32_t>& GetCharacters( void ) const;
 
 	void AddItem( int32_t itemId );
-	std::ostream &PrintItems( std::ostream &os );
+	void RemoveItem( int32_t itemId );
+	const std::list<int32_t>& GetItems( void ) const;
 
-	std::ostream &PrintDescription( std::ostream &os, bool showLongDesc = false );
-	
+	void SetNeighbor( MoveDirection dir, int32_t nieghborId );
+	const std::map<MoveDirection, int32_t> &GetNeighbors( void ) const;
+
+	void SetShownOnce( void );
+
+	LocationDesc LongOrShortDescription( void ) const;
+	std::ostream &PrintDescription( std::ostream &os, LocationDesc which ) const;
+
 private:
-	template<typename ListT, typename FuncT>
-	void PrintThings( std::ostream &os, ListT list, FuncT getter );
-
 	bool        m_IsStartPosition;
 	bool		m_ShownOnce;
 	std::string m_ShortDesc;
 	std::string m_LongDesc;
 	std::string m_AsSeenDesc;
-	std::map<Map::MoveDirection, int32_t> m_Neighbors;
+	std::map<MoveDirection, int32_t> m_Neighbors;
 
 	std::list<int32_t> m_Characters;
 	std::list<int32_t> m_Items;

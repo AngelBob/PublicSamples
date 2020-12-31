@@ -148,21 +148,26 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Character.cpp" />
-    <ClCompile Include="Inventory.cpp" />
+    <ClCompile Include="Game.cpp" />
     <ClCompile Include="Item.cpp" />
     <ClCompile Include="Location.cpp" />
     <ClCompile Include="Map.cpp" />
+    <ClCompile Include="SimpleParser.cpp" />
+    <ClCompile Include="StringCompare.cpp" />
     <ClCompile Include="TextAdventure.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Character.h" />
-    <ClInclude Include="GameObject.h" />
-    <ClInclude Include="Inventory.h" />
+    <ClInclude Include="Game.h" />
+    <ClInclude Include="InGameObject.h" />
     <ClInclude Include="Item.h" />
     <ClInclude Include="json.hpp" />
     <ClInclude Include="Location.h" />
     <ClInclude Include="Map.h" />
+    <ClInclude Include="Objects.h" />
+    <ClInclude Include="Parser.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="ResourceLoader.hpp" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
@@ -172,6 +177,9 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="TextAdventure.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Verbs.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

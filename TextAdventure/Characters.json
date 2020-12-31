@@ -4,11 +4,16 @@
     "Name": "49er",
     "Location": 1,
     "Responses": [
-      "Feeling better?  You were pretty drunk last night.",
-      "The camp looked like this when we got back yesterday.",
-      "Try retracing your steps, maybe you just left the bag somewhere.",
-      "You were at the saloon, and didn't get back here until nearly sun-up.",
-      "Uh huh."
+      {
+        "Type": "Interaction",
+        "Text": [
+          "Feeling better?  You were pretty drunk last night.",
+          "The camp looked like this when we got back yesterday.",
+          "Try retracing your steps, maybe you just left the bag somewhere.",
+          "You were at the saloon, and didn't get back here until nearly sun-up.",
+          "Uh huh."
+        ]
+      }
     ]
   },
   {
@@ -16,10 +21,45 @@
     "Name": "Blacksmith",
     "Location": 12,
     "Responses": [
-      "Ugh, my head hurts, and I really don't want to be here today.",
-      "I am really tired of that guy.",
-      "One day he'll get his.",
-      "Damn Sherriff."
+      {
+        "Type": "Interaction",
+        "Text": [
+          "Ugh, my head hurts, and I really don't want to be here today.",
+          "I am really tired of that guy.",
+          "One day he'll get his.",
+          "Damn Sheriff.",
+          "The Blacksmith is muttering under his breath, but you can't make out what he's saying."
+        ]
+      },
+      {
+        "Type": "Transact",
+        "SpecificVerb": "pay",
+        "Text": [
+          "The blacksmith refuses your money, saying he is too busy to take on any new work."
+        ]
+      },
+      {
+        "Type": "Transact",
+        "SpecificVerb": "buy",
+        "Text": [
+          "The blacksmith apologizes, and says all of those are spoken for."
+        ]
+      },
+      {
+        "Type": "Attack",
+        "Text": [
+          "Ooof.  Lucky blow.  The blacksmith lands a punch to your stomach.",
+          "Argh.  Another blow starts your ears ringing.",
+          "Ouch.  An uppercut comes out of nowhere, and you feel your legs start to buckle.",
+          "You manage to recover, and land the final blow.  The blacksmith slumps, unconscience, to the floor."
+        ],
+        "Triggers": "OnGoToJail"
+      },
+      {
+        "Type": "Take",
+        "RequiresTrigger": "OnOutOfJail",
+        "Triggers": "OnHavePosseIncrement"
+      }
     ]
   },
   {
@@ -27,42 +67,85 @@
     "Name": "Shop keeper",
     "Location": 13,
     "Responses": [
-      "Howdy!  Come back for more supplies today?",
-      "You didn't have quite enough money for everything yesterday.",
-      "Why don't you wait until after the Sherriff stops by.",
-      "Have a look around."
+      {
+        "Type": "Interaction",
+        "Text": [
+          "Howdy!  Come back for more supplies today?",
+          "You didn't have quite enough money for everything yesterday.",
+          "Why don't you wait until after the sheriff comes by.",
+          "Have a look around."
+        ],
+        "Triggers": "OnShopKeeperToJail"
+      },
+      {
+        "Type": "Transact",
+        "Text": [
+          "I'm afraid you still don't have any money."
+        ]
+
+      },
+      {
+        "Type": "Take",
+        "RequiresTrigger": "OnOutOfJail",
+        "Triggers": "OnHavePosseIncrement"
+      }
     ]
   },
   {
     "Id": 4,
     "Name": "Assayer",
     "Location": 14,
-    "Responses": [
+    "InteractionResponses": [
       "Back to trade out the rest of your gold?",
       "You didn't trade it all yesterday, the bag was still half full.",
+      "I see.  Sorry, I can't help with that.",
       "I see.  Sorry, I can't help with that."
+    ],
+    "Responses": [
+      {
+        "Type": "Interaction",
+        "Triggers": "Assayer_OnOutOfOffice"
+      }
     ]
   },
   {
     "Id": 5,
     "Name": "Barkeep",
     "Location": 15,
-    "Responses": [
+    "InteractionResponses": [
       "In for some hair of the dog?",
       "You got pretty far into your cups last night.",
       "Was just you for a while.",
       "About 10, Smithy joined you.",
       "I had to kick you out at closing.",
       "Ready for another?"
+    ],
+    "Responses": [
+      { "Type": "Interaction" },
+      { "Type": "Transact" },
+      {
+        "Type": "Take",
+        "RequiresTrigger": "OnOutOfJail",
+        "Triggers": "OnHavePosseIncrement"
+      }
     ]
   },
   {
     "Id": 6,
-    "Name": "Sherriff",
+    "Name": "Sheriff",
     "Location": 16,
     "Responses": [
-      "Yep",
-      "Nope"
+      {
+        "Type": "Interaction",
+        "Text": [
+          "Yep",
+          "Nope"
+        ]
+      },
+      {
+        "Type": "Take",
+        "RequiresTrigger": "OnHavePosseComplete"
+      }
     ]
   },
   {
@@ -70,8 +153,36 @@
     "Name": "Teller",
     "Location": 17,
     "Responses": [
-      "Deposit or withdrawal?",
-      "I can only do a deposit or withdrawal."
+      {
+        "Type": "Interaction",
+        "Text": [
+          "Deposit or withdrawal?",
+          "I can only do a deposit or withdrawal."
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 8,
+    "Name": "Lady",
+    "Location": 17,
+    "Responses": [
+      {
+        "Type": "Interaction",
+        "Text": [
+          "Couldn't resist me, hey?",
+          "Last night was such fun, can't we go again?",
+          "Are you sure?"
+        ]
+      }
+      {
+        "Type": "Transact",
+        "SpecificVerb": "pay",
+        "Text": [
+          "You should check the cabinet in the far room."
+        ],
+        "Triggers": "HotelRoom2_OnCabinetKeyVisible"
+      }
     ]
   }
 ]
