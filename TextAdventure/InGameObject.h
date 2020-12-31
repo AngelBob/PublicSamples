@@ -25,8 +25,11 @@ public:
 
 				bool requiresPossession = it->value( "RequiresPossession", false );
 				m_IsEnvironmentExaminable = !requiresPossession;
-
-				break;
+			}
+			if( it->at( "Type" ) == "Take" )
+			{
+				m_IsTakeable = true;
+				m_IsTakeableTrigger = it->value( "RequiresTrigger", "-none-" );
 			}
 		}
 
@@ -50,6 +53,16 @@ public:
 	inline bool AllowsEnvironmentExamination( void )
 	{
 		return m_IsEnvironmentExaminable;
+	}
+
+	inline bool IsTakeable( void ) const
+	{
+		return m_IsTakeable;
+	}
+
+	const std::string &GetTakeableTrigger( void ) const
+	{
+		return m_IsTakeableTrigger;
 	}
 
 	inline int32_t GetObjectId( void ) const
@@ -91,6 +104,9 @@ protected:
 	std::string m_Description;
 	std::vector<std::string> m_InteractionResponses;
 	std::string m_ExaminationResponse;
+
+	bool m_IsTakeable;
+	std::string m_IsTakeableTrigger;
 
 	bool m_IsEnvironmentExaminable;
 };

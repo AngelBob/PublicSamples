@@ -38,6 +38,7 @@ void GameLoop( Game& game )
             game.OnMove( *parser );
             break;
         case Parser::ParsedType::PARSED_TYPE_TAKE:
+            game.OnTake( *parser );
             break;
         case Parser::ParsedType::PARSED_TYPE_EXAMINE:
             game.OnExamine( *parser );
@@ -59,6 +60,10 @@ void GameLoop( Game& game )
             if( 0 == comparitor.compare( parser->GetLastVerb(), "quit" ) )
             {
                 quit = true;
+            }
+            else if( 0 == comparitor.compare( parser->GetLastVerb(), "inventory" ) )
+            {
+                game.OnInventory();
             }
             break;
         }

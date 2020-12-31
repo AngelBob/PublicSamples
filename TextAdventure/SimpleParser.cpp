@@ -5,7 +5,7 @@
 
 namespace Parser
 {
-	SimpleParser::SimpleParser( void )
+	SimpleParser::SimpleParser()
 	{
 		LoadJSONResources();
 	}
@@ -122,8 +122,9 @@ namespace Parser
 				}
 				else
 				{
-					// Bad parse
-					status = ParserStatus::STATUS_EXPECTING_PREPOSITION;
+					// game confirms multi-work object, concatenate the strings
+					m_LastObject += " ";
+					m_LastObject += token;
 				}
 				break;
 			case ParseState::STATE_HAVE_PREPOSITION:
@@ -142,7 +143,7 @@ namespace Parser
 					// Have an indirect object.  That's all we can handle, so any other
 					// text is dropped on the floor
 					m_LastIndirectObject = token;
-					state = ParseState::STATE_END;
+					state = ParseState::STATE_HAVE_INDIRECT_OBJECT;
 				}
 				else
 				{
@@ -152,6 +153,13 @@ namespace Parser
 					haveDirectObject = true;
 					state = ParseState::STATE_HAVE_DIRECT_OBJECT;
 				}
+				break;
+			case ParseState::STATE_HAVE_INDIRECT_OBJECT:
+				// The indirect object should be the last thing in the string
+				// but need to check for multi-word objects
+				m_LastIndirectObject += " ";
+				m_LastIndirectObject += token;
+				break;
 			}
 		}
 

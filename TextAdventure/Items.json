@@ -21,7 +21,7 @@
     "Id": 2,
     "Name": "Iron bar",
     "Location": 12,
-    "Description": "a bar of iron in a pile of dust on the floor",
+    "Description": "an iron bar in a pile of dust on the floor",
     "Responses": [
       { "Type": "Take" },
       { "Type": "Discard" },

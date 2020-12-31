@@ -25,8 +25,11 @@ public:
 	void OnUnload( void );
 
 	void OnMove( const ParserT& parser );
-	void OnInteraction( const ParserT& parser );
+	void OnTake( const ParserT &parser );
 	void OnExamine( const ParserT& parser );
+	void OnInteraction( const ParserT &parser );
+
+	void OnInventory( void ) const;
 
 	// Accessors
 	const Map& GetMap( void );
@@ -41,7 +44,10 @@ private:
 	std::ostream &PrintCharacters( std::ostream &os, size_t &numCharacters ) const;
 	std::ostream &PrintItems( std::ostream &os, size_t &numItems ) const;
 
+	bool GetItemData( const std::string &name, int32_t &itemId, int32_t& itemLocId, bool& isInInventory ) const;
 	void DoItemExamination( const std::string &name, int32_t itemId, bool isInInventory ) const;
+
+	bool GetCharacterData( const std::string &name, int32_t& characterId, int32_t& charLocId, bool& isInPosse ) const;
 	void DoCharacterExamination( const std::string &name, int32_t characterId, bool isInPosse ) const;
 
 	// Map contains a list of locations

@@ -4,7 +4,7 @@
 
 namespace Parser
 {
-	ParserBase::ParserBase( void )
+	ParserBase::ParserBase()
 		: m_LastType( ParsedType::PARSED_TYPE_INVALID )
 	{
 		// Load name to type enum map
