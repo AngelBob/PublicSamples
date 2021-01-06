@@ -573,7 +573,7 @@
         "Direction": "south",
         "DestinationId": 24,
         "RequiresTrigger": "OnCellUnlock",
-        "RequiresItem": "Key",
+        "RequiresObject": "Key",
         "Text": "You remember the key you found in the hotel room and wonder... It slides roughly into the lock on the cell door, and with just a little effort the key turns, the door unlocks, and slides open.",
         "Triggers": "OnCellUnlock"
       }

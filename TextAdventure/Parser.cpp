@@ -29,6 +29,11 @@ namespace Parser
 		return m_LastObject;
 	}
 
+	const std::string &ParserBase::GetLastPreposition( void ) const
+	{
+		return m_LastPreposition;
+	}
+
 	const std::string& ParserBase::GetLastIndirectObject( void ) const
 	{
 		return m_LastIndirectObject;

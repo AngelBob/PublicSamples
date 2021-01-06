@@ -42,16 +42,12 @@
       {
         "Type": "Transact",
         "SpecificVerb": "pay",
-        "Text": [
-          "The blacksmith refuses your money, saying he is too busy to take on any new work."
-        ]
+        "Text": "The blacksmith refuses your money, saying he is too busy to take on any new work."
       },
       {
         "Type": "Transact",
         "SpecificVerb": "buy",
-        "Text": [
-          "The blacksmith apologizes, and says all of those are spoken for."
-        ]
+        "Text": "The blacksmith apologizes, and says all of those are spoken for."
       },
       {
         "Type": "Attack",
@@ -61,12 +57,13 @@
           "Ouch.  An uppercut comes out of nowhere, and you feel your legs start to buckle.",
           "You manage to recover, and land the final blow.  The blacksmith slumps, unconscience, to the floor."
         ],
-        "Triggers": "OnGoToJail"
+        "TriggersEvent": "OnGoToJail"
       },
       {
         "Type": "Take",
-        "RequiresTrigger": "OnOutOfJail",
-        "Triggers": "OnHavePosseIncrement"
+        "RequiresEvent": "OnOutOfJail",
+        "TriggersEvent": "OnHavePosseIncrement",
+        "Text": "The smithy agrees to join your posse."
       }
     ]
   },
@@ -86,19 +83,17 @@
           "You didn't have quite enough money for everything yesterday.",
           "Why don't you wait until after the sheriff comes by.",
           "Have a look around."
-        ],
-        "Triggers": "OnShopKeeperToJail"
-      },
-      {
-        "Type": "Transact",
-        "Text": [
-          "I'm afraid you still don't have any money."
         ]
       },
       {
+        "Type": "Transact",
+        "Text": "I'm afraid you still don't have any money."
+      },
+      {
         "Type": "Take",
-        "RequiresTrigger": "OnOutOfJail",
-        "Triggers": "OnHavePosseIncrement"
+        "RequiresEvent": "OnOutOfJail",
+        "TriggersEvent": "OnHavePosseIncrement",
+        "Text": "The shop keeper agrees to join your posse."
       }
     ]
   },
@@ -119,7 +114,7 @@
           "I see.  Sorry, I can't help with that.",
           "I see.  Sorry, I can't help with that."
         ],
-        "Triggers": "Assayer_OnOutOfOffice"
+        "TriggersEvent": "OnAssayerOutOfOffice"
       }
     ]
   },
@@ -146,8 +141,9 @@
       { "Type": "Transact" },
       {
         "Type": "Take",
-        "RequiresTrigger": "OnOutOfJail",
-        "Triggers": "OnHavePosseIncrement"
+        "RequiresEvent": "OnOutOfJail",
+        "TriggersEvent": "OnHavePosseIncrement",
+        "Text": "The barman agrees to join your posse."
       }
     ]
   },
@@ -169,7 +165,8 @@
       },
       {
         "Type": "Take",
-        "RequiresTrigger": "OnHavePosseComplete"
+        "RequiresEvent": "OnHavePosseComplete",
+        "Text": "The sheriff is defiant, but appears resigned to his fate."
       }
     ]
   },
@@ -211,10 +208,8 @@
       {
         "Type": "Transact",
         "SpecificVerb": "pay",
-        "Text": [
-          "You should check the cabinet in the far room."
-        ],
-        "Triggers": "HotelRoom2_OnCabinetKeyVisible"
+        "Text": "Let's head upstairs, hon.  By the way, when we're finished, you should check out the cabinet in the far room.",
+        "TriggersEvent": "OnCabinetKeyVisible"
       }
     ]
   }

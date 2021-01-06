@@ -11,9 +11,6 @@ void GameLoop( Game& game )
     // Initialize the parser from the game resources
     std::shared_ptr<ParserT> parser = std::make_shared<ParserT>();
 
-    // First, display a description of the location
-    game.DescribeScene();
-
     bool quit = false;
     while( !quit )
     {
@@ -31,28 +28,73 @@ void GameLoop( Game& game )
             continue;
         }
 
-        // Have a good parse, let's see what the user wants to do
+        // Figure out what the user wants to act on and what should happen.
+        Game::GameObjectData objectData;
+        Response *response = nullptr;
+        game.GetObjectData( parser->GetLastObject(), objectData );
+        if( InGameObject::INVALID != objectData.id )
+        {
+            // Map verb type to response type
+            ResponseType type = ResponseType::RESPONSE_TYPE_INVALID;
+            switch( parser->GetLastVerbType() )
+            {
+            case Parser::ParsedType::PARSED_TYPE_TAKE:
+                type = ResponseType::RESPONSE_TYPE_TAKE;
+                break;
+            case Parser::ParsedType::PARSED_TYPE_EXAMINE:
+                type = ResponseType::RESPONSE_TYPE_EXAMINE;
+                break;
+            case Parser::ParsedType::PARSED_TYPE_DISCARD:
+                type = ResponseType::RESPONSE_TYPE_DISCARD;
+                break;
+            case Parser::ParsedType::PARSED_TYPE_THROW:
+                type = ResponseType::RESPONSE_TYPE_THROW;
+                break;
+            case Parser::ParsedType::PARSED_TYPE_INTERACTION:
+                type = ResponseType::RESPONSE_TYPE_INTERACTION;
+                break;
+            case Parser::ParsedType::PARSED_TYPE_ATTACK:
+                type = ResponseType::RESPONSE_TYPE_ATTACK;
+                break;
+            case Parser::ParsedType::PARSED_TYPE_TRANSACT:
+                type = ResponseType::RESPONSE_TYPE_TRANSACT;
+                break;
+            default:
+                break;
+            }
+
+            if( ResponseType::RESPONSE_TYPE_INVALID != type )
+            {
+                response = game.GetBestResponse( objectData, parser->GetLastVerb(), type );
+            }
+        }
+
+        // Execute the user event
         switch( parser->GetLastVerbType() )
         {
         case Parser::ParsedType::PARSED_TYPE_MOVE:
             game.OnMove( *parser );
             break;
         case Parser::ParsedType::PARSED_TYPE_TAKE:
-            game.OnTake( *parser );
+            game.OnTake( objectData, response );
             break;
         case Parser::ParsedType::PARSED_TYPE_EXAMINE:
-            game.OnExamine( *parser );
+            game.OnExamine( objectData, response );
             break;
         case Parser::ParsedType::PARSED_TYPE_DISCARD:
+            game.OnDiscard( objectData, response );
             break;
         case Parser::ParsedType::PARSED_TYPE_THROW:
+            game.OnThrow( objectData, response );
             break;
         case Parser::ParsedType::PARSED_TYPE_INTERACTION:
-            game.OnInteraction( *parser );
+            game.OnInteraction( objectData, response );
             break;
         case Parser::ParsedType::PARSED_TYPE_ATTACK:
+            game.OnAttack( objectData, response );
             break;
         case Parser::ParsedType::PARSED_TYPE_TRANSACT:
+            game.OnTransact( objectData, response );
             break;
         case Parser::ParsedType::PARSED_TYPE_GAME:
             // Game directive is to do one of:
@@ -67,6 +109,9 @@ void GameLoop( Game& game )
             }
             break;
         }
+
+        // Handle any triggers set by the response
+        game.OnTrigger( response );
     };
 }
 

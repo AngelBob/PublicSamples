@@ -17,27 +17,18 @@ void Game::OnLoad( void )
     LoadGameResources();
 
     // Place the characters and items into their starting locations
-    // Cycle through all of the characters fisrt.
-    for( auto& character : m_Characters )
+    for( auto& object : m_Objects )
     {
         // The first "character" is the invalid character, and it gets placed into the invalid location
-        Location &location = m_Map->GetLocation( character->GetLocation() );
-        location.AddCharacter( character->GetObjectId() );
+        Location& location = m_Map->GetLocation( object->GetLocation() );
+        location.AddObject( object->GetObjectId() );
 
         // Add the character name and Id to the map
-        m_CharacterNameToIdMap.insert( std::make_pair( character->GetName(), character->GetObjectId() ) );
+        m_ObjectNameToIdMap.insert( std::make_pair( object->GetName(), object->GetObjectId() ) );
     }
 
-    // Cycle through all of the items next.
-    for( auto &item : m_Items )
-    {
-        // The first "item" is the invalid item, and it gets placed into the invalid location.
-        Location &location = m_Map->GetLocation( item->GetLocation() );
-        location.AddItem( item->GetObjectId() );
-
-        // Add the item name and Id to the map
-        m_ItemNameToIdMap.insert( std::make_pair( item->GetName(), item->GetObjectId() ) );
-    }
+    // After everything is loaded, describe the opening scene
+    DescribeScene();
 }
 
 void Game::OnUnload( void )
@@ -54,9 +45,12 @@ void Game::OnMove( const ParserT& parser )
     {
         // Move was good
         // Posse needs to come with us
-        for( int32_t characterId : m_Posse )
+        for( int32_t objectId : m_Inventory )
         {
-            m_Characters.at( characterId )->SetLocation( m_Map->GetLocation().GetObjectId() );
+            if( ObjectType::OBJECT_CHARACTER == m_Objects.at( objectId )->GetType() )
+            {
+                m_Objects.at( objectId )->SetLocation( m_Map->GetLocation().GetObjectId() );
+            }
         }
 
         // Describe the new scene
@@ -79,12 +73,47 @@ void Game::OnMove( const ParserT& parser )
     }
 }
 
-void Game::OnExamine( const ParserT& parser )
+void Game::OnTake( const GameObjectData& objectData, Response* response )
+{
+    // Player wants to add an object to the inventory
+    // Options:
+    // 1) It's not even an object, let the user know
+    // 2) It is an object
+    //    a) it's not here,
+    //    b) it's not takeable
+    //    c) it's takeable
+
+    if( InGameObject::INVALID != objectData.id )
+    {
+        // It is an object, let see if it can be added to the inventory
+        if( response )
+        {
+            // It's here and available, add the item to the inventory and remove it from the location
+            int32_t itemId = objectData.id;
+            m_Inventory.emplace_back( itemId );
+            m_Map->GetLocation( m_Objects.at( itemId )->GetLocation() ).RemoveObject( itemId );
+            m_Objects.at( itemId )->SetLocation( InGameObject::INVALID );
+
+            std::cout << response->GetResponseText() << std::endl;
+        }
+        else
+        {
+            // Item isn't takeable
+            std::cout << "That didn't work." << std::endl;
+        }
+    }
+    else
+    {
+        // Case 1
+        std::cout << "I don't know what that is, so you won't be taking it." << std::endl;
+    }
+}
+
+void Game::OnExamine( const GameObjectData& objectData, Response* response )
 {
     // Look more closely at the environment or an item.
     // Some items may need to be in inventory before examination.
-    const std::string &name = parser.GetLastObject();
-    if( name.empty() )
+    if( InGameObject::INVALID == objectData.id )
     {
         // User wants to look at the environment
         DescribeScene();
@@ -93,202 +122,269 @@ void Game::OnExamine( const ParserT& parser )
     {
         // User wants to look at a specific item or character.
 
-        // Three cases:
-        // 1) the item doesn't exist anywhere
-        // 2) the item is present in inventory, just do it.
-        // 3) the item is present in the environment
-        //    a) if the item can be examined in the environment, do it
-        //    b) if the item must be in inventory say so.
-
         // Figure out what the user wants to look at and what's here.
         // Is it an item or a character?
-        int32_t itemId;
-        int32_t itemLocId;
-        bool isInInventory;
-        bool isItem = GetItemData( name, itemId, itemLocId, isInInventory );
-
-        // Is it an character?
-        int32_t characterId;
-        int32_t charLocId;
-        bool isInPosse;
-        bool isCharacter = GetCharacterData( name, characterId, charLocId, isInPosse );
-
-        if( !isItem && !isCharacter )
+        if( response )
         {
-            // Case 1) the item/character doesn't exist
-            std::cout << "I don't see the " << name << " here." << std::endl;
-        }
-        else if( isItem )
-        {
-            // Case 2) the item is present in the user's inventory
-            DoItemExamination( name, itemId, isInInventory );
+            std::cout << response->GetResponseText() << std::endl;
         }
         else
         {
-            DoCharacterExamination( name, characterId, isInPosse );
+            assert( !"What's happened?" );
         }
     }
 }
 
-void Game::OnTake( const ParserT &parser )
+void Game::OnDiscard( const GameObjectData& objectData, Response* response )
 {
-    // Player wants to add an item to the inventory
-    const std::string &name = parser.GetLastObject();
-
-    // Figure out what the user wants to add and what's here.
-    // Is it even an item?
-    int32_t itemId;
-    int32_t itemLocId;
-    bool isInInventory;
-    bool isItem = GetItemData( name, itemId, itemLocId, isInInventory );
-
-    // Options:
-    // 1) It's not even an object, let the user know
-    // 2) It is an object
-    //    a) it's not here,
-    //    b) it's not takeable
-    //    c) it's takeable
-
-    if( !isItem )
+    // User wants to drop something from inventory.
+    if( InGameObject::INVALID != objectData.id )
     {
-        // Case 1
-        std::cout << "I don't know what " << name << " is, so you won't be taking that." << std::endl;
-    }
-    else
-    {
-        // It is an object, let see if it can be added to the inventory
-        bool isHere = ( m_Map->GetLocation().GetObjectId() == itemLocId );
-        bool isTakeable = m_Items.at( itemId )->IsTakeable();
-        if( isHere && isTakeable )
+        if( response )
         {
-            // It's here and available, add the item to the inventory and remove it from the location
-            m_Inventory.emplace_back( itemId );
-            m_Map->GetLocation( m_Items.at( itemId )->GetLocation() ).RemoveItem( itemId );
-
-            std::cout << name << " has been added to your inventory." << std::endl;
-        }
-        else if( !isHere )
-        {
-            // Item isn't here
-            std::cout << "I don't see the " << name << " here." << std::endl;
+            DoDrop( objectData );
+            std::cout << response->GetResponseText() << std::endl;
         }
         else
         {
-            // Item isn't takeable
-            std::cout << "You can't take the " << name << " it's much to heavy for you." << std::endl;
-        }
-    }
-}
-
-void Game::OnInteraction( const ParserT &parser )
-{
-    // Get the character(s) from the current location.
-    // If there is more than one, need to tell the user to be more specific.
-    const std::list<int32_t> &characterIds = m_Map->GetLocation().GetCharacters();
-    if( 0 == characterIds.size() )
-    {
-        // There are no characters here, the user is crazy.
-        std::cout << "There's no one here, are you responding to the voices in your head?" << std::endl;
-    }
-    else
-    {
-        // The intereseting bit.. have the character respond (assuming the user is
-        // wanting to talk to someone that's actually present).
-
-        // Figure out who the user want to talk to and who's here.
-        const std::string &name = parser.GetLastObject();
-        int32_t characterId;
-        int32_t characterLocId;
-        bool isInPosse;
-        bool isCharacter = GetCharacterData( name, characterId, characterLocId, isInPosse );
-
-        // Options:
-        // 1) only a single character present:
-        //    a) if there is a character name, validate that character is present.
-        //    b) if the user provided no character name interact with the single character,
-        // 2) multiple characters present:
-        //    a) if there is a character name, validate that character is present.
-        //    b) if the user provided no name, indicate a name is required.
-        bool doInteraction = false;
-        if( !name.empty() )
-        {
-            // User provided a name, this is scenarios 1a and 2a
-            if(    isInPosse
-                || characterLocId == m_Map->GetLocation().GetObjectId() )
+            const std::string &name = m_Objects.at( objectData.id ).get()->GetName();
+            if( ObjectType::OBJECT_ITEM == objectData.type )
             {
-                // Requested character is present
-                doInteraction = true;
+                std::cout << "You don't have the " << name << " in your pockets." << std::endl;
+            }
+            else if( !objectData.haveIt )
+            {
+                std::cout << name << " is not with you." << std::endl;
             }
             else
             {
-                // Requested character isn't here
-                std::cout << name << " isn't here." << std::endl;
+                std::cout << name << " refuses to leave the posse." << std::endl;
             }
         }
-        else if( 1 == characterIds.size() )
+    }
+    else
+    {
+        std::cout << "I'm not sure what it is you want to discard." << std::endl;
+    }
+}
+
+void Game::OnThrow( const GameObjectData &objectData, Response *response )
+{
+    // User wants to throw something from inventory.
+    if( InGameObject::INVALID != objectData.id )
+    {
+        if( response )
         {
-            // No name provided, but only a single character present; this is scenario 1b.
-            // Validate the lists are in sync...
-            assert( characterId == InGameObject::INVALID_OBJECT
-                || characterId == characterIds.front() );
-            characterId = characterIds.front();
-            doInteraction = true;
+            // Remove the item from inventory and add it to the location
+            DoDrop( objectData );
+            std::cout << response->GetResponseText() << std::endl;
         }
         else
         {
-            // No name provided, and multiple characters are present; this is scenario 2b.
-            std::cout << "Are you talking to ";
-            auto start = characterIds.begin();
-            auto stop = characterIds.end();
-            --stop;
-
-            while( start != stop )
+            const std::string &name = m_Objects.at( objectData.id ).get()->GetName();
+            if( ObjectType::OBJECT_CHARACTER == objectData.type )
             {
-                std::cout << m_Characters.at( *start )->GetName() << ", ";
-                ++start;
+                // Can't throw characters at all.
+                std::string filler;
+                if( !objectData.isHere )
+                {
+                    filler = "probably would not";
+                }
+                else
+                {
+                    filler = "definitely does not";
+                }
+
+                std::cout << "The " << name << " " << filler << " " << "appreciate your attempt." << std::endl;
             }
-            std::cout << "or " << m_Characters.at( *start )->GetName() << "?" << std::endl;
+            else if( !objectData.haveIt )
+            {
+                // Can't throw something the user doesn't have.
+                std::cout << "The " << name << " is not in one of your pockets." << std::endl;
+            }
+        }
+    }
+    else
+    {
+        std::cout << "I'm sorry, I can't allow you to throw that.  It might hurt someone." << std::endl;
+    }
+}
+
+void Game::OnInteraction( const GameObjectData& objectData, Response* response )
+{
+    // Get the character(s) from the current location.
+    const std::list<int32_t> &objectIds = m_Map->GetLocation().GetObjects();
+
+    // Need to filter the characters from the items at the current location
+    std::list<int32_t> characterIds;
+    std::copy_if( objectIds.begin(),
+                  objectIds.end(),
+                  std::back_inserter( characterIds ),
+                  [ this ]( const int id ) { return ( ObjectType::OBJECT_CHARACTER == m_Objects.at( id )->GetType() ); } );
+
+
+    if( 0 < characterIds.size() )
+    {
+        // The intereseting bit... have the character respond (assuming the user is
+        // wanting to talk to someone that's actually present).
+
+        // Options:
+        // 1) Player provided a character name, and the character is present.
+        // 2) Player provided no name.
+        //    a) if there is a single character present, do the interaction.
+        //    b) if there is more than one character present, tell the user.
+        // 3) The character is not present.
+
+        // Default to checking for case 1
+        bool doInteraction = objectData.isHere && ( response != nullptr );
+        if( !doInteraction )
+        {
+            // Case 2 or 3
+            if( InGameObject::INVALID == objectData.id )
+            {
+                // This is case 2 - no name provided.
+                // How many characters?
+                if( characterIds.size() == 1 )
+                {
+                    // Scenario 2a - single character present
+                    doInteraction = true;
+                    GameObjectData charData;
+                    GetObjectData( m_Objects.at( characterIds.front() ).get()->GetName(), charData );
+                    assert( InGameObject::INVALID != charData.id && ObjectType::OBJECT_CHARACTER == charData.type );
+                    response = GetBestResponse( charData, "talk", ResponseType::RESPONSE_TYPE_INTERACTION );
+                }
+                else
+                {
+                    // No name provided, and multiple characters are present; this is scenario 2b.
+                    std::cout << "Are you talking to ";
+                    auto start = characterIds.begin();
+                    auto stop = characterIds.end();
+                    --stop;
+
+                    while( start != stop )
+                    {
+                        std::cout << m_Objects.at( *start )->GetName() << ", ";
+                        ++start;
+                    }
+                    std::cout << "or " << m_Objects.at( *start )->GetName() << "?" << std::endl;
+                }
+            }
+            else
+            {
+                // This is case 3 - name was provided, but character is not present
+                if( ObjectType::OBJECT_CHARACTER == objectData.type )
+                {
+                    std::cout << m_Objects.at( objectData.id ).get()->GetName() << " isn't here." << std::endl;
+                }
+                else
+                {
+                    std::cout << "You probably shouldn't try talking to the " << m_Objects.at( objectData.id ).get()->GetName() << std::endl;
+                }
+            }
         }
 
         if( doInteraction )
         {
-            m_Characters.at( characterId )->OnInteraction( std::cout ) << std::endl;
+            std::cout << response->GetResponseText() << std::endl;
         }
+    }
+    else
+    {
+        // There are no characters here, the user is crazy.
+        std::cout << "There's no one here, are you responding to the voices in your head?" << std::endl;
+    }
+}
+
+void Game::OnAttack( const GameObjectData &objectData, Response *response )
+{
+    // Player is attacking someone or something.
+    if( InGameObject::INVALID != objectData.id )
+    {
+        if( response )
+        {
+            std::cout << response->GetResponseText() << std::endl;
+        }
+        else
+        {
+            std::cout << "You should try taking your frustrations out at the gym." << std::endl;
+        }
+    }
+    else
+    {
+        std::cout << "Are you fighting the visions in your head?" << std::endl;
+    }
+}
+
+void Game::OnTransact( const GameObjectData &objectData, Response *response )
+{
+    if( InGameObject::INVALID != objectData.id )
+    {
+        if( response )
+        {
+            std::cout << response->GetResponseText() << std::endl;
+        }
+        else
+        {
+            std::cout << "I'm really not sure how to do that." << std::endl;
+        }
+    }
+    else
+    {
+        std::cout << "What a strange person you are." << std::endl;
     }
 }
 
 void Game::OnInventory( void ) const
 {
-    if( m_Inventory.size() > 0 )
-    {
-        std::cout << "You have:\n";
+    // Need to filter inventory to extract the objects
+    std::list<int32_t> items;
+    std::copy_if( m_Inventory.begin(),
+        m_Inventory.end(),
+        std::back_inserter( items ),
+        [this]( const int32_t id ) { return ( ObjectType::OBJECT_ITEM == m_Objects.at( id )->GetType() ); } );
 
-        auto start = m_Inventory.begin();
-        auto stop = m_Inventory.end();
+    if( 0 == items.size() > 0 )
+    {
+        std::cout << "Your pockets are empty." << std::endl;
+    }
+    else if( 1 == items.size() )
+    {
+        std::cout << "You have " << m_Objects.at( items.front() )->GetName() << " in your pocket.\n";
+    }
+    else
+    {
+        std::cout << "You have " << items.size() << " item in your pockets:\n";
+
+        auto start = items.begin();
+        auto stop = items.end();
         --stop;
 
         while( start != stop )
         {
-            std::cout << m_Items.at( *start )->GetName() << "\n";
+            std::cout << m_Objects.at( *start )->GetName() << "\n";
             ++start;
         }
 
-        if( m_Inventory.size() > 1 )
-        {
-            std::cout << "and\n";
-        }
-        std::cout << m_Items.at( *start )->GetName() << "\nin your pockets" << std::endl;
-    }
-    else
-    {
-        std::cout << "Your pockets are empty." << std::endl;
+        std::cout << "and\n";
+        std::cout << m_Objects.at( *start )->GetName() << std::endl;
     }
 }
+
+void Game::OnTrigger( Response *response )
+{
+    if( response != nullptr && !response->GetTriggeredEvent().empty() )
+    {
+        // Do some stuff with the event
+        //std::cout << response->GetTriggeredEvent() << std::endl;
+    }
+}
+
+//private:
 void Game::DescribeScene( void )
 {
     std::stringstream ss;
 
-    const Location& curLocation = m_Map->GetLocation();
+    Location &curLocation = m_Map->GetLocation();
     ss << curLocation.GetName();
     ss << "\n";
 
@@ -298,7 +394,7 @@ void Game::DescribeScene( void )
     }
     else
     {
-        ss << curLocation.GetExaminationResponse();
+        ss << curLocation.GetResponses( ResponseType::RESPONSE_TYPE_EXAMINE ).front().get()->GetResponseText();
     }
 
     size_t numNeighbors;
@@ -330,7 +426,6 @@ void Game::DescribeScene( void )
     std::cout << message << std::endl;
 }
 
-//private:
 void Game::LoadGameResources()
 {
     // Need to load up the character and item resources
@@ -341,21 +436,20 @@ void Game::LoadGameResources()
 
     for( int32_t idx = 0; idx < _countof( resources); ++idx )
     {
+        ObjectType objType;
         json items;
-        ResourceLoader::LoadStringResource( items, resources[ idx ].name, resources[ idx ].id );
 
+        ResourceLoader::LoadStringResource( items, resources[ idx ].name, resources[ idx ].id );
         switch( resources[ idx ].id )
         {
-	        case IDR_CHARACTERS1:
-                // Building character objects
-                ResourceLoader::BuildObjects( items, m_Characters );
-                break;
-
-            case IDR_ITEMS1:
-                // Building item objects
-                ResourceLoader::BuildObjects( items, m_Items );
-                break;
+        case IDR_CHARACTERS1:
+            objType = ObjectType::OBJECT_CHARACTER;
+            break;
+        case IDR_ITEMS1:
+            objType = ObjectType::OBJECT_ITEM;
+            break;
         }
+        ResourceLoader::BuildObjects<InGameObject>( items, objType, m_Objects );
     }
 }
 
@@ -394,32 +488,40 @@ std::ostream &Game::PrintDirectionsAsSeen( std::ostream &os, size_t &numNeighbor
 
 std::ostream& Game::PrintCharacters( std::ostream &os, size_t &numCharacters ) const
 {
-    const std::list<int32_t>& characters = m_Map->GetLocation().GetCharacters();
-    if( characters.size() )
+    const std::list<int32_t>& objectIds = m_Map->GetLocation().GetObjects();
+
+    // Need to filter the characters from the items at the current location
+    std::list<int32_t> characterIds;
+    std::copy_if( objectIds.begin(),
+                  objectIds.end(),
+                  std::back_inserter( characterIds ),
+                  [ this ]( const int32_t id ) { return ( ObjectType::OBJECT_CHARACTER == m_Objects.at( id )->GetType() ); } );
+
+    if( characterIds.size() )
     {
-        std::list<int32_t>::const_iterator cur = characters.begin();
-        std::list<int32_t>::const_iterator stop = characters.end();
+        std::list<int32_t>::const_iterator cur = characterIds.begin();
+        std::list<int32_t>::const_iterator stop = characterIds.end();
         --stop;
 
         // Character printing starts on a new line, so no space before.
         os << "The ";
         while( cur != stop )
         {
-            os << m_Characters.at( *cur )->GetName();
-            if( 2 != characters.size() )
+            os << m_Objects.at( *cur )->GetName();
+            if( 2 != characterIds.size() )
             {
                 os << ", ";
             }
             ++cur;
         }
 
-        if( 2 == characters.size() )
+        if( 2 == characterIds.size() )
         {
             os << " and ";
         }
-        os << m_Characters.at( *cur )->GetName();
+        os << m_Objects.at( *cur )->GetName();
 
-        if( characters.size() == 1 )
+        if( characterIds.size() == 1 )
         {
             os << " is";
         }
@@ -430,22 +532,30 @@ std::ostream& Game::PrintCharacters( std::ostream &os, size_t &numCharacters ) c
         os << " here.";
     }
 
-    numCharacters = characters.size();
+    numCharacters = characterIds.size();
 
     return os;
 }
 
 std::ostream& Game::PrintItems( std::ostream &os, size_t &numItems ) const
 {
-    const std::list<int32_t> &items = m_Map->GetLocation().GetItems();
-    if( items.size() )
+    const std::list<int32_t> &objectIds = m_Map->GetLocation().GetObjects();
+
+    // Need to filter the characters from the items at the current location
+    std::list<int32_t> itemIds;
+    std::copy_if( objectIds.begin(),
+        objectIds.end(),
+        std::back_inserter( itemIds ),
+        [ this ]( const int32_t id ) { return ( ObjectType::OBJECT_ITEM == m_Objects.at( id )->GetType() ); } );
+
+    if( itemIds.size() )
     {
-        std::list<int32_t>::const_iterator cur = items.begin();
-        std::list<int32_t>::const_iterator stop = items.end();
+        std::list<int32_t>::const_iterator cur = itemIds.begin();
+        std::list<int32_t>::const_iterator stop = itemIds.end();
         --stop;
 
         // Item printing starts on a new line, so no space before.
-        if( items.size() > 1 )
+        if( itemIds.size() > 1 )
         {
             os << "There are ";
         }
@@ -456,128 +566,223 @@ std::ostream& Game::PrintItems( std::ostream &os, size_t &numItems ) const
 
         while( cur != stop )
         {
-            os << m_Items.at( *cur )->GetDescription();
-            if( 2 != items.size() )
+            os << m_Objects.at( *cur )->GetDescription();
+            if( 2 != itemIds.size() )
             {
                 os << ", ";
             }
             ++cur;
         }
 
-        if( 2 == items.size() )
+        if( 2 == itemIds.size() )
         {
             os << " and ";
         }
-        os << m_Items.at( *cur )->GetDescription();
+        os << m_Objects.at( *cur )->GetDescription();
 
         os << " here.";
     }
 
-    numItems = items.size();
+    numItems = itemIds.size();
 
     return os;
 }
 
-bool Game::GetItemData( const std::string& name, int32_t& itemId, int32_t& itemLocId, bool& isInInventory ) const
+void Game::GetObjectData( const std::string& name, GameObjectData& objectData ) const
 {
-    // Get the item ID for the item "name"
-    itemId = InGameObject::INVALID_OBJECT;
-    auto itemIt = m_ItemNameToIdMap.find( name );
-    if( itemIt != m_ItemNameToIdMap.end() )
+    // Get the object ID for the item "name"
+    objectData.id = InGameObject::INVALID;
+    auto objectIt = m_ObjectNameToIdMap.find( name );
+    if( objectIt != m_ObjectNameToIdMap.end() )
     {
-        itemId = itemIt->second;
+        objectData.id = objectIt->second;
     }
 
     // Get the item's current location
-    if( InGameObject::INVALID_OBJECT != itemId )
+    if( InGameObject::INVALID != objectData.id )
     {
+        // Get the object type
+        objectData.type = m_Objects.at( objectData.id )->GetType();
+
         // Get the item's current location
-        itemLocId = m_Items.at( itemId )->GetLocation();
+        objectData.locationId = m_Objects.at( objectData.id )->GetLocation();
 
         // Is the item in the inventory?
-        auto invIt = std::find( m_Inventory.begin(), m_Inventory.end(), itemId );
-        isInInventory = ( invIt != m_Inventory.end() );
+        auto invIt = std::find( m_Inventory.begin(), m_Inventory.end(), objectData.id );
+        objectData.haveIt = ( invIt != m_Inventory.end() );
+
+        // Is the object in the same location as the player?
+        // Either in the inventory or at the same map location.
+        objectData.isHere = objectData.haveIt || ( objectData.locationId == m_Map->GetLocation().GetObjectId() );
     }
     else
     {
-        itemLocId = InGameObject::INVALID_OBJECT;
-        isInInventory = false;
-    }
-
-    // Return boolean saying if there is even an item "name"
-    return ( itemId != InGameObject::INVALID_OBJECT );
-}
-
-void Game::DoItemExamination( const std::string &name, int32_t itemId, bool isInInventory ) const
-{
-    // Some items can't be examined unless they are in the inventory
-    bool doItemExamination = false;
-    if( m_Items.at( itemId )->AllowsEnvironmentExamination() )
-    {
-        doItemExamination = true;
-    }
-    else
-    {
-        doItemExamination = isInInventory;
-    }
-
-    if( doItemExamination )
-    {
-        std::cout << m_Items.at( itemId )->GetExaminationResponse() << std::endl;
-    }
-    else
-    {
-        std::cout << "You don't have the " << name << ", so you can't look at it." << std::endl;
+        objectData.locationId = InGameObject::INVALID;
+        objectData.haveIt = false;
+        objectData.isHere = false;
     }
 }
 
-bool Game::GetCharacterData( const std::string& name, int32_t& characterId, int32_t& charLocId, bool& isInPosse ) const
+Response* Game::GetBestResponse( const GameObjectData &objectData, const std::string &verb, const ResponseType& type) const
 {
-    // Get the character ID for the character "name"
-    characterId = InGameObject::INVALID_OBJECT;
-    auto charIt = m_CharacterNameToIdMap.find( name );
-    if( charIt != m_CharacterNameToIdMap.end() )
+    // Find the best available response object
+    std::vector<std::shared_ptr<Response>>& responses = m_Objects.at( objectData.id )->GetResponses( type );
+
+    std::vector<Response*> validResponses;
+    if( 0 == responses.size() )
     {
-        characterId = charIt->second;
+        validResponses.emplace_back( nullptr );
     }
-
-    if( InGameObject::INVALID_OBJECT != characterId )
+    else if( !objectData.isHere )
     {
-        // Get the character's current location
-        charLocId = m_Characters.at( characterId )->GetLocation();
-
-        // Is the item in the inventory?
-        auto posseIt = std::find( m_Posse.begin(), m_Posse.end(), characterId );
-        isInPosse = ( posseIt != m_Posse.end() );
+        // To interact, the item and the user must be in the same location
+        validResponses.emplace_back( nullptr );
+    }
+    else if( 1 == responses.size() )
+    {
+        validResponses.emplace_back( responses.front().get() );
     }
     else
     {
-        charLocId = InGameObject::INVALID_OBJECT;
-        isInPosse = false;
+        // The interesting case.  Need to find responses for which all necessary criteria are met
+        for( auto &it : responses )
+        {
+            Response *thisResponse = it.get();
+
+            if( thisResponse->ObjectPossessionIsRequired() && !objectData.haveIt )
+            {
+                // Object must be in inventory, but it's not.
+                // This response is not valid at this time.
+                continue;
+            }
+
+            if(    thisResponse->GetRequiredLocation() != InGameObject::INVALID
+                && thisResponse->GetRequiredLocation() != m_Map->GetLocation().GetObjectId() )
+            {
+                // Object must be located in a particular location, but it's not.
+                // This response is invalid at this time.
+                continue;
+            }
+
+            if(   !thisResponse->GetRequiredVerb().empty()
+                && thisResponse->GetRequiredVerb() != verb )
+            {
+                // Response requires a specific verb to have been used, but it wasn't.
+                // This response is invalid at this time.
+                continue;
+            }
+
+            const std::list<int32_t>& requiredObjects = thisResponse->GetRequiredObjects();
+            if( 0 < requiredObjects.size() )
+            {
+                bool criteriaMet = true;
+                for( int32_t id : requiredObjects )
+                {
+                    if( m_Inventory.end() == std::find( m_Inventory.begin(), m_Inventory.end(), id ) )
+                    {
+                        // Object requires another object to be in inventory, but it's not.
+                        // This response is invalid at this time.
+                        criteriaMet = false;
+                        break;
+                    }
+                }
+
+                if( !criteriaMet )
+                {
+                    continue;
+                }
+            }
+
+            if( 0 < m_TriggeredEvents.size() )
+            {
+                bool criteriaMet = true;
+                for( const std::string& event : m_TriggeredEvents )
+                {
+                    if( m_TriggeredEvents.end() == std::find( m_TriggeredEvents.begin(), m_TriggeredEvents.end(), thisResponse->GetRequiredEvent() ) )
+                    {
+                        // Object requires an event to have happened, but it's hasn't.
+                        // This response is invalid at this time.
+                        criteriaMet = false;
+                        break;
+                    }
+                }
+
+                if( !criteriaMet )
+                {
+                    continue;
+                }
+            }
+
+            // If we're here, the response is valid.  Push it into the valid responses list
+            validResponses.emplace_back( thisResponse );
+        }
     }
 
-    // Return boolean saying if there is even a character "name"
-    return ( characterId != InGameObject::INVALID_OBJECT );
+    Response *response = nullptr;
+    if( 1 == validResponses.size() )
+    {
+        response = validResponses.front();
+    }
+    else
+    {
+        // More than one, find the most appropriate.
+        // Preferred order:
+        // 1) responses that trigger an event,
+        // 2) responses that require an event,
+        // 3) responses that have no requirements
+        // The response requirements should be set such that there can
+        // be at most one of each of the above catagories present
+        for( auto& it : validResponses )
+        {
+            const std::string& trigger = it->GetTriggeredEvent();
+            if( !trigger.empty() )
+            {
+                // Responses that trigger events are highest priority, no need to keep looking.
+                response = it;
+                break;
+            }
+            
+            const std::string& event = it->GetRequiredEvent();
+            if( nullptr == response && !event.empty() )
+            {
+                // Responses that require events are next priority, but need to keep looking.
+                response = it;
+            }
+
+            if( nullptr == response )
+            {
+                // Vanilla resonses are lowest priority.
+                response = it;
+            }
+        }
+    }
+
+    return response;
 }
 
-void Game::DoCharacterExamination( const std::string &name, int32_t characterId, bool isInPosse ) const
+int32_t Game::DoDrop( const GameObjectData &objectData )
 {
-    // Characters can't been examined unless they are present
-    bool doCharacterExamination = isInPosse;
-    if( !isInPosse )
-    {
-        // Character isn't with us, so see if it's in the same location
-        const std::list<int32_t>& characters = m_Map->GetLocation().GetCharacters();
-        auto charIt = std::find( characters.begin(), characters.end(), characterId );
-        doCharacterExamination = ( charIt != characters.end() );
-    }
+    // Move the item from inventory to the current location
+    int32_t itemId = objectData.id;
 
-    if( doCharacterExamination )
+    std::list<int32_t>::const_iterator invIter = std::find( m_Inventory.begin(), m_Inventory.end(), itemId );
+    assert( invIter != m_Inventory.end() );
+
+    m_Inventory.erase( invIter );
+
+    int32_t newObjectLoc = InGameObject::INVALID;
+    if( ObjectType::OBJECT_ITEM == objectData.type )
     {
-        std::cout << m_Characters.at( characterId )->GetExaminationResponse() << std::endl;
+        // Items stay where they are dropped (the id of the location)
+        newObjectLoc = m_Map->GetLocation().GetObjectId();
     }
-     else
+    else
     {
-        std::cout << "The " << name << " isn't here." << std::endl;
+        // Characters return to their default locations
+        newObjectLoc = m_Objects.at( itemId )->GetDefaultLocation();
     }
+    m_Map->GetLocation( newObjectLoc ).AddObject( itemId );
+    m_Objects.at( itemId )->SetLocation( newObjectLoc );
+
+    return newObjectLoc;
 }

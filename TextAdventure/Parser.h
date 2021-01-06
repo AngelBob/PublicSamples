@@ -56,6 +56,7 @@ namespace Parser
 		ParsedType GetLastVerbType( void ) const;
 		const std::string &GetLastVerb( void ) const;
 		const std::string &GetLastObject( void ) const;
+		const std::string &GetLastPreposition( void ) const;
 		const std::string &GetLastIndirectObject( void ) const;
 
 		const std::string& GetVerbTypeName( ParsedType type ) const;

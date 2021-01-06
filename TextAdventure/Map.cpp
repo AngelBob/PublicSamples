@@ -25,10 +25,15 @@ void Map::OnLoad( void )
 			{
 				// Convert the direction strings to Map::MOVE_DIRECTION enum values
 				const std::string& direction = it->at( "Direction" );
-				int32_t destinationId = it->at( "DestinationId" );
-
 				MoveDirection directionId = GetDirectionEnum( direction );
-				( *mlocIter )->SetNeighbor( directionId, destinationId );
+
+				// Convert the destination id to a global location ID
+				int32_t destinationId = it->at( "DestinationId" );
+				auto found = std::find_if( m_Locations.begin(), m_Locations.end(), [destinationId]( const std::shared_ptr<InGameObject> obj ) { return ( destinationId == obj->GetObjectClassId() );  } );
+				if( found != m_Locations.end() )
+				{
+					static_cast< Location * >( ( *mlocIter ).get() )->SetNeighbor( directionId, (*found)->GetObjectId() );
+				}
 			}
 		}
 	}
@@ -40,7 +45,7 @@ void Map::OnLoad( void )
 		m_LocationNameToIdMap.insert( std::make_pair( location->GetName(), location->GetObjectId() ) );
 
 		// Set the starting location, if appropriate
-		if( location->IsStartPosition() )
+		if( static_cast<Location*>( location.get() )->IsStartPosition() )
 		{
 			SetLocation( location->GetLocation() );
 		}
@@ -55,7 +60,7 @@ bool Map::OnMove( const std::string &direction )
 	Location& loc = GetLocation();
 
 	int32_t newLoc = loc.OnMove( dir );
-	if( InGameObject::INVALID_OBJECT != newLoc )
+	if( InGameObject::INVALID != newLoc )
 	{
 		// Valid move
 		IsMoveValid = true;
@@ -73,7 +78,7 @@ Location& Map::GetLocation( int32_t locationId )
 		locationId = m_CurLocation;
 	}
 
-	return *(m_Locations.at( locationId ));
+	return *( static_cast<Location*>( m_Locations.at( locationId ).get() ) );
 }
 
 const std::string &Map::GetDirectionName( MoveDirection direction )
@@ -153,7 +158,7 @@ void Map::LoadLocationResources( json& locations )
 	ResourceLoader::LoadStringResource( locations, L"LOCATIONS", IDR_LOCATIONS1 );
 
 	// Build location objects
-	ResourceLoader::BuildObjects( locations, m_Locations );
+	ResourceLoader::BuildObjects<Location>( locations, ObjectType::OBJECT_LOCATION, m_Locations );
 }
 
 void Map::SetLocation( int32_t newLocation )

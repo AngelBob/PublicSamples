@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Character.h"
-#include "Item.h"
-#include "Location.h"
-#include "Map.h"
+enum class ObjectType;
+
+enum class ResponseType;
+class Response;
 
 class Game
 {
@@ -17,50 +17,63 @@ class Game
 	};
 
 public:
+	struct GameObjectData
+	{
+		ObjectType	type;
+		int32_t		id;
+		int32_t		locationId;
+		bool		haveIt;
+		bool		isHere;
+	};
+
 	// Let the compiler generate the default ctor and dtor
 	// until there is a compelling reason not to.
+
+	// Get interesting information prior to calling the event handlers.
+	void GetObjectData( const std::string &objectName, GameObjectData &objectData ) const;
+	Response*GetBestResponse( const GameObjectData &objectData, const std::string &verb, const ResponseType &type ) const;
 
 	// Event handlers
 	void OnLoad( void );
 	void OnUnload( void );
 
 	void OnMove( const ParserT& parser );
-	void OnTake( const ParserT &parser );
-	void OnExamine( const ParserT& parser );
-	void OnInteraction( const ParserT &parser );
+	void OnTake( const GameObjectData &objectData, Response* response );
+	void OnExamine( const GameObjectData &objectData, Response* response );
+	void OnDiscard( const GameObjectData &objectData, Response* response );
+	void OnThrow( const GameObjectData &objectData, Response* response );
+	void OnInteraction( const GameObjectData &objectData, Response* response );
+	void OnAttack(const GameObjectData &objectData, Response* response );
+	void OnTransact( const GameObjectData &objectData, Response *response );
 
 	void OnInventory( void ) const;
+
+	void OnTrigger( Response* response );
 
 	// Accessors
 	const Map& GetMap( void );
 
-	// Utility
-	void DescribeScene( void );
-
 private:
 	void LoadGameResources( void );
 
+	// Utility
+	void DescribeScene( void );
 	std::ostream &PrintDirectionsAsSeen( std::ostream &os, size_t &numNeighbors ) const;
 	std::ostream &PrintCharacters( std::ostream &os, size_t &numCharacters ) const;
 	std::ostream &PrintItems( std::ostream &os, size_t &numItems ) const;
 
-	bool GetItemData( const std::string &name, int32_t &itemId, int32_t& itemLocId, bool& isInInventory ) const;
-	void DoItemExamination( const std::string &name, int32_t itemId, bool isInInventory ) const;
-
-	bool GetCharacterData( const std::string &name, int32_t& characterId, int32_t& charLocId, bool& isInPosse ) const;
-	void DoCharacterExamination( const std::string &name, int32_t characterId, bool isInPosse ) const;
+	int32_t DoDrop( const GameObjectData& objectData );
 
 	// Map contains a list of locations
 	std::unique_ptr<Map>	m_Map;
 
-	// Characters and Items are stand-alone things, but relate to the locations
-	std::map<std::string, int32_t, typename StringCompareT> m_CharacterNameToIdMap;
-	std::vector<std::unique_ptr<Character>> m_Characters;
-
-	std::map<std::string, int32_t, StringCompareT>	m_ItemNameToIdMap;
-	std::vector<std::unique_ptr<Item>>      m_Items;
+	// Objects are stand-alone things, but relate to the locations
+	std::map<std::string, int32_t, typename StringCompareT> m_ObjectNameToIdMap;
+	std::vector<std::shared_ptr<InGameObject>> m_Objects;
 
 	// The user inventory
-	std::list<int32_t> m_Inventory; // It's possible to collect items
-	std::list<int32_t> m_Posse;     // It's possible to collect characters
+	std::list<int32_t> m_Inventory; // It's possible to collect items and characters
+
+	// Game events
+	std::list<std::string> m_TriggeredEvents;
 };

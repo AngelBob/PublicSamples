@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "Objects.h"
 
-Location::Location( const json &location )
-	: InGameObject( location )
+Location::Location( const json &location, ObjectType type, const int32_t classId, const int32_t globalId )
+	: InGameObject( location, type, classId, globalId )
 	, m_ShownOnce( false )
 {
 	// Bail on invalid location creation
@@ -10,6 +10,9 @@ Location::Location( const json &location )
 	{
 		return;
 	}
+
+	// Locations don't have a specific "Location" entry, just default it to the class ID value
+	m_Location = classId;
 
 	// The as seen description is required
 	m_AsSeenDesc = location.at( "AsSeenDesc" );
@@ -21,7 +24,7 @@ Location::Location( const json &location )
 #pragma region Event handlers
 int32_t Location::OnMove( MoveDirection direction )
 {
-	int32_t nextLocation = INVALID_OBJECT;
+	int32_t nextLocation = INVALID;
 
 	std::map<MoveDirection, int32_t>::const_iterator found = m_Neighbors.find( direction );
 	if( found != m_Neighbors.end() )
@@ -39,34 +42,19 @@ bool Location::IsStartPosition( void )
 	return m_IsStartPosition;
 }
 
-void Location::AddCharacter( int32_t characterId )
+void Location::AddObject( int32_t itemId )
 {
-	m_Characters.emplace_back( characterId );
+	m_Objects.emplace_back( itemId );
 }
 
-void Location::RemoveCharacter( int32_t characterId )
+void Location::RemoveObject( int32_t itemId )
 {
-	m_Characters.remove_if( [ characterId ]( int n ) { return n == characterId; } );
+	m_Objects.remove_if( [itemId]( int n ) { return n == itemId; } );
 }
 
-const std::list<int32_t>& Location::GetCharacters( void ) const
+const std::list<int32_t>& Location::GetObjects( void ) const
 {
-	return m_Characters;
-}
-
-void Location::AddItem( int32_t itemId )
-{
-	m_Items.emplace_back( itemId );
-}
-
-void Location::RemoveItem( int32_t itemId )
-{
-	m_Items.remove_if( [itemId]( int n ) { return n == itemId; } );
-}
-
-const std::list<int32_t> &Location::GetItems( void ) const
-{
-	return m_Items;
+	return m_Objects;
 }
 
 void Location::SetNeighbor( MoveDirection dir, int32_t neighborId )

@@ -8,8 +8,9 @@
       {
         "Type": "Discard",
         "SpecificVerb": "put",
-        "RequiresItem": "Sheriff",
-        "Triggers": "EndGame"
+        "RequiresObject": 6,
+        "RequiresLocation": 11,
+        "TriggersEvent": "OnGameOver"
       },
       {
         "Type": "Examine",
@@ -23,23 +24,31 @@
     "Location": 12,
     "Description": "an iron bar in a pile of dust on the floor",
     "Responses": [
-      { "Type": "Take" },
-      { "Type": "Discard" },
       {
-        "Type": "Throw",
-        "SpecificVerb": "throw",
-        "RequiresPossession": true,
-        "RequiresLocation": "The Blacksmith",
-        "Triggers": "Blacksmith_OnAttack"
-      },
-      {
-        "Type": "Throw",
-        "RequiresPossession": true
+        "Type": "Take",
+        "Text": "The iron bar has been added to your inventory."
       },
       {
         "Type": "Examine",
         "RequiresPossession": true,
         "Text": "It looks to be a good, solid piece of iron."
+      },
+      {
+        "Type": "Discard",
+        "RequiresPossession": true,
+        "Text": "The iron bar lands with a thud at your feet."
+      },
+      {
+        "Type": "Throw",
+        "RequiresLocation": 12,
+        "RequiresPossession": true,
+        "TriggersEvent": "OnBlacksmithAttack",
+        "Text": "The iron bar connects squarely with the blacksmith's head.  The blacksmith is none too pleased with you."
+      },
+      {
+        "Type": "Throw",
+        "RequiresPossession": true,
+        "Text": "The iron bar lands in a cloud of dust several yards away."
       }
     ]
   },
@@ -74,14 +83,24 @@
     "Responses": [
       {
         "Type": "Take",
-        "RequiresTrigger": "Assayer_OnOutOfOffice"
+        "RequiresEvent": "OnAssayerOutOfOffice",
+        "Text": "The familiar looking bag has been added to your inventory."
       },
       {
         "Type": "Examine",
         "RequiresPossession": true,
         "Text": "Looking more closely, you recognize the bag as the one that previously contained your gold.  The bag is empty."
       },
-      { "Type": "Discard" }
+      {
+        "Type": "Discard",
+        "RequiresPossession": true,
+        "Text": "The empty bag floats lightly to the floor."
+      },
+      {
+        "Type": "Throw",
+        "RequiresPossession": true,
+        "Text": "The empty bag lands gently at your feet."
+      }
     ]
   },
   {
@@ -92,12 +111,12 @@
     "Responses": [
       {
         "Type": "Examine",
-        "Text": "The runner is quite worn and wrinkled, and the glass vase is yellowed and cracked."
+        "Text": "A closer look reveals a key hidden under one of the wrinkles in the velvet runner.",
+        "RequiresEvent": "OnCabinetKeyVisible"
       },
       {
         "Type": "Examine",
-        "Text": "A closer look reveals a key hidden under one of the wrinkles in the velvet runner.",
-        "RequiresTrigger": "HotelRoom2_OnCabinetKeyVisible"
+        "Text": "The runner is quite worn and wrinkled, and the glass vase is yellowed and cracked."
       }
     ]
   },
@@ -109,13 +128,24 @@
     "Responses": [
       {
         "Type": "Take",
-        "RequiresTrigger": "HotelRoom2_OnCabinetKeyVisible"
+        "RequiresEvent": "OnCabinetKeyVisible",
+        "Text": "The key has been added to your inventory."
       },
       {
         "Type": "Examine",
-        "Text":  "A closer look reveals no markings, and no indication of what the key may be for."
+        "RequiresPossession": true,
+        "Text": "A closer look reveals no markings, and no indication of what the key may be for."
       },
-      { "Type": "Discard" }
+      {
+        "Type": "Discard",
+        "RequiresPossession": true,
+        "Text": "The key makes a metallic ringing as it lands."
+      },
+      {
+        "Type": "Throw",
+        "RequiresPossession": true,
+        "Text": "You hear a faint ringing sound as the key lands several yards away."
+      }
     ]
   }
 ]
