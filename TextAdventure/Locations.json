@@ -1,8 +1,7 @@
 [
   {
-    "Id": 1,
-    "IsStartPosition": true,
-    "Name": "49er Camp",
+    "Id": "camp",
+    "DisplayName": "49er Camp",
     "Description": "Your camp.  It's a  mess.",
     "AsSeenDesc": "your camp.",
     "Responses": [
@@ -13,13 +12,13 @@
       {
         "Type": "Movement",
         "Direction": "south west",
-        "DestinationId": 2
+        "Destination": "camptrail"
       }
     ]
   },
   {
-    "Id": 2,
-    "Name": "Camp Trail",
+    "Id": "camptrail",
+    "DisplayName": "Camp Trail",
     "Description": "A trail leading to your camp.",
     "AsSeenDesc": "a well-worn pathway leading into the bush.",
     "Responses": [
@@ -30,18 +29,18 @@
       {
         "Type": "Movement",
         "Direction": "north east",
-        "DestinationId": 1
+        "Destination": "camp"
       },
       {
         "Type": "Movement",
         "Direction": "south east",
-        "DestinationId": 3
+        "Destination": "roadoutoftown_east"
       }
     ]
   },
   {
-    "Id": 3,
-    "Name": "The Road Out of Town",
+    "Id": "roadoutoftown_east",
+    "DisplayName": "The Road Out of Town",
     "Description": "On the road heading east out of town.",
     "AsSeenDesc": "the main road through town.",
     "Responses": [
@@ -52,23 +51,23 @@
       {
         "Type": "Movement",
         "Direction": "north west",
-        "DestinationId": 2
+        "Destination": "camptrail"
       },
       {
         "Type": "Movement",
         "Direction": "east",
-        "DestinationId": 4
+        "Destination": "mapedge_east"
       },
       {
         "Type": "Movement",
         "Direction": "west",
-        "DestinationId": 5
+        "Destination": "roadeastoftown"
       }
     ]
   },
   {
-    "Id": 4,
-    "Name": "The Road",
+    "Id": "mapedge_east",
+    "DisplayName": "The Road",
     "Description": "On the road heading out of town.",
     "AsSeenDesc": "a rutted road stretching through the sage and dust as far as you can see.",
     "Responses": [
@@ -79,18 +78,19 @@
       {
         "Type": "Movement",
         "Direction": "east",
-        "DestinationId": 4
+        "Destination": "mapedge_east",
+        "Increments": true
       },
       {
         "Type": "Movement",
         "Direction": "west",
-        "DestinationId": 3
+        "Destination": "roadoutoftown_east"
       }
     ]
   },
   {
-    "Id": 5,
-    "Name": "The Road east Of Town",
+    "Id": "roadeastoftown",
+    "DisplayName": "The Road east Of Town",
     "Description": "The main road just east of town.",
     "AsSeenDesc": "the main road outside of town.",
     "Responses": [
@@ -101,23 +101,23 @@
       {
         "Type": "Movement",
         "Direction": "east",
-        "DestinationId": 3
+        "Destination": "roadoutoftown_east"
       },
       {
         "Type": "Movement",
         "Direction": "south east",
-        "DestinationId": 11
+        "Destination": "meadow"
       },
       {
         "Type": "Movement",
         "Direction": "west",
-        "DestinationId": 6
+        "Destination": "towneast"
       }
     ]
   },
   {
-    "Id": 6,
-    "Name": "The Road At the east End of Town",
+    "Id": "towneast",
+    "DisplayName": "The Road At the east End of Town",
     "Description": "The main road at the east end of town",
     "AsSeenDesc": "the east end of town.",
     "Responses": [
@@ -128,28 +128,28 @@
       {
         "Type": "Movement",
         "Direction": "north",
-        "DestinationId": 15
+        "Destination": "saloon"
       },
       {
         "Type": "Movement",
         "Direction": "east",
-        "DestinationId": 5
+        "Destination": "roadeastoftown"
       },
       {
         "Type": "Movement",
         "Direction": "south",
-        "DestinationId": 12
+        "Destination": "blacksmithshop"
       },
       {
         "Type": "Movement",
         "Direction": "west",
-        "DestinationId": 7
+        "Destination": "townmiddle"
       }
     ]
   },
   {
-    "Id": 7,
-    "Name": "The Road In the Middle of Town",
+    "Id": "townmiddle",
+    "DisplayName": "The Road In the Middle of Town",
     "Description": "The main road in the middle of town.",
     "AsSeenDesc": "the middle of town.",
     "Responses": [
@@ -160,28 +160,28 @@
       {
         "Type": "Movement",
         "Direction": "north",
-        "DestinationId": 16
+        "Destination": "sherrifsoffice"
       },
       {
         "Type": "Movement",
         "Direction": "east",
-        "DestinationId": 6
+        "Destination": "towneast"
       },
       {
         "Type": "Movement",
         "Direction": "south",
-        "DestinationId": 13
+        "Destination": "store"
       },
       {
         "Type": "Movement",
         "Direction": "west",
-        "DestinationId": 8
+        "Destination": "townwest"
       }
     ]
   },
   {
-    "Id": 8,
-    "Name": "The Road At the west End of Town",
+    "Id": "townwest",
+    "DisplayName": "The Road At the west End of Town",
     "Description": "The main road at the west end of town",
     "AsSeenDesc": "the west end of town.",
     "Responses": [
@@ -192,28 +192,28 @@
       {
         "Type": "Movement",
         "Direction": "north",
-        "DestinationId": 17
+        "Destination": "bank"
       },
       {
         "Type": "Movement",
         "Direction": "east",
-        "DestinationId": 7
+        "Destination": "townmiddle"
       },
       {
         "Type": "Movement",
         "Direction": "south",
-        "DestinationId": 14
+        "Destination": "assayoffice"
       },
       {
         "Type": "Movement",
         "Direction": "west",
-        "DestinationId": 9
+        "Destination": "roadwestoftown"
       }
     ]
   },
   {
-    "Id": 9,
-    "Name": "The Road west Of Town",
+    "Id": "roadwestoftown",
+    "DisplayName": "The Road west Of Town",
     "Description": "The main road just west of town.",
     "AsSeenDesc": "the main road outside of town.",
     "Responses": [
@@ -224,18 +224,18 @@
       {
         "Type": "Movement",
         "Direction": "east",
-        "DestinationId": 8
+        "Destination": "townwest"
       },
       {
         "Type": "Movement",
         "Direction": "west",
-        "DestinationId": 10
+        "Destination": "roadoutoftown_west"
       }
     ]
   },
   {
-    "Id": 10,
-    "Name": "The Road",
+    "Id": "roadoutoftown_west",
+    "DisplayName": "The Road",
     "Description": "You are riding off into the sunset.",
     "AsSeenDesc": "a rutted road stretching through the sage and dust, disappearing into the sunset.",
     "Responses": [
@@ -246,18 +246,18 @@
       {
         "Type": "Movement",
         "Direction": "east",
-        "DestinationId": 9
+        "Destination": "roadwestoftown"
       },
       {
         "Type": "Movement",
         "Direction": "west",
-        "DestinationId": 10
+        "Destination": "roadoutoftown_west"
       }
     ]
   },
   {
-    "Id": 11,
-    "Name": "Meadow",
+    "Id": "meadow",
+    "DisplayName": "Meadow",
     "Description": "A grassy area with a tree in the middle.",
     "AsSeenDesc": "a meadow with a tree standing in the middle.",
     "Responses": [
@@ -268,15 +268,16 @@
       {
         "Type": "Movement",
         "Direction": "north east",
-        "DestinationId": 5
+        "Destination": "roadeastoftown"
       }
     ]
   },
   {
-    "Id": 12,
-    "Name": "The Blacksmith",
+    "Id": "blacksmithshop",
+    "DisplayName": "The Blacksmith",
     "Description": "A blacksmith shop, with all the required tools and materials.",
     "AsSeenDesc": "the blacksmith shop.",
+    "IsStartPosition": true,
     "Responses": [
       {
         "Type": "Examine",
@@ -285,13 +286,13 @@
       {
         "Type": "Movement",
         "Direction": "north",
-        "DestinationId": 6
+        "Destination": "towneast"
       }
     ]
   },
   {
-    "Id": 13,
-    "Name": "The General Store",
+    "Id": "store",
+    "DisplayName": "The General Store",
     "Description": "A store with everything the townsfolk require.",
     "AsSeenDesc": "the general store.",
     "Responses": [
@@ -302,13 +303,13 @@
       {
         "Type": "Movement",
         "Direction": "north",
-        "DestinationId": 7
+        "Destination": "townmiddle"
       }
     ]
   },
   {
-    "Id": 14,
-    "Name": "The Assay Office",
+    "Id": "assayoffice",
+    "DisplayName": "The Assay Office",
     "Description": "A small, stuffy office with a single desk and large safe.",
     "AsSeenDesc": "the assay office.",
     "Responses": [
@@ -319,13 +320,13 @@
       {
         "Type": "Movement",
         "Direction": "north",
-        "DestinationId": 8
+        "Destination": "townwest"
       }
     ]
   },
   {
-    "Id": 15,
-    "Name": "Saloon and Hotel",
+    "Id": "saloon",
+    "DisplayName": "Saloon and Hotel",
     "Description": "The bar is dimly lit and dusty.  There are stairs leading up.  The bartender is here.",
     "AsSeenDesc": "the saloon.",
     "Responses": [
@@ -336,18 +337,18 @@
       {
         "Type": "Movement",
         "Direction": "south",
-        "DestinationId": 6
+        "Destination": "towneast"
       },
       {
         "Type": "Movement",
         "Direction": "up",
-        "DestinationId": 18
+        "Destination": "topofstairs"
       }
     ]
   },
   {
-    "Id": 16,
-    "Name": "Sheriff's Office",
+    "Id": "sherrifsoffice",
+    "DisplayName": "Sheriff's Office",
     "Description": "The local sherrif's office, with a single desk.",
     "AsSeenDesc": "the sherrif's office.",
     "Responses": [
@@ -358,18 +359,25 @@
       {
         "Type": "Movement",
         "Direction": "north",
-        "DestinationId": 23
+        "RequiresEvent": "OnCellUnlock",
+        "Destination": "cellblockhallway_east"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "north",
+        "Destination": "sherrifsoffice",
+        "Text": "The sherrif makes a noise in the back of his throat.  You take it to mean you won't be going that way"
       },
       {
         "Type": "Movement",
         "Direction": "south",
-        "DestinationId": 7
+        "Destination": "townmiddle"
       }
     ]
   },
   {
-    "Id": 17,
-    "Name": "Bank",
+    "Id": "bank",
+    "DisplayName": "Bank",
     "Description": "The single table is available and the tellers' window is open.",
     "AsSeenDesc": "the bank.",
     "Responses": [
@@ -380,13 +388,13 @@
       {
         "Type": "Movement",
         "Direction": "south",
-        "DestinationId": 8
+        "Destination": "townwest"
       }
     ]
   },
   {
-    "Id": 18,
-    "Name": "Top of the Stairs",
+    "Id": "topofstairs",
+    "DisplayName": "Top of the Stairs",
     "Description": "The top of the stairs leading to the hotel rooms.",
     "AsSeenDesc": "the landing at the top of the stairs.",
     "Responses": [
@@ -397,18 +405,18 @@
       {
         "Type": "Movement",
         "Direction": "down",
-        "DestinationId": 15
+        "Destination": "saloon"
       },
       {
         "Type": "Movement",
         "Direction": "east",
-        "DestinationId": 19
+        "Destination": "balconymiddle"
       }
     ]
   },
   {
-    "Id": 19,
-    "Name": "Middle of the Balcony",
+    "Id": "balconymiddle",
+    "DisplayName": "Middle of the Balcony",
     "Description": "The balcony above the barroom.",
     "AsSeenDesc": "the balcony leading to the rooms.",
     "Responses": [
@@ -419,23 +427,23 @@
       {
         "Type": "Movement",
         "Direction": "north",
-        "DestinationId": 21
+        "Destination": "hotelroom1"
       },
       {
         "Type": "Movement",
         "Direction": "west",
-        "DestinationId": 18
+        "Destination": "topofstairs"
       },
       {
         "Type": "Movement",
         "Direction": "east",
-        "DestinationId": 20
+        "Destination": "balconyend"
       }
     ]
   },
   {
-    "Id": 20,
-    "Name": "End of the Balcony",
+    "Id": "balconyend",
+    "DisplayName": "End of the Balcony",
     "Description": "The end of the balcony above the barroom.",
     "AsSeenDesc": "the balcony ends.",
     "Responses": [
@@ -446,18 +454,18 @@
       {
         "Type": "Movement",
         "Direction": "north",
-        "DestinationId": 22
+        "Destination": "hotelroom2"
       },
       {
         "Type": "Movement",
         "Direction": "west",
-        "DestinationId": 19
+        "Destination": "balconymiddle"
       }
     ]
   },
   {
-    "Id": 21,
-    "Name": "Hotel Room 1",
+    "Id": "hotelroom1",
+    "DisplayName": "Hotel Room",
     "Description": "A dingy hotel room.",
     "AsSeenDesc": "a door with the number 1.",
     "Responses": [
@@ -468,13 +476,13 @@
       {
         "Type": "Movement",
         "Direction": "south",
-        "DestinationId": 19
+        "Destination": "balconymiddle"
       }
     ]
   },
   {
-    "Id": 22,
-    "Name": "Hotel Room 2",
+    "Id": "hotelroom2",
+    "DisplayName": "Hotel Room",
     "Description": "A dingy hotel room.",
     "AsSeenDesc": "a door with the number 2.",
     "Responses": [
@@ -485,13 +493,13 @@
       {
         "Type": "Movement",
         "Direction": "south",
-        "DestinationId": 20
+        "Destination": "balconyend"
       }
     ]
   },
   {
-    "Id": 23,
-    "Name": "Cellblock Hallway",
+    "Id": "cellblockhallway_east",
+    "DisplayName": "Cellblock Hallway",
     "Description": "The cellblock hallway allows access to both cells.",
     "AsSeenDesc": "the hallway.",
     "Responses": [
@@ -502,24 +510,23 @@
       {
         "Type": "Movement",
         "Direction": "north",
-        "DestinationId": 25,
-        "RequiresTrigger": "OnCellUnlock"
+        "Destination": "jailcell1"
       },
       {
         "Type": "Movement",
         "Direction": "south",
-        "DestinationId": 16
+        "Destination": "sherrifsoffice"
       },
       {
         "Type": "Movement",
         "Direction": "west",
-        "DestinationId": 24
+        "Destination": "cellblockhallway_west"
       }
     ]
   },
   {
-    "Id": 24,
-    "Name": "Cellblock Hallway",
+    "Id": "cellblockhallway_west",
+    "DisplayName": "Cellblock Hallway",
     "Description": "The cellblock hallway allows access to both cells.",
     "AsSeenDesc": "the hallway.",
     "Responses": [
@@ -530,19 +537,18 @@
       {
         "Type": "Movement",
         "Direction": "north",
-        "DestinationId": 26,
-        "RequiresTrigger": "OnCellUnlock"
+        "Destination": "jailcell2"
       },
       {
         "Type": "Movement",
         "Direction": "east",
-        "DestinationId": 23
+        "Destination": "cellblockhallway_east"
       }
     ]
   },
   {
-    "Id": 25,
-    "Name": "Jail Cell",
+    "Id": "jailcell1",
+    "DisplayName": "Jail Cell",
     "Description": "The jail cell is very dirty.",
     "AsSeenDesc": "a jail cell.",
     "Responses": [
@@ -553,14 +559,13 @@
       {
         "Type": "Movement",
         "Direction": "south",
-        "DestinationId": 23,
-        "RequiresTrigger": "OnCellUnlock"
+        "Destination": "cellblockhallway_east"
       }
     ]
   },
   {
-    "Id": 26,
-    "Name": "Jail Cell",
+    "Id": "jailcell2",
+    "DisplayName": "Jail Cell",
     "Description": "The jail cell is very dirty.",
     "AsSeenDesc": "a jail cell.",
     "Responses": [
@@ -571,11 +576,10 @@
       {
         "Type": "Movement",
         "Direction": "south",
-        "DestinationId": 24,
-        "RequiresTrigger": "OnCellUnlock",
-        "RequiresObject": "Key",
+        "Destination": "cellblockhallway_west",
+        "RequiresObject": "key",
         "Text": "You remember the key you found in the hotel room and wonder... It slides roughly into the lock on the cell door, and with just a little effort the key turns, the door unlocks, and slides open.",
-        "Triggers": "OnCellUnlock"
+        "TriggersEvent": "OnCellUnlock"
       }
     ]
   }

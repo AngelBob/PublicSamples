@@ -19,12 +19,21 @@ void Game::OnLoad( void )
     // Place the characters and items into their starting locations
     for( auto& object : m_Objects )
     {
-        // The first "character" is the invalid character, and it gets placed into the invalid location
-        Location& location = m_Map->GetLocation( object->GetLocation() );
+        Location& location = m_Map->GetLocation( object->GetLocationId() );
         location.AddObject( object->GetObjectId() );
 
-        // Add the character name and Id to the map
-        m_ObjectNameToIdMap.insert( std::make_pair( object->GetName(), object->GetObjectId() ) );
+        // Add the game object name and id to the map
+        m_ObjectNameToIdMap.insert( std::make_pair( object->GetDisplayName(), object->GetObjectId() ) );
+        m_ObjectIdToGlobalIdMap.insert( std::make_pair( object->GetObjectName(), object->GetObjectId() ) );
+    }
+
+    // Create the events
+    LoadGameEvents();
+
+    // Create the event name to id map
+    for( auto& event : m_Events )
+    {
+        m_EventNameToIdMap.insert( std::make_pair( event->GetEventName(), event->GetEventId() ) );
     }
 
     // After everything is loaded, describe the opening scene
@@ -36,37 +45,49 @@ void Game::OnUnload( void )
 
 }
 
-void Game::OnMove( const ParserT& parser )
+void Game::OnMove( const GameObjectData& objectData, Response* response )
 {
-    // On a move, get the direction from the parser and check with the location to see if the
-// direction is valid.  If so, execute, otherwise notify the user they can't go that way.
-    const std::string &dir = parser.GetLastObject();
-    if( m_Map->OnMove( dir ) )
+    // Check the move response to see if it's a valid move, if so, notify the map.
+    if( nullptr != response )
     {
         // Move was good
-        // Posse needs to come with us
-        for( int32_t objectId : m_Inventory )
+        m_Map->GetLocation().SetShownOnce();
+        int32_t oldLoc = m_Map->GetLocation().GetObjectId();
+
+        m_Map->OnMove( response->GetMoveDestination() );
+
+        int32_t newLoc = m_Map->GetLocation().GetObjectId();
+
+        if( !response->GetResponseText( false ).empty() )
         {
-            if( ObjectType::OBJECT_CHARACTER == m_Objects.at( objectId )->GetType() )
-            {
-                m_Objects.at( objectId )->SetLocation( m_Map->GetLocation().GetObjectId() );
-            }
+            std::cout << response->GetResponseText() << std::endl;
         }
 
-        // Describe the new scene
-        std::cout << "\n";
-        DescribeScene();
+        if( oldLoc != newLoc )
+        {
+            // Posse needs to come with us
+            for( int32_t objectId : m_Inventory )
+            {
+                if( ObjectType::OBJECT_CHARACTER == m_Objects.at( objectId )->GetType() )
+                {
+                    m_Objects.at( objectId )->SetLocationId( m_Map->GetLocation().GetObjectId() );
+                }
+            }
+
+            // Describe the new scene
+            std::cout << "\n";
+            DescribeScene();
+        }
     }
     else
     {
-        MoveDirection dirEnum = m_Map->GetDirectionEnum( dir );
-        if( MoveDirection::MOVE_INVALID == dirEnum )
+        if( MoveDirection::MOVE_INVALID == objectData.dir )
         {
             std::cout << "I don't know how to go in that direction";
         }
         else
         {
-            const std::string &directionName = m_Map->GetDirectionName( dirEnum );
+            const std::string &directionName = m_Map->GetDirectionName( objectData.dir );
             std::cout << "You are unable to move to the " << directionName;
         }
         std::cout << std::endl;
@@ -91,8 +112,8 @@ void Game::OnTake( const GameObjectData& objectData, Response* response )
             // It's here and available, add the item to the inventory and remove it from the location
             int32_t itemId = objectData.id;
             m_Inventory.emplace_back( itemId );
-            m_Map->GetLocation( m_Objects.at( itemId )->GetLocation() ).RemoveObject( itemId );
-            m_Objects.at( itemId )->SetLocation( InGameObject::INVALID );
+            m_Map->GetLocation( m_Objects.at( itemId )->GetLocationId() ).RemoveObject( itemId );
+            m_Objects.at( itemId )->SetLocationId( InGameObject::INVALID );
 
             std::cout << response->GetResponseText() << std::endl;
         }
@@ -116,7 +137,7 @@ void Game::OnExamine( const GameObjectData& objectData, Response* response )
     if( InGameObject::INVALID == objectData.id )
     {
         // User wants to look at the environment
-        DescribeScene();
+        DescribeScene( true );
     }
     else
     {
@@ -147,7 +168,7 @@ void Game::OnDiscard( const GameObjectData& objectData, Response* response )
         }
         else
         {
-            const std::string &name = m_Objects.at( objectData.id ).get()->GetName();
+            const std::string &name = m_Objects.at( objectData.id ).get()->GetDisplayName();
             if( ObjectType::OBJECT_ITEM == objectData.type )
             {
                 std::cout << "You don't have the " << name << " in your pockets." << std::endl;
@@ -181,7 +202,7 @@ void Game::OnThrow( const GameObjectData &objectData, Response *response )
         }
         else
         {
-            const std::string &name = m_Objects.at( objectData.id ).get()->GetName();
+            const std::string &name = m_Objects.at( objectData.id ).get()->GetDisplayName();
             if( ObjectType::OBJECT_CHARACTER == objectData.type )
             {
                 // Can't throw characters at all.
@@ -249,7 +270,7 @@ void Game::OnInteraction( const GameObjectData& objectData, Response* response )
                     // Scenario 2a - single character present
                     doInteraction = true;
                     GameObjectData charData;
-                    GetObjectData( m_Objects.at( characterIds.front() ).get()->GetName(), charData );
+                    GetObjectData( m_Objects.at( characterIds.front() ).get()->GetDisplayName(), charData );
                     assert( InGameObject::INVALID != charData.id && ObjectType::OBJECT_CHARACTER == charData.type );
                     response = GetBestResponse( charData, "talk", ResponseType::RESPONSE_TYPE_INTERACTION );
                 }
@@ -263,10 +284,10 @@ void Game::OnInteraction( const GameObjectData& objectData, Response* response )
 
                     while( start != stop )
                     {
-                        std::cout << m_Objects.at( *start )->GetName() << ", ";
+                        std::cout << m_Objects.at( *start )->GetDisplayName() << ", ";
                         ++start;
                     }
-                    std::cout << "or " << m_Objects.at( *start )->GetName() << "?" << std::endl;
+                    std::cout << "or " << m_Objects.at( *start )->GetDisplayName() << "?" << std::endl;
                 }
             }
             else
@@ -274,11 +295,11 @@ void Game::OnInteraction( const GameObjectData& objectData, Response* response )
                 // This is case 3 - name was provided, but character is not present
                 if( ObjectType::OBJECT_CHARACTER == objectData.type )
                 {
-                    std::cout << m_Objects.at( objectData.id ).get()->GetName() << " isn't here." << std::endl;
+                    std::cout << m_Objects.at( objectData.id ).get()->GetDisplayName() << " isn't here." << std::endl;
                 }
                 else
                 {
-                    std::cout << "You probably shouldn't try talking to the " << m_Objects.at( objectData.id ).get()->GetName() << std::endl;
+                    std::cout << "You probably shouldn't try talking to the " << m_Objects.at( objectData.id ).get()->GetDisplayName() << std::endl;
                 }
             }
         }
@@ -349,7 +370,7 @@ void Game::OnInventory( void ) const
     }
     else if( 1 == items.size() )
     {
-        std::cout << "You have " << m_Objects.at( items.front() )->GetName() << " in your pocket.\n";
+        std::cout << "You have " << m_Objects.at( items.front() )->GetDisplayName() << " in your pocket.\n";
     }
     else
     {
@@ -361,40 +382,75 @@ void Game::OnInventory( void ) const
 
         while( start != stop )
         {
-            std::cout << m_Objects.at( *start )->GetName() << "\n";
+            std::cout << m_Objects.at( *start )->GetDisplayName() << "\n";
             ++start;
         }
 
         std::cout << "and\n";
-        std::cout << m_Objects.at( *start )->GetName() << std::endl;
+        std::cout << m_Objects.at( *start )->GetDisplayName() << std::endl;
     }
 }
 
-void Game::OnTrigger( Response *response )
+void Game::OnTrigger( Response* response )
 {
     if( response != nullptr && !response->GetTriggeredEvent().empty() )
     {
-        // Do some stuff with the event
-        //std::cout << response->GetTriggeredEvent() << std::endl;
+        // Look through the event list for the event triggered by this response
+        int32_t eventId = m_EventNameToIdMap.at( response->GetTriggeredEvent() );
+
+        InGameEvent* event = m_Events.at( eventId ).get();
+        OnTrigger( event );
+    }
+}
+
+void Game::OnTrigger( InGameEvent* event )
+{
+    if( event->OnTrigger() )
+    {
+        // Event fires, take action(s)
+        if( !event->GetEventText().empty() )
+        {
+            std::cout << event->GetEventText() << std::endl;
+        }
+
+        if( !event->GetMakeVisibleTarget().empty() )
+        {
+            // Need to make an item visible
+            int32_t objId = m_ObjectIdToGlobalIdMap.at( event->GetMakeVisibleTarget() );
+            m_Objects.at( objId )->SetVisibility();
+        }
+
+        if( !event->GetGoToTarget().empty() )
+        {
+            m_Map->OnMove( event->GetGoToTarget() );
+            DescribeScene( true );
+        }
+
+        // Recurse...
+        for( auto& chainedName : event->GetEventChain() )
+        {
+            InGameEvent* chainedEvent = m_Events.at( m_EventNameToIdMap.at( chainedName ) ).get();
+            OnTrigger( chainedEvent );
+        }
     }
 }
 
 //private:
-void Game::DescribeScene( void )
+void Game::DescribeScene( bool doFullDescription )
 {
     std::stringstream ss;
 
     Location &curLocation = m_Map->GetLocation();
-    ss << curLocation.GetName();
+    ss << curLocation.GetDisplayName();
     ss << "\n";
 
-    if( curLocation.GetShownOnce() )
+    if( doFullDescription || !curLocation.GetShownOnce() )
     {
-        ss << curLocation.GetDescription();
+        ss << curLocation.GetResponses( ResponseType::RESPONSE_TYPE_EXAMINE ).front().get()->GetResponseText();
     }
     else
     {
-        ss << curLocation.GetResponses( ResponseType::RESPONSE_TYPE_EXAMINE ).front().get()->GetResponseText();
+        ss << curLocation.GetDescription();
     }
 
     size_t numNeighbors;
@@ -426,7 +482,7 @@ void Game::DescribeScene( void )
     std::cout << message << std::endl;
 }
 
-void Game::LoadGameResources()
+void Game::LoadGameResources( void )
 {
     // Need to load up the character and item resources
     static const ResourceList resources[ 2 ] = {
@@ -436,21 +492,34 @@ void Game::LoadGameResources()
 
     for( int32_t idx = 0; idx < _countof( resources); ++idx )
     {
-        ObjectType objType;
         json items;
 
         ResourceLoader::LoadStringResource( items, resources[ idx ].name, resources[ idx ].id );
         switch( resources[ idx ].id )
         {
         case IDR_CHARACTERS1:
-            objType = ObjectType::OBJECT_CHARACTER;
+            ResourceLoader::BuildObjects<Character>( items, m_Objects );
             break;
         case IDR_ITEMS1:
-            objType = ObjectType::OBJECT_ITEM;
+            ResourceLoader::BuildObjects<Item>( items, m_Objects );
             break;
         }
-        ResourceLoader::BuildObjects<InGameObject>( items, objType, m_Objects );
     }
+
+    // Go through the list of objects and do some setup
+    for( auto &obj : m_Objects )
+    {
+        int32_t location = m_Map->GetLocation( obj->GetDefaultLocation() ).GetObjectId();
+        obj->SetDefaultLocationId( location );
+        obj->SetLocationId( location );
+    }
+}
+
+void Game::LoadGameEvents( void )
+{
+    json items;
+    ResourceLoader::LoadStringResource( items, L"EVENTS", IDR_EVENTS1 );
+    ResourceLoader::BuildEvents( items, m_Events );
 }
 
 std::ostream &Game::PrintDirectionsAsSeen( std::ostream &os, size_t &numNeighbors ) const
@@ -507,7 +576,7 @@ std::ostream& Game::PrintCharacters( std::ostream &os, size_t &numCharacters ) c
         os << "The ";
         while( cur != stop )
         {
-            os << m_Objects.at( *cur )->GetName();
+            os << m_Objects.at( *cur )->GetDisplayName();
             if( 2 != characterIds.size() )
             {
                 os << ", ";
@@ -519,7 +588,7 @@ std::ostream& Game::PrintCharacters( std::ostream &os, size_t &numCharacters ) c
         {
             os << " and ";
         }
-        os << m_Objects.at( *cur )->GetName();
+        os << m_Objects.at( *cur )->GetDisplayName();
 
         if( characterIds.size() == 1 )
         {
@@ -546,7 +615,7 @@ std::ostream& Game::PrintItems( std::ostream &os, size_t &numItems ) const
     std::copy_if( objectIds.begin(),
         objectIds.end(),
         std::back_inserter( itemIds ),
-        [ this ]( const int32_t id ) { return ( ObjectType::OBJECT_ITEM == m_Objects.at( id )->GetType() ); } );
+        [ this ]( const int32_t id ) { return ( ObjectType::OBJECT_ITEM == m_Objects.at( id )->GetType() && m_Objects.at( id )->GetVisibility() ); } );
 
     if( itemIds.size() )
     {
@@ -604,8 +673,11 @@ void Game::GetObjectData( const std::string& name, GameObjectData& objectData ) 
         // Get the object type
         objectData.type = m_Objects.at( objectData.id )->GetType();
 
+        // Objects don't have movement directions
+        objectData.dir = MoveDirection::MOVE_INVALID;
+
         // Get the item's current location
-        objectData.locationId = m_Objects.at( objectData.id )->GetLocation();
+        objectData.locationId = m_Objects.at( objectData.id )->GetLocationId();
 
         // Is the item in the inventory?
         auto invIt = std::find( m_Inventory.begin(), m_Inventory.end(), objectData.id );
@@ -623,137 +695,139 @@ void Game::GetObjectData( const std::string& name, GameObjectData& objectData ) 
     }
 }
 
+void Game::GetMoveData( const std::string& dir, GameObjectData &objectData ) const
+{
+    // Get the object type
+    objectData.type = m_Map->GetLocation().GetType();
+    assert( ObjectType::OBJECT_LOCATION == objectData.type );
+
+    // Get the movement direction
+    objectData.dir = m_Map->GetDirectionEnum( dir );
+
+    // Get the current location ID; location ID == object ID for locations
+    objectData.id = m_Map->GetLocation().GetObjectId();
+    objectData.locationId = objectData.id;
+    assert( InGameObject::INVALID != objectData.id );
+
+    // Locations can't be in the inventory
+    objectData.haveIt = false;
+
+    // Locations are always in the same place as the player
+    objectData.isHere = true;
+}
+
 Response* Game::GetBestResponse( const GameObjectData &objectData, const std::string &verb, const ResponseType& type) const
 {
     // Find the best available response object
-    std::vector<std::shared_ptr<Response>>& responses = m_Objects.at( objectData.id )->GetResponses( type );
+    std::vector<std::shared_ptr<Response>>& responses = ( objectData.type != ObjectType::OBJECT_LOCATION ) ? m_Objects.at( objectData.id )->GetResponses( type ) : m_Map->GetLocation().GetResponses( type );
 
     std::vector<Response*> validResponses;
-    if( 0 == responses.size() )
+    // The interesting case.  Need to find responses for which all necessary criteria are met
+    for( auto &it : responses )
     {
-        validResponses.emplace_back( nullptr );
-    }
-    else if( !objectData.isHere )
-    {
-        // To interact, the item and the user must be in the same location
-        validResponses.emplace_back( nullptr );
-    }
-    else if( 1 == responses.size() )
-    {
-        validResponses.emplace_back( responses.front().get() );
-    }
-    else
-    {
-        // The interesting case.  Need to find responses for which all necessary criteria are met
-        for( auto &it : responses )
+        Response *thisResponse = it.get();
+
+        if( thisResponse->ObjectPossessionIsRequired() && !objectData.haveIt )
         {
-            Response *thisResponse = it.get();
-
-            if( thisResponse->ObjectPossessionIsRequired() && !objectData.haveIt )
-            {
-                // Object must be in inventory, but it's not.
-                // This response is not valid at this time.
-                continue;
-            }
-
-            if(    thisResponse->GetRequiredLocation() != InGameObject::INVALID
-                && thisResponse->GetRequiredLocation() != m_Map->GetLocation().GetObjectId() )
-            {
-                // Object must be located in a particular location, but it's not.
-                // This response is invalid at this time.
-                continue;
-            }
-
-            if(   !thisResponse->GetRequiredVerb().empty()
-                && thisResponse->GetRequiredVerb() != verb )
-            {
-                // Response requires a specific verb to have been used, but it wasn't.
-                // This response is invalid at this time.
-                continue;
-            }
-
-            const std::list<int32_t>& requiredObjects = thisResponse->GetRequiredObjects();
-            if( 0 < requiredObjects.size() )
-            {
-                bool criteriaMet = true;
-                for( int32_t id : requiredObjects )
-                {
-                    if( m_Inventory.end() == std::find( m_Inventory.begin(), m_Inventory.end(), id ) )
-                    {
-                        // Object requires another object to be in inventory, but it's not.
-                        // This response is invalid at this time.
-                        criteriaMet = false;
-                        break;
-                    }
-                }
-
-                if( !criteriaMet )
-                {
-                    continue;
-                }
-            }
-
-            if( 0 < m_TriggeredEvents.size() )
-            {
-                bool criteriaMet = true;
-                for( const std::string& event : m_TriggeredEvents )
-                {
-                    if( m_TriggeredEvents.end() == std::find( m_TriggeredEvents.begin(), m_TriggeredEvents.end(), thisResponse->GetRequiredEvent() ) )
-                    {
-                        // Object requires an event to have happened, but it's hasn't.
-                        // This response is invalid at this time.
-                        criteriaMet = false;
-                        break;
-                    }
-                }
-
-                if( !criteriaMet )
-                {
-                    continue;
-                }
-            }
-
-            // If we're here, the response is valid.  Push it into the valid responses list
-            validResponses.emplace_back( thisResponse );
+            // Object must be in inventory, but it's not.
+            // This response is not valid at this time.
+            continue;
         }
-    }
 
-    Response *response = nullptr;
-    if( 1 == validResponses.size() )
-    {
-        response = validResponses.front();
-    }
-    else
-    {
-        // More than one, find the most appropriate.
-        // Preferred order:
-        // 1) responses that trigger an event,
-        // 2) responses that require an event,
-        // 3) responses that have no requirements
-        // The response requirements should be set such that there can
-        // be at most one of each of the above catagories present
-        for( auto& it : validResponses )
+        if(   !thisResponse->GetRequiredLocation().empty()
+            && thisResponse->GetRequiredLocation() != m_Map->GetLocation().GetObjectName() )
         {
-            const std::string& trigger = it->GetTriggeredEvent();
-            if( !trigger.empty() )
+            // Object must be located in a particular location, but it's not.
+            // This response is invalid at this time.
+            continue;
+        }
+
+        if(   !thisResponse->GetRequiredVerb().empty()
+            && thisResponse->GetRequiredVerb() != verb )
+        {
+            // Response requires a specific verb to have been used, but it wasn't.
+            // This response is invalid at this time.
+            continue;
+        }
+
+        const std::list<std::string>& requiredObjects = thisResponse->GetRequiredObjects();
+        if( 0 < requiredObjects.size() )
+        {
+            bool criteriaMet = true;
+            for( const std::string& str : requiredObjects )
             {
-                // Responses that trigger events are highest priority, no need to keep looking.
-                response = it;
-                break;
-            }
-            
-            const std::string& event = it->GetRequiredEvent();
-            if( nullptr == response && !event.empty() )
-            {
-                // Responses that require events are next priority, but need to keep looking.
-                response = it;
+                int32_t id = m_ObjectNameToIdMap.at( str );
+                if( m_Inventory.end() == std::find( m_Inventory.begin(), m_Inventory.end(), id ) )
+                {
+                    // Object requires another object to be in inventory, but it's not.
+                    // This response is invalid at this time.
+                    criteriaMet = false;
+                    break;
+                }
             }
 
-            if( nullptr == response )
+            if( !criteriaMet )
             {
-                // Vanilla resonses are lowest priority.
-                response = it;
+                continue;
             }
+        }
+
+        if( !thisResponse->GetRequiredEvent().empty() )
+        {
+            int32_t eventId = m_EventNameToIdMap.at( thisResponse->GetRequiredEvent() );
+            if( !m_Events.at( eventId )->IsTriggered() )
+            {
+                // Response requires an event that hasn't fired yet.
+                // This response is invalid at this time.
+                continue;
+            }
+        }
+
+        // Additional handler for movement responses
+        if( ObjectType::OBJECT_LOCATION == objectData.type )
+        {
+            // Movement requires matching direction as well
+            MoveDirection moveDir = m_Map->GetDirectionEnum( thisResponse->GetMoveDirection() );
+            if( objectData.dir != moveDir )
+            {
+                // Movement is in the wrong direction for this response
+                continue;
+            }
+        }
+
+        // If we're here, the response is valid.  Push it into the valid responses list
+        validResponses.emplace_back( thisResponse );
+    }
+
+    // Find the most appropriate response.
+    // Preferred order:
+    // 1) responses that trigger an event,
+    // 2) responses that require an event,
+    // 3) responses that have no requirements
+    // The response requirements should be set such that there can
+    // be at most one of each of the above catagories present
+    Response *response = nullptr;
+    for( auto& it : validResponses )
+    {
+        const std::string& trigger = it->GetTriggeredEvent();
+        if( !trigger.empty() )
+        {
+            // Responses that trigger events are highest priority, no need to keep looking.
+            response = it;
+            break;
+        }
+            
+        const std::string& event = it->GetRequiredEvent();
+        if( nullptr == response && !event.empty() )
+        {
+            // Responses that require events are next priority, but need to keep looking.
+            response = it;
+        }
+
+        if( nullptr == response )
+        {
+            // Vanilla resonses are lowest priority.
+            response = it;
         }
     }
 
@@ -779,10 +853,10 @@ int32_t Game::DoDrop( const GameObjectData &objectData )
     else
     {
         // Characters return to their default locations
-        newObjectLoc = m_Objects.at( itemId )->GetDefaultLocation();
+        newObjectLoc = m_Objects.at( itemId )->GetDefaultLocationId();
     }
     m_Map->GetLocation( newObjectLoc ).AddObject( itemId );
-    m_Objects.at( itemId )->SetLocation( newObjectLoc );
+    m_Objects.at( itemId )->SetLocationId( newObjectLoc );
 
     return newObjectLoc;
 }

@@ -13,61 +13,41 @@ void Map::OnLoad( void )
 	json jsonLocations;
 	LoadLocationResources( jsonLocations );
 
-	// Build the map by linking all of the locations to their neighbors
-	auto mlocIter = m_Locations.begin();
-	++mlocIter; // Skip the first invalid location
-	for( auto loc = jsonLocations.begin(); loc != jsonLocations.end() && mlocIter != m_Locations.end(); ++loc, ++mlocIter )
+	// Go through the list of locations and do some setup
+	for( auto& loc : m_Locations )
 	{
-		auto &responses = loc->at( "Responses" );
-		for( auto it = responses.begin(); it != responses.end(); ++it )
-		{
-			if( it->at( "Type" ) == "Movement" )
-			{
-				// Convert the direction strings to Map::MOVE_DIRECTION enum values
-				const std::string& direction = it->at( "Direction" );
-				MoveDirection directionId = GetDirectionEnum( direction );
-
-				// Convert the destination id to a global location ID
-				int32_t destinationId = it->at( "DestinationId" );
-				auto found = std::find_if( m_Locations.begin(), m_Locations.end(), [destinationId]( const std::shared_ptr<InGameObject> obj ) { return ( destinationId == obj->GetObjectClassId() );  } );
-				if( found != m_Locations.end() )
-				{
-					static_cast< Location * >( ( *mlocIter ).get() )->SetNeighbor( directionId, (*found)->GetObjectId() );
-				}
-			}
-		}
-	}
-	
-	// Go through the list of locations and do additional setup
-	for( auto& location : m_Locations )
-	{
-		// Add the map entry
-		m_LocationNameToIdMap.insert( std::make_pair( location->GetName(), location->GetObjectId() ) );
+		// Add the map entry - maps Id property to GlobalId value
+		m_LocationNameToIdMap.insert( std::make_pair( loc->GetObjectName(), loc->GetObjectId() ) );
+		loc->SetDefaultLocationId( loc->GetObjectId() );
+		loc->SetLocationId( loc->GetObjectId() );
 
 		// Set the starting location, if appropriate
-		if( static_cast<Location*>( location.get() )->IsStartPosition() )
+		if( static_cast<Location*>( loc.get() )->IsStartPosition() )
 		{
-			SetLocation( location->GetLocation() );
+			SetLocation( loc->GetObjectId() );
+		}
+	}
+
+	// Build the map by linking all of the locations to their neighbors.
+	// Must happen after m_LocationNameToIdMap is built.
+	for( auto& loc : m_Locations )
+	{
+		auto& responses = loc->GetResponses( ResponseType::RESPONSE_TYPE_MOVE );
+		for( auto it = responses.begin(); it != responses.end(); ++it )
+		{
+			// Convert the direction and destination strings to integer values
+			MoveDirection directionId = GetDirectionEnum( ( *it )->GetMoveDirection() );
+			int32_t destinationId = m_LocationNameToIdMap.at( ( *it )->GetMoveDestination() );
+
+			std::static_pointer_cast<Location>( loc )->SetNeighbor( directionId, destinationId );
 		}
 	}
 }
 
-bool Map::OnMove( const std::string &direction )
+void Map::OnMove( const std::string &destination )
 {
-	bool IsMoveValid = false;
-
-	MoveDirection dir = GetDirectionEnum( direction );
-	Location& loc = GetLocation();
-
-	int32_t newLoc = loc.OnMove( dir );
-	if( InGameObject::INVALID != newLoc )
-	{
-		// Valid move
-		IsMoveValid = true;
-		SetLocation( newLoc );
-	}
-
-	return IsMoveValid;
+	int32_t dest = m_LocationNameToIdMap.at( destination );
+	SetLocation( dest );
 }
 
 Location& Map::GetLocation( int32_t locationId )
@@ -79,6 +59,11 @@ Location& Map::GetLocation( int32_t locationId )
 	}
 
 	return *( static_cast<Location*>( m_Locations.at( locationId ).get() ) );
+}
+
+Location& Map::GetLocation( const std::string& name )
+{
+	return GetLocation( m_LocationNameToIdMap.at( name ) );
 }
 
 const std::string &Map::GetDirectionName( MoveDirection direction )
@@ -158,7 +143,7 @@ void Map::LoadLocationResources( json& locations )
 	ResourceLoader::LoadStringResource( locations, L"LOCATIONS", IDR_LOCATIONS1 );
 
 	// Build location objects
-	ResourceLoader::BuildObjects<Location>( locations, ObjectType::OBJECT_LOCATION, m_Locations );
+	ResourceLoader::BuildObjects<Location>( locations, m_Locations );
 }
 
 void Map::SetLocation( int32_t newLocation )

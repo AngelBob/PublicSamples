@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "Objects.h"
 
-Location::Location( const json &location, ObjectType type, const int32_t classId, const int32_t globalId )
-	: InGameObject( location, type, classId, globalId )
+Location::Location( const json &location, const int32_t globalId )
+	: InGameObject( location, globalId )
 	, m_ShownOnce( false )
 {
 	// Bail on invalid location creation
@@ -11,30 +11,12 @@ Location::Location( const json &location, ObjectType type, const int32_t classId
 		return;
 	}
 
-	// Locations don't have a specific "Location" entry, just default it to the class ID value
-	m_Location = classId;
-
 	// The as seen description is required
 	m_AsSeenDesc = location.at( "AsSeenDesc" );
 
 	// Start position will only be set for one location
 	m_IsStartPosition = location.value( "IsStartPosition", false );
 }
-
-#pragma region Event handlers
-int32_t Location::OnMove( MoveDirection direction )
-{
-	int32_t nextLocation = INVALID;
-
-	std::map<MoveDirection, int32_t>::const_iterator found = m_Neighbors.find( direction );
-	if( found != m_Neighbors.end() )
-	{
-		nextLocation = found->second;
-	}
-
-	return nextLocation;
-}
-#pragma endregion Event handlers
 
 #pragma region Accessors
 bool Location::IsStartPosition( void )

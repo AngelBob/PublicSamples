@@ -1,0 +1,41 @@
+[
+  {
+    "Id": "OnBlackSmithStartAttack"
+  },
+  {
+    "Id": "OnBlackSmithAttack",
+    "Repeats": 4,
+    "TriggersEvent": "OnGoToJail"
+  },
+  {
+    "Id": "OnGoToJail",
+    "Action": { "GoTo": "jailcell2" },
+    "Text": "The sherrif steps between you and the smity to break up the fight, and roughly escorts you to jail."
+  },
+  {
+    "Id": "OnAssayerOutOfOffice",
+    "Action": { "MakeVisible": "bag" }
+  },
+  {
+    "Id": "OnCabinetKeyVisible",
+    "Action": { "MakeVisible": "key" }
+  },
+  {
+    "Id": "OnCellUnlock"
+  },
+  {
+    "Id": "OnOutOfJail"
+  },
+  {
+    "Id": "OnHavePosseIncrement",
+    "Repeats": 3,
+    "TriggersEvent": "OnHavePosseComplete"
+  },
+  {
+    "Id": "OnHavePosseComplete"
+  },
+  {
+    "Id": "OnGameOver",
+    "Text": "You and the posse have extracted Old West justice on the corrupt sherrif.  The barkeep invites everyone back to the saloon for drinks.  Someone asks who will be the new sherrif?  Almost in unison, the crowd points and yells your name.  Congratulations, there's new sherrif in town, and it's you."
+  }
+]

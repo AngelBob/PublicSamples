@@ -1,15 +1,14 @@
 [
   {
-    "Id": 1,
-    "Name": "Rope",
-    "Location": 11,
+    "Id": "rope",
+    "DisplayName": "Rope",
+    "Location": "meadow",
     "Description": "a rope hanging from one of the branches of the tree",
     "Responses": [
       {
         "Type": "Discard",
         "SpecificVerb": "put",
-        "RequiresObject": 6,
-        "RequiresLocation": 11,
+        "RequiresObject": "sherrif",
         "TriggersEvent": "OnGameOver"
       },
       {
@@ -19,10 +18,10 @@
     ]
   },
   {
-    "Id": 2,
-    "Name": "Iron bar",
-    "Location": 12,
-    "Description": "an iron bar in a pile of dust on the floor",
+    "Id": "ironbar",
+    "DisplayName": "Iron bar",
+    "Location": "blacksmithshop",
+    "Description": "an iron bar in a pile of dust on the ground",
     "Responses": [
       {
         "Type": "Take",
@@ -40,10 +39,10 @@
       },
       {
         "Type": "Throw",
-        "RequiresLocation": 12,
+        "RequiresLocation": "blacksmithshop",
         "RequiresPossession": true,
-        "TriggersEvent": "OnBlacksmithAttack",
-        "Text": "The iron bar connects squarely with the blacksmith's head.  The blacksmith is none too pleased with you."
+        "TriggersEvent": "OnBlacksmithStartAttack",
+        "Text": "The iron bar connects squarely with the blacksmithshop's head.  The blacksmithshop is none too pleased with you.  He drops his tools, makes his way slowly over to you, and punches you, hard, in the stomach."
       },
       {
         "Type": "Throw",
@@ -53,9 +52,9 @@
     ]
   },
   {
-    "Id": 3,
-    "Name": "Hot, loud, dirty forge",
-    "Location": 12,
+    "Id": "forge",
+    "DisplayName": "Hot, loud, dirty forge",
+    "Location": "blacksmithshop",
     "Description": "a hot, loud, dirty forge",
     "Responses": [
       {
@@ -76,10 +75,11 @@
     ]
   },
   {
-    "Id": 4,
-    "Name": "Empty bag",
-    "Location": 14,
+    "Id": "bag",
+    "DisplayName": "Empty bag",
+    "Location": "assayoffice",
     "Description": "an empty bag lying on the floor",
+    "IsVisible": false,
     "Responses": [
       {
         "Type": "Take",
@@ -104,9 +104,9 @@
     ]
   },
   {
-    "Id": 5,
-    "Name": "Cabinet",
-    "Location": 22,
+    "Id": "cabinet",
+    "DisplayName": "Cabinet",
+    "Location": "hotelroom2",
     "Description": "a cabinet with a blue velvet runner with a vase of violets sitting on top",
     "Responses": [
       {
@@ -121,10 +121,11 @@
     ]
   },
   {
-    "Id": 6,
-    "Name": "Key",
-    "Location": 22,
+    "Id": "key",
+    "DisplayName": "Key",
+    "Location": "hotelroom2",
     "Description": "a key",
+    "IsVisible": false,
     "Responses": [
       {
         "Type": "Take",

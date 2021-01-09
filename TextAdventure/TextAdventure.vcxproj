@@ -148,6 +148,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="InGameEvents.cpp" />
     <ClCompile Include="InGameObject.cpp" />
     <ClCompile Include="Location.cpp" />
     <ClCompile Include="Map.cpp" />
@@ -156,6 +157,7 @@
     <ClCompile Include="TextAdventure.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="InGameEvents.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="InGameObject.h" />
     <ClInclude Include="json.hpp" />
@@ -171,6 +173,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Characters.json" />
+    <None Include="default1.bin" />
+    <None Include="Events.json" />
     <None Include="Items.json" />
     <None Include="Locations.json" />
   </ItemGroup>

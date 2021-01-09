@@ -4,6 +4,7 @@
 enum class ResponseType
 {
 	RESPONSE_TYPE_INVALID = -1,
+	RESPONSE_TYPE_MOVE,
 	RESPONSE_TYPE_TAKE,
 	RESPONSE_TYPE_EXAMINE,
 	RESPONSE_TYPE_DISCARD,
@@ -25,30 +26,34 @@ public:
 
 	bool ObjectPossessionIsRequired( void ) const;
 
-	int32_t GetRequiredLocation( void ) const;
-	const std::list<int32_t>& GetRequiredObjects( void ) const;
+	const std::string& GetRequiredLocation( void ) const;
+	const std::list<std::string>& GetRequiredObjects( void ) const;
 
 	const std::string& GetRequiredVerb( void ) const;
 	const std::string& GetRequiredEvent( void ) const;
 	const std::string& GetTriggeredEvent( void ) const;
-	std::string GetResponseText( void );
+	const std::string& GetResponseText( bool doAdvance = true );
+	const std::string& GetMoveDirection( void ) const;
+	const std::string& GetMoveDestination( void ) const;
 
 protected:
 	void SetRequiresPossession( bool required );
-	void PushRequiredObject( int32_t id );
-	void SetRequiredLocation( int32_t id );
-	void SetRequiredVerb( const std::string &verb );
-	void SetRequiredEvent( const std::string &event );
-	void SetTriggeredEvent( const std::string &event );
-	void PushResponseText( const std::string &text );
+	void PushRequiredObject( const std::string& obj );
+	void SetRequiredLocation( const std::string& loc );
+	void SetRequiredVerb( const std::string& verb );
+	void SetRequiredEvent( const std::string& event );
+	void SetTriggeredEvent( const std::string& event );
+	void PushResponseText( const std::string& text );
+	void SetMoveDirection( const std::string& dir );
+	void SetMoveDestination( const std::string& dest );
 
 private:
 	// Response requires the object to be in inventory
 	bool		m_RequiresPossession;
 
 	// Response requires character and/or item to be in inventory
-	int32_t		m_RequiresLocation;
-	std::list<int32_t> m_RequiresObjects;
+	std::string			   m_RequiresLocation;
+	std::list<std::string> m_RequiresObjects;
 
 	// Response requires the use of a specific verb
 	std::string m_RequiresVerb;
@@ -62,6 +67,10 @@ private:
 	// List of all possible textual outputs from this response
 	size_t					 m_CurrentResponse;
 	std::vector<std::string> m_Text;
+
+	// Movement responses also have a direction and destination
+	std::string				 m_Direction;
+	std::string              m_DestinationId;
 };
 
 enum class ObjectType
@@ -75,33 +84,74 @@ enum class ObjectType
 class InGameObject
 {
 public:
-	static const int32_t INVALID = 0;
+	static const int32_t INVALID = -1;
 
-	InGameObject( const json &objectJson, ObjectType objectType, const int32_t classId, const int32_t globalId );
+	InGameObject( const json &objectJson, const int32_t globalId );
+	virtual ~InGameObject();
 
 	bool IsInvalid( const json &objectJson ) const;
 
-	ObjectType GetType( void ) const;
-	int32_t GetObjectClassId( void ) const;
+	virtual ObjectType GetType( void ) const = 0;
 	int32_t GetObjectId( void ) const;
+	const std::string& GetObjectName( void ) const;
 
-	int32_t GetLocation( void ) const;
-	int32_t GetDefaultLocation( void ) const;
-	void SetLocation( int32_t location );
+	const std::string&GetDisplayName( void ) const;
+	const std::string&GetDescription( void ) const;
 
-	const std::string& GetName( void ) const;
-	const std::string& GetDescription( void ) const;
-	std::vector<std::shared_ptr<Response>>& GetResponses( ResponseType type );
+	const std::string& GetDefaultLocation( void ) const;
+	int32_t GetDefaultLocationId( void ) const;
+	int32_t GetLocationId( void ) const;
+
+	std::vector<std::shared_ptr<Response>> &GetResponses( ResponseType type );
+
+	bool GetVisibility( void ) const;
+
+	void SetLocationId( int32_t locationId );
+	void SetDefaultLocationId( int32_t locationId );
+
+	void SetVisibility( bool isVisible = true );
 
 protected:
 	int32_t		m_GlobalId;
-	int32_t		m_ClassId;
-	ObjectType  m_ObjectType;
-	int32_t		m_Location;
-	int32_t		m_DefaultLocation;
 	std::string m_Name;
+
+	std::string m_DefaultLocation;
+	int32_t		m_DefaultLocationId;
+	int32_t		m_LocationId;
+
+	std::string m_DisplayName;
 	std::string m_Description;
+
+	bool m_IsVisible;
 
 	// Responses
 	std::array<std::vector<std::shared_ptr<Response>>, static_cast<size_t>( ResponseType::RESPONSE_TYPE_MAX )> m_Responses;
+};
+
+class Character : public InGameObject
+{
+public:
+	inline Character( const json& objectJson, const int32_t globalId )
+		: InGameObject( objectJson, globalId )
+	{
+	}
+
+	inline ObjectType GetType( void ) const
+	{
+		return ObjectType::OBJECT_CHARACTER;
+	}
+};
+
+class Item : public InGameObject
+{
+public:
+	inline Item( const json& objectJson, const int32_t globalId )
+		: InGameObject( objectJson, globalId )
+	{
+	}
+
+	inline ObjectType GetType( void ) const
+	{
+		return ObjectType::OBJECT_ITEM;
+	}
 };

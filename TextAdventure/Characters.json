@@ -1,8 +1,8 @@
 ﻿[
   {
-    "Id": 1,
-    "Name": "49er",
-    "Location": 1,
+    "Id": "49er",
+    "DisplayName": "49er",
+    "Location": "camp",
     "Responses": [
       {
         "Type": "Examine",
@@ -21,9 +21,9 @@
     ]
   },
   {
-    "Id": 2,
-    "Name": "Blacksmith",
-    "Location": 12,
+    "Id": "blacksmith",
+    "DisplayName": "Blacksmith",
+    "Location": "blacksmithshop",
     "Responses": [
       {
         "Type": "Examine",
@@ -57,7 +57,12 @@
           "Ouch.  An uppercut comes out of nowhere, and you feel your legs start to buckle.",
           "You manage to recover, and land the final blow.  The blacksmith slumps, unconscience, to the floor."
         ],
-        "TriggersEvent": "OnGoToJail"
+        "RequiresEvent": "OnBlacksmithStartAttack",
+        "TriggersEvent": "OnBlacksmithAttack"
+      },
+      {
+        "Type": "Attack",
+        "Text": "You can't reach the blacksmith from here, and he doesn't seem interested in a melee"
       },
       {
         "Type": "Take",
@@ -68,9 +73,9 @@
     ]
   },
   {
-    "Id": 3,
-    "Name": "Shop keeper",
-    "Location": 13,
+    "Id": "shopkeeper",
+    "DisplayName": "Shop keeper",
+    "Location": "store",
     "Responses": [
       {
         "Type": "Examine",
@@ -98,9 +103,9 @@
     ]
   },
   {
-    "Id": 4,
-    "Name": "Assayer",
-    "Location": 14,
+    "Id": "assayer",
+    "DisplayName": "Assayer",
+    "Location": "assayoffice",
     "Responses": [
       {
         "Type": "Examine",
@@ -111,17 +116,16 @@
         "Text": [
           "Back to trade out the rest of your gold?",
           "You didn't trade it all yesterday, the bag was still half full.",
-          "I see.  Sorry, I can't help with that.",
-          "I see.  Sorry, I can't help with that."
+          "Ummm.  The sherrif might know something about that."
         ],
         "TriggersEvent": "OnAssayerOutOfOffice"
       }
     ]
   },
   {
-    "Id": 5,
-    "Name": "Barkeep",
-    "Location": 15,
+    "Id": "barkeep",
+    "DisplayName": "Barkeep",
+    "Location": "saloon",
     "Responses": [
       {
         "Type": "Examine",
@@ -148,9 +152,9 @@
     ]
   },
   {
-    "Id": 6,
-    "Name": "Sheriff",
-    "Location": 16,
+    "Id": "sherrif",
+    "DisplayName": "Sheriff",
+    "Location": "sherrifsoffice",
     "Responses": [
       {
         "Type": "Examine",
@@ -171,9 +175,9 @@
     ]
   },
   {
-    "Id": 7,
-    "Name": "Teller",
-    "Location": 17,
+    "Id": "bankteller",
+    "DisplayName": "Teller",
+    "Location": "bank",
     "Responses": [
       {
         "Type": "Examine",
@@ -189,9 +193,9 @@
     ]
   },
   {
-    "Id": 8,
-    "Name": "Lady",
-    "Location": 15,
+    "Id": "lady",
+    "DisplayName": "Lady",
+    "Location": "saloon",
     "Responses": [
       {
         "Type": "Examine",

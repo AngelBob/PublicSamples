@@ -29,43 +29,57 @@ void GameLoop( Game& game )
         }
 
         // Figure out what the user wants to act on and what should happen.
+        Parser::ParsedType parseType = parser->GetLastVerbType();
+        ResponseType responseType = ResponseType::RESPONSE_TYPE_INVALID;
+
         Game::GameObjectData objectData;
         Response *response = nullptr;
-        game.GetObjectData( parser->GetLastObject(), objectData );
+
+        if( Parser::ParsedType::PARSED_TYPE_MOVE == parseType )
+        {
+            game.GetMoveData( parser->GetLastObject(), objectData );
+        }
+        else
+        {
+            game.GetObjectData( parser->GetLastObject(), objectData );
+        }
+
         if( InGameObject::INVALID != objectData.id )
         {
             // Map verb type to response type
-            ResponseType type = ResponseType::RESPONSE_TYPE_INVALID;
-            switch( parser->GetLastVerbType() )
+            switch( parseType )
             {
+            case Parser::ParsedType::PARSED_TYPE_MOVE:
+                responseType = ResponseType::RESPONSE_TYPE_MOVE;
+                break;
             case Parser::ParsedType::PARSED_TYPE_TAKE:
-                type = ResponseType::RESPONSE_TYPE_TAKE;
+                responseType = ResponseType::RESPONSE_TYPE_TAKE;
                 break;
             case Parser::ParsedType::PARSED_TYPE_EXAMINE:
-                type = ResponseType::RESPONSE_TYPE_EXAMINE;
+                responseType = ResponseType::RESPONSE_TYPE_EXAMINE;
                 break;
             case Parser::ParsedType::PARSED_TYPE_DISCARD:
-                type = ResponseType::RESPONSE_TYPE_DISCARD;
+                responseType = ResponseType::RESPONSE_TYPE_DISCARD;
                 break;
             case Parser::ParsedType::PARSED_TYPE_THROW:
-                type = ResponseType::RESPONSE_TYPE_THROW;
+                responseType = ResponseType::RESPONSE_TYPE_THROW;
                 break;
             case Parser::ParsedType::PARSED_TYPE_INTERACTION:
-                type = ResponseType::RESPONSE_TYPE_INTERACTION;
+                responseType = ResponseType::RESPONSE_TYPE_INTERACTION;
                 break;
             case Parser::ParsedType::PARSED_TYPE_ATTACK:
-                type = ResponseType::RESPONSE_TYPE_ATTACK;
+                responseType = ResponseType::RESPONSE_TYPE_ATTACK;
                 break;
             case Parser::ParsedType::PARSED_TYPE_TRANSACT:
-                type = ResponseType::RESPONSE_TYPE_TRANSACT;
+                responseType = ResponseType::RESPONSE_TYPE_TRANSACT;
                 break;
             default:
                 break;
             }
 
-            if( ResponseType::RESPONSE_TYPE_INVALID != type )
+            if( ResponseType::RESPONSE_TYPE_INVALID != responseType )
             {
-                response = game.GetBestResponse( objectData, parser->GetLastVerb(), type );
+                response = game.GetBestResponse( objectData, parser->GetLastVerb(), responseType );
             }
         }
 
@@ -73,7 +87,7 @@ void GameLoop( Game& game )
         switch( parser->GetLastVerbType() )
         {
         case Parser::ParsedType::PARSED_TYPE_MOVE:
-            game.OnMove( *parser );
+            game.OnMove( objectData, response );
             break;
         case Parser::ParsedType::PARSED_TYPE_TAKE:
             game.OnTake( objectData, response );

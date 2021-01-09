@@ -1,11 +1,9 @@
-#pragma once
 #include "stdafx.h"
 #include "Objects.h"
 
 #pragma region Response Object
 Response::Response( void )
 	: m_RequiresPossession( false )
-	, m_RequiresLocation( 0 )
 	, m_CurrentResponse( 0 )
 {
 }
@@ -15,12 +13,12 @@ bool Response::ObjectPossessionIsRequired( void ) const
 	return m_RequiresPossession;
 }
 
-const std::list<int32_t>& Response::GetRequiredObjects( void ) const
+const std::list<std::string>& Response::GetRequiredObjects( void ) const
 {
 	return m_RequiresObjects;
 }
 
-int32_t Response::GetRequiredLocation( void ) const
+const std::string& Response::GetRequiredLocation( void ) const
 {
 	return m_RequiresLocation;
 }
@@ -40,23 +38,38 @@ const std::string& Response::GetTriggeredEvent( void ) const
 	return m_TriggersEvent;
 }
 
-std::string Response::GetResponseText( void )
+const std::string& Response::GetResponseText( bool doAdvance )
 {
 	if( 0 < m_Text.size() )
 	{
-		const std::string &text = m_Text.at( m_CurrentResponse++ );
+		const std::string &text = m_Text.at( m_CurrentResponse );
 
-		if( m_CurrentResponse >= m_Text.size() )
+		if( doAdvance )
 		{
-			m_CurrentResponse = m_Text.size() - 1;
+			++m_CurrentResponse;
+			if( m_CurrentResponse >= m_Text.size() )
+			{
+				m_CurrentResponse = m_Text.size() - 1;
+			}
 		}
 
 		return text;
 	}
 	else
 	{
-		return "";
+		static const std::string blank;
+		return blank;
 	}
+}
+
+const std::string &Response::GetMoveDirection( void ) const
+{
+	return m_Direction;
+}
+
+const std::string& Response::GetMoveDestination( void ) const
+{
+	return m_DestinationId;
 }
 
 void Response::SetRequiresPossession( bool required )
@@ -64,14 +77,14 @@ void Response::SetRequiresPossession( bool required )
 	m_RequiresPossession = required;
 }
 
-void Response::PushRequiredObject( int32_t id )
+void Response::PushRequiredObject( const std::string& obj )
 {
-	m_RequiresObjects.emplace_back( id );
+	m_RequiresObjects.emplace_back( obj );
 }
 
-void Response::SetRequiredLocation( int32_t id )
+void Response::SetRequiredLocation( const std::string& loc )
 {
-	m_RequiresLocation = id;
+	m_RequiresLocation = loc;
 }
 
 void Response::SetRequiredVerb( const std::string &verb )
@@ -93,39 +106,43 @@ void Response::PushResponseText( const std::string &text )
 {
 	m_Text.emplace_back( text );
 }
+
+void Response::SetMoveDirection( const std::string &dir )
+{
+	m_Direction = dir;
+}
+
+void Response::SetMoveDestination( const std::string& dest )
+{
+	m_DestinationId = dest;
+}
 #pragma endregion Response Object
 
 #pragma region InGameObject
 
 InGameObject::InGameObject(
 	const json& objectJson,
-	ObjectType objectType,
-	const int32_t classId,
 	const int32_t globalId )
-		: m_ObjectType( objectType )
+	: m_GlobalId( globalId )
 {
-	m_GlobalId = globalId;
-
 	// validate the objectID == array index strategy
-	m_ClassId = objectJson.at( "Id" );
-	assert( m_ClassId == classId );
-
-	m_Name = objectJson.at( "Name" );
+	m_Name = objectJson.at( "Id" );
+	m_DisplayName = objectJson.at( "DisplayName" );
 
 	// Locations and items have descriptions
 	m_Description = objectJson.value( "Description", "" );
 
 	if( objectJson.contains( "Location" ) )
 	{
-		m_Location = objectJson.at( "Location" );
-		m_DefaultLocation = m_Location;
+		m_DefaultLocation = objectJson.at( "Location" );
 	}
 	else
 	{
 		// Set to INVALID
-		m_Location = INVALID;
-		m_DefaultLocation = INVALID;
+		m_DefaultLocation = "invalid";
 	}
+
+	m_IsVisible = objectJson.value( "IsVisible", true );
 
 	assert( objectJson.at( "Responses" ).is_array() );
 	for( auto& it : objectJson.at( "Responses" ) )
@@ -133,7 +150,11 @@ InGameObject::InGameObject(
 		ResponseType type = ResponseType::RESPONSE_TYPE_INVALID;
 		std::string jsonType = it.at( "Type" );
 
-		if( "Take" == jsonType )
+		if( "Movement" == jsonType )
+		{
+			type = ResponseType::RESPONSE_TYPE_MOVE;
+		}
+		else if( "Take" == jsonType )
 		{
 			type = ResponseType::RESPONSE_TYPE_TAKE;
 		}
@@ -170,7 +191,11 @@ InGameObject::InGameObject(
 		Response* response = responsePtr.get();
 
 		response->SetRequiresPossession( it.value( "RequiresPossession", false ) );
-		response->SetRequiredLocation( it.value( "RequiresLocation", INVALID ) );
+
+		if( it.contains( "RequiresLocation" ) )
+		{
+			response->SetRequiredLocation( it.at( "RequiresLocation" ) );
+		}
 
 		if( it.contains( "RequiresVerb" ) )
 		{
@@ -185,6 +210,16 @@ InGameObject::InGameObject(
 		if( it.contains( "TriggersEvent" ) )
 		{
 			response->SetTriggeredEvent( it.at( "TriggersEvent" ) );
+		}
+
+		if( it.contains( "Direction" ) )
+		{
+			response->SetMoveDirection( it.at( "Direction" ) );
+		}
+
+		if( it.contains( "Destination" ) )
+		{
+			response->SetMoveDestination( it.at( "Destination" ) );
 		}
 
 		// Not all responses have text, but if it's present it might be an array
@@ -221,19 +256,13 @@ InGameObject::InGameObject(
 	}
 }
 
+InGameObject::~InGameObject( void )
+{
+}
+
 bool InGameObject::IsInvalid( const json& objectJson ) const
 {
-	return( objectJson.at( "Id" ) == 0 && objectJson.at( "Name" ) == "invalid" );
-}
-
-ObjectType InGameObject::GetType( void ) const
-{
-	return m_ObjectType;
-}
-
-int32_t InGameObject::GetObjectClassId( void ) const
-{
-	return m_ClassId;
+	return( objectJson.at( "Id" ) == "invalid" );
 }
 
 int32_t InGameObject::GetObjectId( void ) const
@@ -241,33 +270,58 @@ int32_t InGameObject::GetObjectId( void ) const
 	return m_GlobalId;
 }
 
-int32_t InGameObject::GetLocation( void ) const
-{
-	return m_Location;
-}
-
-int32_t InGameObject::GetDefaultLocation( void ) const
-{
-	return m_DefaultLocation;
-}
-
-void InGameObject::SetLocation( int32_t location )
-{
-	m_Location = location;
-}
-
-const std::string& InGameObject::GetName( void ) const
+const std::string& InGameObject::GetObjectName( void ) const
 {
 	return m_Name;
 }
 
-const std::string& InGameObject::GetDescription( void ) const
+const std::string &InGameObject::GetDisplayName( void ) const
+{
+	return m_DisplayName;
+}
+
+const std::string &InGameObject::GetDescription( void ) const
 {
 	return m_Description;
+}
+
+const std::string& InGameObject::GetDefaultLocation( void ) const
+{
+	return m_DefaultLocation;
+}
+
+int32_t InGameObject::GetDefaultLocationId( void ) const
+{
+	return m_DefaultLocationId;
+}
+
+int32_t InGameObject::GetLocationId( void ) const
+{
+	return m_LocationId;
 }
 
 std::vector<std::shared_ptr<Response>>& InGameObject::GetResponses( ResponseType type )
 {
 	assert( ResponseType::RESPONSE_TYPE_INVALID < type && type < ResponseType::RESPONSE_TYPE_MAX );
 	return m_Responses[ static_cast<size_t>( type ) ];
+}
+
+bool InGameObject::GetVisibility( void ) const
+{
+	return m_IsVisible;
+}
+
+void InGameObject::SetDefaultLocationId( int32_t locId )
+{
+	m_DefaultLocation = locId;
+}
+
+void InGameObject::SetLocationId( int32_t locId )
+{
+	m_LocationId = locId;
+}
+
+void InGameObject::SetVisibility( bool isVisible )
+{
+	m_IsVisible = isVisible;
 }

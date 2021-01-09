@@ -36,6 +36,9 @@
     <ClCompile Include="InGameObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="InGameEvents.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Location.h">
@@ -74,6 +77,9 @@
     <ClInclude Include="SimpleParser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="InGameEvents.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Characters.json">
@@ -83,6 +89,12 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="Items.json">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="default1.bin">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Events.json">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

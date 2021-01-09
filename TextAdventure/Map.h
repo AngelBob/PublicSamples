@@ -32,10 +32,11 @@ class Map : public std::enable_shared_from_this<Map>
 public:
     // Event handlers
     void OnLoad( void );
-    bool OnMove( const std::string &direction );
+    void OnMove( const std::string &destination );
 
     // Accessors
     Location& GetLocation( int32_t locationId = -1 );
+    Location& GetLocation( const std::string& name );
 
     const std::string& GetDirectionName( MoveDirection direction );
     MoveDirection GetDirectionEnum( const std::string& direction );

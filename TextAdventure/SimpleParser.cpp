@@ -1,5 +1,6 @@
 #include "stdafx.h"
 
+#include "Objects.h"
 #include "ResourceLoader.hpp"
 #include "SimpleParser.h"
 
