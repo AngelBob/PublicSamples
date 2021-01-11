@@ -144,6 +144,11 @@
         "Type": "Movement",
         "Direction": "west",
         "Destination": "townmiddle"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "north west",
+        "Destination": "alleyway1"
       }
     ]
   },
@@ -160,7 +165,25 @@
       {
         "Type": "Movement",
         "Direction": "north",
-        "Destination": "sherrifsoffice"
+        "Destination": "sheriffsoffice",
+        "RequiresEvent": "OnOutOfJail",
+        "TriggersEvent": "OnGoToJail2"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "north",
+        "Destination": "sheriffsoffice",
+        "RequiresEvent": "OnHavePosseComplete"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "north",
+        "Destination": "sheriffsoffice"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "north east",
+        "Destination": "alleyway1"
       },
       {
         "Type": "Movement",
@@ -176,6 +199,11 @@
         "Type": "Movement",
         "Direction": "west",
         "Destination": "townwest"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "north west",
+        "Destination": "alleyway2"
       }
     ]
   },
@@ -193,6 +221,11 @@
         "Type": "Movement",
         "Direction": "north",
         "Destination": "bank"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "north east",
+        "Destination": "alleyway2"
       },
       {
         "Type": "Movement",
@@ -277,11 +310,23 @@
     "DisplayName": "The Blacksmith",
     "Description": "A blacksmith shop, with all the required tools and materials.",
     "AsSeenDesc": "the blacksmith shop.",
-    "IsStartPosition": true,
     "Responses": [
       {
         "Type": "Examine",
         "Text": "The blacksmith shop is hot and loud.  The tools and materials are all arranged, the sign of a quality craftsman.  A posting says the smithy has been keeping the local horses in shoes for 20 years."
+      },
+      {
+        "Destination": "towneast",
+        "Direction": "north",
+        "RequiresEvent": "OnGoToJail",
+        "Type": "Movement"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "north",
+        "Destination": "blacksmithshop",
+        "Text": "The blacksmith grabs you and punches you again.  You're not going anywhere until this is finished.",
+        "RequiresEvent": "OnBlackSmithStartAttack"
       },
       {
         "Type": "Movement",
@@ -312,6 +357,7 @@
     "DisplayName": "The Assay Office",
     "Description": "A small, stuffy office with a single desk and large safe.",
     "AsSeenDesc": "the assay office.",
+    "IsStartPosition": true,
     "Responses": [
       {
         "Type": "Examine",
@@ -347,31 +393,75 @@
     ]
   },
   {
-    "Id": "sherrifsoffice",
-    "DisplayName": "Sheriff's Office",
-    "Description": "The local sherrif's office, with a single desk.",
-    "AsSeenDesc": "the sherrif's office.",
+    "Id": "alleyway1",
+    "DisplayName": "Alley Between the Saloon and the Sheriff's Office",
+    "Description": "A dusty alley between two large brick buildings.",
+    "AsSeenDesc": "an alleyway.",
     "Responses": [
       {
         "Type": "Examine",
-        "Text": "The sherrif's office is well kept and nicely furnished.  The single desk is made of expensive imported wood and looks almost new."
+        "Text": "The alley looks like most alleys.  There are empty crates and barrels, and other bits of rubbish blowing in the wind."
+      },
+      {
+        "Type": "Movement",
+        "Direction": "south east",
+        "Destination": "towneast"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "south west",
+        "Destination": "townmiddle"
+      }
+    ]
+  },
+  {
+    "Id": "sheriffsoffice",
+    "DisplayName": "Sheriff's Office",
+    "Description": "The local sheriff's office, with a single desk.",
+    "AsSeenDesc": "the sheriff's office.",
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The sheriff's office is well kept and nicely furnished.  The single desk is made of expensive imported wood and looks almost new."
       },
       {
         "Type": "Movement",
         "Direction": "north",
-        "RequiresEvent": "OnCellUnlock",
+        "RequiresEvent": "OnOutOfJail",
         "Destination": "cellblockhallway_east"
       },
       {
         "Type": "Movement",
         "Direction": "north",
-        "Destination": "sherrifsoffice",
-        "Text": "The sherrif makes a noise in the back of his throat.  You take it to mean you won't be going that way"
+        "Destination": "sheriffsoffice",
+        "Text": "The sheriff makes a noise in the back of his throat.  You take it to mean you won't be going that way"
       },
       {
         "Type": "Movement",
         "Direction": "south",
         "Destination": "townmiddle"
+      }
+    ]
+  },
+  {
+    "Id": "alleyway2",
+    "DisplayName": "Alley Between the Sheriff's Office and the Bank",
+    "Description": "A dusty alley between two large brick buildings.",
+    "AsSeenDesc": "an alleyway.",
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The alley looks like most alleys.  There are empty crates and barrels, and other bits of rubbish blowing in the wind."
+      },
+      {
+        "Type": "Movement",
+        "Direction": "south east",
+        "Destination": "townmiddle"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "south west",
+        "Destination": "townwest"
       }
     ]
   },
@@ -500,12 +590,12 @@
   {
     "Id": "cellblockhallway_east",
     "DisplayName": "Cellblock Hallway",
-    "Description": "The cellblock hallway allows access to both cells.",
+    "Description": "The cellblock hallway allows access to both cells.  There is a window that allows some natural light into the dingy hallway.",
     "AsSeenDesc": "the hallway.",
     "Responses": [
       {
         "Type": "Examine",
-        "Text": "The cellblock hallway is the main passageway between the two cells in the sheriff's office."
+        "Text": "The cellblock hallway is the main passageway between the two cells in the sheriff's office.  There is a window in the wall that overlooks an alley between the sheriff's office and the saloon."
       },
       {
         "Type": "Movement",
@@ -515,7 +605,22 @@
       {
         "Type": "Movement",
         "Direction": "south",
-        "Destination": "sherrifsoffice"
+        "Destination": "sheriffsoffice",
+        "RequiresEvent": "OnOutOfJail",
+        "TriggersEvent": "OnGoToJail2"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "south",
+        "RequiresEvent": "OnHavePosseComplete",
+        "Destination": "sheriffsoffice"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "east",
+        "Destination": "alleyway1",
+        "RequiresEvent": "OnOutOfJail",
+        "Text": "You quietly open the window and slip into the alley.  The window slams closed as you drop to the ground outside."
       },
       {
         "Type": "Movement",
@@ -543,6 +648,13 @@
         "Type": "Movement",
         "Direction": "east",
         "Destination": "cellblockhallway_east"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "west",
+        "Destination": "alleyway2",
+        "RequiresEvent": "OnOutOfJail",
+        "Text": "You quietly open the window and slip into the alley.  The window slams closed as you drop to the ground outside."
       }
     ]
   },
@@ -579,7 +691,7 @@
         "Destination": "cellblockhallway_west",
         "RequiresObject": "key",
         "Text": "You remember the key you found in the hotel room and wonder... It slides roughly into the lock on the cell door, and with just a little effort the key turns, the door unlocks, and slides open.",
-        "TriggersEvent": "OnCellUnlock"
+        "TriggersEvent": "OnOutOfJail"
       }
     ]
   }

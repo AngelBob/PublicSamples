@@ -18,6 +18,11 @@ const std::list<std::string>& Response::GetRequiredObjects( void ) const
 	return m_RequiresObjects;
 }
 
+const std::string& Response::GetRequiredIndirectObject( void ) const
+{
+	return m_RequiresIndirectObject;
+}
+
 const std::string& Response::GetRequiredLocation( void ) const
 {
 	return m_RequiresLocation;
@@ -82,6 +87,11 @@ void Response::PushRequiredObject( const std::string& obj )
 	m_RequiresObjects.emplace_back( obj );
 }
 
+void Response::SetRequiredIndirectObject( const std::string& obj )
+{
+	m_RequiresIndirectObject = obj;
+}
+
 void Response::SetRequiredLocation( const std::string& loc )
 {
 	m_RequiresLocation = loc;
@@ -125,24 +135,26 @@ InGameObject::InGameObject(
 	const int32_t globalId )
 	: m_GlobalId( globalId )
 {
-	// validate the objectID == array index strategy
+	// Textual identifications and description for this game object
 	m_Name = objectJson.at( "Id" );
 	m_DisplayName = objectJson.at( "DisplayName" );
-
-	// Locations and items have descriptions
+	if( objectJson.contains( "AltNames" ) )
+	{
+		// Load up the array of alternate names for this object
+		for( auto &it : objectJson.at( "AltNames" ) )
+		{
+			m_AltNames.push_back( it );
+		}
+	}
 	m_Description = objectJson.value( "Description", "" );
 
+	// The default location for this object.
 	if( objectJson.contains( "Location" ) )
 	{
 		m_DefaultLocation = objectJson.at( "Location" );
 	}
-	else
-	{
-		// Set to INVALID
-		m_DefaultLocation = "invalid";
-	}
-
 	m_IsVisible = objectJson.value( "IsVisible", true );
+
 
 	assert( objectJson.at( "Responses" ).is_array() );
 	for( auto& it : objectJson.at( "Responses" ) )
@@ -253,6 +265,11 @@ InGameObject::InGameObject(
 				response->PushRequiredObject( it.at( "RequiresObject" ) );
 			}
 		}
+
+		if( it.contains( "RequiresIndirectObject" ) )
+		{
+			response->SetRequiredIndirectObject( it.at( "RequiresIndirectObject" ) );
+		}
 	}
 }
 
@@ -275,29 +292,24 @@ const std::string& InGameObject::GetObjectName( void ) const
 	return m_Name;
 }
 
-const std::string &InGameObject::GetDisplayName( void ) const
+const std::string& InGameObject::GetDisplayName( void ) const
 {
 	return m_DisplayName;
 }
 
-const std::string &InGameObject::GetDescription( void ) const
+const std::string& InGameObject::GetDescription( void ) const
 {
 	return m_Description;
+}
+
+const std::vector<std::string>& InGameObject::GetAltNames( void ) const
+{
+	return m_AltNames;
 }
 
 const std::string& InGameObject::GetDefaultLocation( void ) const
 {
 	return m_DefaultLocation;
-}
-
-int32_t InGameObject::GetDefaultLocationId( void ) const
-{
-	return m_DefaultLocationId;
-}
-
-int32_t InGameObject::GetLocationId( void ) const
-{
-	return m_LocationId;
 }
 
 std::vector<std::shared_ptr<Response>>& InGameObject::GetResponses( ResponseType type )
@@ -309,19 +321,4 @@ std::vector<std::shared_ptr<Response>>& InGameObject::GetResponses( ResponseType
 bool InGameObject::GetVisibility( void ) const
 {
 	return m_IsVisible;
-}
-
-void InGameObject::SetDefaultLocationId( int32_t locId )
-{
-	m_DefaultLocation = locId;
-}
-
-void InGameObject::SetLocationId( int32_t locId )
-{
-	m_LocationId = locId;
-}
-
-void InGameObject::SetVisibility( bool isVisible )
-{
-	m_IsVisible = isVisible;
 }

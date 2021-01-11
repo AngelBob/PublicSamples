@@ -2,13 +2,15 @@
   {
     "Id": "rope",
     "DisplayName": "Rope",
+    "AltNames": [ "noose" ],
     "Location": "meadow",
     "Description": "a rope hanging from one of the branches of the tree",
     "Responses": [
       {
         "Type": "Discard",
         "SpecificVerb": "put",
-        "RequiresObject": "sherrif",
+        "RequiresObject": "sheriff",
+        "RequiresIndirectObject": "sheriff",
         "TriggersEvent": "OnGameOver"
       },
       {
@@ -20,6 +22,7 @@
   {
     "Id": "ironbar",
     "DisplayName": "Iron bar",
+    "AltNames": [ "iron", "bar" ],
     "Location": "blacksmithshop",
     "Description": "an iron bar in a pile of dust on the ground",
     "Responses": [
@@ -29,31 +32,32 @@
       },
       {
         "Type": "Examine",
-        "RequiresPossession": true,
-        "Text": "It looks to be a good, solid piece of iron."
+        "Text": "It looks to be a good, solid piece of iron.",
+        "RequiresPossession": true
       },
       {
         "Type": "Discard",
-        "RequiresPossession": true,
-        "Text": "The iron bar lands with a thud at your feet."
+        "Text": "The iron bar lands with a thud at your feet.",
+        "RequiresPossession": true
       },
       {
         "Type": "Throw",
+        "Text": "The iron bar connects squarely with the blacksmith's head.  The blacksmith is none too pleased with you.  He drops his tools, makes his way slowly over to you, and punches you, hard, in the stomach.",
         "RequiresLocation": "blacksmithshop",
         "RequiresPossession": true,
-        "TriggersEvent": "OnBlacksmithStartAttack",
-        "Text": "The iron bar connects squarely with the blacksmithshop's head.  The blacksmithshop is none too pleased with you.  He drops his tools, makes his way slowly over to you, and punches you, hard, in the stomach."
+        "TriggersEvent": "OnBlacksmithStartAttack"
       },
       {
         "Type": "Throw",
-        "RequiresPossession": true,
-        "Text": "The iron bar lands in a cloud of dust several yards away."
+        "Text": "The iron bar lands in a cloud of dust several yards away.",
+        "RequiresPossession": true
       }
     ]
   },
   {
     "Id": "forge",
     "DisplayName": "Hot, loud, dirty forge",
+    "AltNames": [ "forge" ],
     "Location": "blacksmithshop",
     "Description": "a hot, loud, dirty forge",
     "Responses": [
@@ -77,29 +81,31 @@
   {
     "Id": "bag",
     "DisplayName": "Empty bag",
+    "AltNames": [ "bag" ],
     "Location": "assayoffice",
-    "Description": "an empty bag lying on the floor",
     "IsVisible": false,
+    "Description": "an empty bag lying on the floor",
     "Responses": [
       {
         "Type": "Take",
-        "RequiresEvent": "OnAssayerOutOfOffice",
-        "Text": "The familiar looking bag has been added to your inventory."
+        "Text": "The familiar looking bag has been added to your inventory.",
+        "RequiresEvent": "OnAssayerOutOfOffice"
       },
       {
         "Type": "Examine",
+        "Text": "Looking more closely, you recognize the bag as the one that previously contained your gold.  The bag is empty.",
         "RequiresPossession": true,
-        "Text": "Looking more closely, you recognize the bag as the one that previously contained your gold.  The bag is empty."
+        "TriggersEvent": "OnExamineBag"
       },
       {
         "Type": "Discard",
-        "RequiresPossession": true,
-        "Text": "The empty bag floats lightly to the floor."
+        "Text": "The empty bag floats lightly to the floor.",
+        "RequiresPossession": true
       },
       {
         "Type": "Throw",
-        "RequiresPossession": true,
-        "Text": "The empty bag lands gently at your feet."
+        "Text": "The empty bag lands gently at your feet.",
+        "RequiresPossession": true
       }
     ]
   },
@@ -124,12 +130,11 @@
     "Id": "key",
     "DisplayName": "Key",
     "Location": "hotelroom2",
-    "Description": "a key",
     "IsVisible": false,
+    "Description": "a key",
     "Responses": [
       {
         "Type": "Take",
-        "RequiresEvent": "OnCabinetKeyVisible",
         "Text": "The key has been added to your inventory."
       },
       {

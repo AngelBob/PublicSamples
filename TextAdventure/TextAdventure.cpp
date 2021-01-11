@@ -24,9 +24,11 @@ void GameLoop( Game& game )
         if( ParserStatusT::STATUS_PARSE_OK != parser->ParsePhrase( ui ) )
         {
             // TODO: insert smart mouthed responses here...
-            std::cout << "I didn't understand that, please try again." << std::endl;
+            std::cout << "I didn't understand that, please try again.\n" << std::endl;
             continue;
         }
+
+        std::cout << "\n";
 
         // Figure out what the user wants to act on and what should happen.
         Parser::ParsedType parseType = parser->GetLastVerbType();
@@ -41,7 +43,7 @@ void GameLoop( Game& game )
         }
         else
         {
-            game.GetObjectData( parser->GetLastObject(), objectData );
+            game.GetObjectData( parser->GetLastObject(), objectData, parseType );
         }
 
         if( InGameObject::INVALID != objectData.id )
@@ -79,7 +81,7 @@ void GameLoop( Game& game )
 
             if( ResponseType::RESPONSE_TYPE_INVALID != responseType )
             {
-                response = game.GetBestResponse( objectData, parser->GetLastVerb(), responseType );
+                response = game.GetBestResponse( objectData, parser->GetLastVerb(), parser->GetLastIndirectObject(), responseType );
             }
         }
 
@@ -126,6 +128,9 @@ void GameLoop( Game& game )
 
         // Handle any triggers set by the response
         game.OnTrigger( response );
+
+        // Is the game over?
+        quit = game.IsGameOver();
     };
 }
 

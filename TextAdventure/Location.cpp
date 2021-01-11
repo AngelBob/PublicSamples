@@ -39,6 +39,13 @@ const std::list<int32_t>& Location::GetObjects( void ) const
 	return m_Objects;
 }
 
+bool Location::HasObject( const int32_t id ) const
+{
+	std::list<int32_t>::const_iterator it = std::find( m_Objects.begin(), m_Objects.end(), id );
+
+	return ( it != m_Objects.end() );
+}
+
 void Location::SetNeighbor( MoveDirection dir, int32_t neighborId )
 {
 	m_Neighbors.insert( std::make_pair( dir, neighborId ) );

@@ -17,6 +17,7 @@ public:
 	void AddObject( int32_t itemId );
 	void RemoveObject( int32_t itemId );
 	const std::list<int32_t>& GetObjects( void ) const;
+	bool HasObject( const int32_t id ) const;
 
 	void SetNeighbor( MoveDirection dir, int32_t nieghborId );
 	const std::map<MoveDirection, int32_t>& GetNeighbors( void ) const;

@@ -27,13 +27,15 @@ public:
 		bool		isHere;
 	};
 
-	// Let the compiler generate the default ctor and dtor
-	// until there is a compelling reason not to.
+	inline Game()
+		: m_GameOver( false )
+	{
+	}
 
 	// Get interesting information prior to calling the event handlers.
-	void GetObjectData( const std::string &objectName, GameObjectData& objectData ) const;
-	void GetMoveData( const std::string &objectName, GameObjectData& objectData ) const;
-	Response*GetBestResponse( const GameObjectData& objectData, const std::string &verb, const ResponseType &type ) const;
+	void GetObjectData( const std::string& objectName, GameObjectData& objectData, Parser::ParsedType parsedType ) const;
+	void GetMoveData( const std::string& objectName, GameObjectData& objectData ) const;
+	Response* GetBestResponse( const GameObjectData& objectData, const std::string& verb, const std::string& indirect, const ResponseType& type ) const;
 
 	// Event handlers
 	void OnLoad( void );
@@ -55,6 +57,10 @@ public:
 
 	// Accessors
 	const Map& GetMap( void );
+	inline bool IsGameOver( void ) const
+	{
+		return m_GameOver;
+	}
 
 private:
 	void LoadGameResources( void );
@@ -62,11 +68,11 @@ private:
 
 	// Utility
 	void DescribeScene( bool doFullDescription = false );
-	std::ostream &PrintDirectionsAsSeen( std::ostream &os, size_t &numNeighbors ) const;
-	std::ostream &PrintCharacters( std::ostream &os, size_t &numCharacters ) const;
-	std::ostream &PrintItems( std::ostream &os, size_t &numItems ) const;
+	std::ostream& PrintDirectionsAsSeen( std::ostream& os, size_t &numNeighbors ) const;
+	std::ostream& PrintCharacters( std::ostream& os, size_t &numCharacters ) const;
+	std::ostream& PrintItems( std::ostream& os, size_t &numItems ) const;
 
-	int32_t DoDrop( const GameObjectData& objectData );
+	void DoDrop( const GameObjectData& objectData );
 
 	// Map contains a list of locations
 	std::unique_ptr<Map>	m_Map;
@@ -82,4 +88,7 @@ private:
 	// Game events
 	std::vector<std::shared_ptr<InGameEvent>> m_Events;
 	std::map<std::string, int32_t, typename StringCompareT> m_EventNameToIdMap;
+
+	// End trigger
+	bool m_GameOver;
 };

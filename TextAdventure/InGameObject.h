@@ -28,6 +28,7 @@ public:
 
 	const std::string& GetRequiredLocation( void ) const;
 	const std::list<std::string>& GetRequiredObjects( void ) const;
+	const std::string& GetRequiredIndirectObject( void ) const;
 
 	const std::string& GetRequiredVerb( void ) const;
 	const std::string& GetRequiredEvent( void ) const;
@@ -39,6 +40,7 @@ public:
 protected:
 	void SetRequiresPossession( bool required );
 	void PushRequiredObject( const std::string& obj );
+	void SetRequiredIndirectObject( const std::string& obj );
 	void SetRequiredLocation( const std::string& loc );
 	void SetRequiredVerb( const std::string& verb );
 	void SetRequiredEvent( const std::string& event );
@@ -54,6 +56,7 @@ private:
 	// Response requires character and/or item to be in inventory
 	std::string			   m_RequiresLocation;
 	std::list<std::string> m_RequiresObjects;
+	std::string			   m_RequiresIndirectObject;
 
 	// Response requires the use of a specific verb
 	std::string m_RequiresVerb;
@@ -95,32 +98,24 @@ public:
 	int32_t GetObjectId( void ) const;
 	const std::string& GetObjectName( void ) const;
 
-	const std::string&GetDisplayName( void ) const;
-	const std::string&GetDescription( void ) const;
+	const std::string& GetDisplayName( void ) const;
+	const std::string& GetDescription( void ) const;
+	const std::vector<std::string>& GetAltNames( void ) const;
 
 	const std::string& GetDefaultLocation( void ) const;
-	int32_t GetDefaultLocationId( void ) const;
-	int32_t GetLocationId( void ) const;
 
-	std::vector<std::shared_ptr<Response>> &GetResponses( ResponseType type );
+	std::vector<std::shared_ptr<Response>>& GetResponses( ResponseType type );
 
 	bool GetVisibility( void ) const;
-
-	void SetLocationId( int32_t locationId );
-	void SetDefaultLocationId( int32_t locationId );
-
-	void SetVisibility( bool isVisible = true );
 
 protected:
 	int32_t		m_GlobalId;
 	std::string m_Name;
-
-	std::string m_DefaultLocation;
-	int32_t		m_DefaultLocationId;
-	int32_t		m_LocationId;
-
 	std::string m_DisplayName;
 	std::string m_Description;
+	std::vector<std::string> m_AltNames;
+
+	std::string m_DefaultLocation;
 
 	bool m_IsVisible;
 

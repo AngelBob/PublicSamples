@@ -41,6 +41,8 @@ public:
     const std::string& GetDirectionName( MoveDirection direction );
     MoveDirection GetDirectionEnum( const std::string& direction );
 
+    int32_t FindObject( int32_t obejctId ) const;
+
 private:
     inline static const MoveDirectionToNameMap m_MoveDirectionToNameMap[ 11 ] = {
         { MoveDirection::MOVE_INVALID, "invalid" },

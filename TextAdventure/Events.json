@@ -1,5 +1,25 @@
 [
   {
+    "Id": "OnAssayerOutOfOffice",
+    "Repeats": 3,
+    "Action": [
+      { "MakeVisible": "bag" },
+      { "MakeInvisible": "assayer" }
+    ],
+    "Text": "At that moment, the sheriff walks in.  The sheriff and the assayer head into the back office."
+  },
+  {
+    "Id": "OnExamineBag"
+  },
+  {
+    "Id": "OnPayTheLady",
+    "Action": [
+      { "MakeVisible": "key" },
+      { "MakeInvisible": "lady" },
+      { "GoTo": "hotelroom1" }
+    ]
+  },
+  {
     "Id": "OnBlackSmithStartAttack"
   },
   {
@@ -10,21 +30,19 @@
   {
     "Id": "OnGoToJail",
     "Action": { "GoTo": "jailcell2" },
-    "Text": "The sherrif steps between you and the smity to break up the fight, and roughly escorts you to jail."
-  },
-  {
-    "Id": "OnAssayerOutOfOffice",
-    "Action": { "MakeVisible": "bag" }
-  },
-  {
-    "Id": "OnCabinetKeyVisible",
-    "Action": { "MakeVisible": "key" }
-  },
-  {
-    "Id": "OnCellUnlock"
+    "Text": "The sheriff steps between you and the smithy to break up the fight, and roughly escorts you to jail."
   },
   {
     "Id": "OnOutOfJail"
+  },
+  {
+    "Id": "OnGoToJail2",
+    "Text": "The sheriff looks surprised to see you.  He quickly gathers himself, jumps from his chair, and tackles you.",
+    "Action": [
+      { "GoTo": "jailcell2" },
+      { "MakeInvisible": "key" },
+      { "UntriggerEvent": [ "OnGoToJail2", "OnGoToJail" ] }
+    ]
   },
   {
     "Id": "OnHavePosseIncrement",
@@ -36,6 +54,7 @@
   },
   {
     "Id": "OnGameOver",
-    "Text": "You and the posse have extracted Old West justice on the corrupt sherrif.  The barkeep invites everyone back to the saloon for drinks.  Someone asks who will be the new sherrif?  Almost in unison, the crowd points and yells your name.  Congratulations, there's new sherrif in town, and it's you."
+    "Text": "You and the posse have extracted Old West justice on the corrupt sheriff.  The barkeep invites everyone back to the saloon for drinks.  Someone asks who will be the new sheriff?  Almost in unison, the crowd points and yells your name.  Congratulations, there's new sheriff in town, and it's you.",
+    "Action": { "EndGame": true }
   }
 ]

@@ -23,6 +23,7 @@
   {
     "Id": "blacksmith",
     "DisplayName": "Blacksmith",
+    "AltNames": [ "smithy", "smith" ],
     "Location": "blacksmithshop",
     "Responses": [
       {
@@ -75,6 +76,7 @@
   {
     "Id": "shopkeeper",
     "DisplayName": "Shop keeper",
+    "AltNames": [ "clerk", "shopkeeper" ],
     "Location": "store",
     "Responses": [
       {
@@ -116,7 +118,7 @@
         "Text": [
           "Back to trade out the rest of your gold?",
           "You didn't trade it all yesterday, the bag was still half full.",
-          "Ummm.  The sherrif might know something about that."
+          "Ummm.  The sheriff might know something about that."
         ],
         "TriggersEvent": "OnAssayerOutOfOffice"
       }
@@ -125,6 +127,7 @@
   {
     "Id": "barkeep",
     "DisplayName": "Barkeep",
+    "AltNames": [ "barman" ],
     "Location": "saloon",
     "Responses": [
       {
@@ -152,9 +155,9 @@
     ]
   },
   {
-    "Id": "sherrif",
+    "Id": "sheriff",
     "DisplayName": "Sheriff",
-    "Location": "sherrifsoffice",
+    "Location": "sheriffsoffice",
     "Responses": [
       {
         "Type": "Examine",
@@ -205,15 +208,20 @@
         "Type": "Interaction",
         "Text": [
           "Couldn't resist me, had to come back the next day, yeah?",
-          "Last night was such fun, can't we go again?",
-          "Are you sure?"
+          "Last night was such fun, we should do that again sometime.",
+          "Hey, this is business you know!"
         ]
+      },
+      {
+        "Type": "Transact",
+        "Text": "I'm sorry, but I can't right now.  I've got another client waiting.  Maybe later."
       },
       {
         "Type": "Transact",
         "SpecificVerb": "pay",
         "Text": "Let's head upstairs, hon.  By the way, when we're finished, you should check out the cabinet in the far room.",
-        "TriggersEvent": "OnCabinetKeyVisible"
+        "RequiresEvent": "OnExamineBag",
+        "TriggersEvent": "OnPayTheLady"
       }
     ]
   }

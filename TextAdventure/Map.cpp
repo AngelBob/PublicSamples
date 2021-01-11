@@ -18,8 +18,6 @@ void Map::OnLoad( void )
 	{
 		// Add the map entry - maps Id property to GlobalId value
 		m_LocationNameToIdMap.insert( std::make_pair( loc->GetObjectName(), loc->GetObjectId() ) );
-		loc->SetDefaultLocationId( loc->GetObjectId() );
-		loc->SetLocationId( loc->GetObjectId() );
 
 		// Set the starting location, if appropriate
 		if( static_cast<Location*>( loc.get() )->IsStartPosition() )
@@ -134,6 +132,28 @@ MoveDirection Map::GetDirectionEnum( const std::string &name )
 	}
 
 	return direction;
+}
+
+int32_t Map::FindObject( int32_t objId ) const
+{
+	// Caller isn't sure where in the world the item might be, so find it.
+	Location *ptr = nullptr;
+	for( const std::shared_ptr<InGameObject>& loc : m_Locations )
+	{
+		ptr = static_cast<Location*>( loc.get() );
+		if( ptr->HasObject( objId ) )
+		{
+			break;
+		}
+	}
+
+	int32_t locId = InGameObject::INVALID;
+	if( nullptr != ptr )
+	{
+		locId = ptr->GetObjectId();
+	}
+
+	return locId;
 }
 
 // private:
