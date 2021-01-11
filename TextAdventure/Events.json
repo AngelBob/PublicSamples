@@ -14,10 +14,17 @@
   {
     "Id": "OnPayTheLady",
     "Action": [
-      { "MakeVisible": "key" },
       { "MakeInvisible": "lady" },
       { "GoTo": "hotelroom1" }
-    ]
+    ],
+    "TriggersEvent": "OnCabinetKeyVisible"
+  },
+  {
+    "Id": "OnCabinetKeyVisible"
+  },
+  {
+    "Id": "OnExamineCabinet",
+    "Action": { "MakeVisible": "key" }
   },
   {
     "Id": "OnBlackSmithStartAttack"
@@ -42,6 +49,14 @@
       { "GoTo": "jailcell2" },
       { "MakeInvisible": "key" },
       { "UntriggerEvent": [ "OnGoToJail2", "OnGoToJail" ] }
+    ]
+  },
+  {
+    "Id": "OnGoToJail3",
+    "Action": [
+      { "GoTo": "jailcell2" },
+      { "MakeInvisible": "key" },
+      { "UntriggerEvent": [ "OnGoToJail3", "OnGoToJail" ] }
     ]
   },
   {

@@ -130,8 +130,11 @@ void GameLoop( Game& game )
         game.OnTrigger( response );
 
         // Is the game over?
-        quit = game.IsGameOver();
-    };
+        if( !quit )
+        {
+            quit = game.IsGameOver();
+        }
+     };
 }
 
 int main()

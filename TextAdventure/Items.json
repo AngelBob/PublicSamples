@@ -118,7 +118,8 @@
       {
         "Type": "Examine",
         "Text": "A closer look reveals a key hidden under one of the wrinkles in the velvet runner.",
-        "RequiresEvent": "OnCabinetKeyVisible"
+        "RequiresEvent": "OnCabinetKeyVisible",
+        "TriggersEvent": "OnExamineCabinet"
       },
       {
         "Type": "Examine",

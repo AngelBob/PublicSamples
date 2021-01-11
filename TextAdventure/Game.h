@@ -53,7 +53,7 @@ public:
 	void OnInventory( void ) const;
 
 	void OnTrigger( Response* response );
-	void OnTrigger( InGameEvent* event );
+	void OnTrigger( InGameEvent* event, bool needNL );
 
 	// Accessors
 	const Map& GetMap( void );

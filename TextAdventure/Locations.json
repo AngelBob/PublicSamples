@@ -4,6 +4,7 @@
     "DisplayName": "49er Camp",
     "Description": "Your camp.  It's a  mess.",
     "AsSeenDesc": "your camp.",
+    "IsStartPosition": true,
     "Responses": [
       {
         "Type": "Examine",
@@ -357,7 +358,6 @@
     "DisplayName": "The Assay Office",
     "Description": "A small, stuffy office with a single desk and large safe.",
     "AsSeenDesc": "the assay office.",
-    "IsStartPosition": true,
     "Responses": [
       {
         "Type": "Examine",

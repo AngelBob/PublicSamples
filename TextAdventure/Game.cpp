@@ -69,9 +69,11 @@ void Game::OnMove( const GameObjectData& objectData, Response* response )
 
         int32_t newLoc = m_Map->GetLocation().GetObjectId();
 
+        bool needNL = false;
         if( !response->GetResponseText( false ).empty() )
         {
             std::cout << response->GetResponseText() << std::endl;
+            needNL = true;
         }
 
         if( oldLoc != newLoc )
@@ -87,6 +89,10 @@ void Game::OnMove( const GameObjectData& objectData, Response* response )
             }
 
             // Describe the new scene
+            if( needNL )
+            {
+                std::cout << "\n";
+            }
             DescribeScene();
         }
     }
@@ -374,11 +380,11 @@ void Game::OnTrigger( Response* response )
         int32_t eventId = m_EventNameToIdMap.at( response->GetTriggeredEvent() );
 
         InGameEvent* event = m_Events.at( eventId ).get();
-        OnTrigger( event );
+        OnTrigger( event, !response->GetResponseText( false ).empty() );
     }
 }
 
-void Game::OnTrigger( InGameEvent* event )
+void Game::OnTrigger( InGameEvent* event, bool needNL )
 {
     // Events should trigger only one time.
     if( !event->IsTriggered() && event->OnTrigger() )
@@ -392,6 +398,7 @@ void Game::OnTrigger( InGameEvent* event )
         if( !event->GetEventText().empty() )
         {
             std::cout << event->GetEventText() << std::endl;
+            needNL = true;
         }
 
         if( !event->GetMakeVisibleTarget().empty() )
@@ -422,6 +429,13 @@ void Game::OnTrigger( InGameEvent* event )
         if( !event->GetGoToTarget().empty() )
         {
             m_Map->OnMove( event->GetGoToTarget() );
+
+            // Since the previous response most likely output some text, need to
+            // insert an additional new line here to keep the spacing nice.
+            if( needNL )
+            {
+                std::cout << "\n";
+            }
             DescribeScene( true );
         }
 
@@ -429,7 +443,7 @@ void Game::OnTrigger( InGameEvent* event )
         for( auto& chainedName : event->GetEventChain() )
         {
             InGameEvent* chainedEvent = m_Events.at( m_EventNameToIdMap.at( chainedName ) ).get();
-            OnTrigger( chainedEvent );
+            OnTrigger( chainedEvent, needNL );
         }
 
         // Untrigger...
@@ -453,17 +467,17 @@ void Game::DescribeScene( bool doFullDescription )
     if( doFullDescription || !curLocation.GetShownOnce() )
     {
         ss << curLocation.GetResponses( ResponseType::RESPONSE_TYPE_EXAMINE ).front().get()->GetResponseText();
+
+        size_t numNeighbors;
+        PrintDirectionsAsSeen( ss, numNeighbors );
+        if( 0 != numNeighbors )
+        {
+            ss << "\n";
+        }
     }
     else
     {
         ss << curLocation.GetDescription();
-    }
-
-    size_t numNeighbors;
-    PrintDirectionsAsSeen( ss, numNeighbors );
-    if( 0 != numNeighbors )
-    {
-        ss << "\n";
     }
 
     size_t numCharacters;
