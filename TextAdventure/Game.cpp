@@ -426,17 +426,39 @@ void Game::OnTrigger( InGameEvent* event, bool needNL )
             }
         }
 
-        if( !event->GetGoToTarget().empty() )
+        for( const std::pair<std::string, std::string>& moveObj : event->GetMoveObjects() )
         {
-            m_Map->OnMove( event->GetGoToTarget() );
-
-            // Since the previous response most likely output some text, need to
-            // insert an additional new line here to keep the spacing nice.
-            if( needNL )
+            // Need to move either a game object or the player
+            if( "player" == moveObj.first )
             {
-                std::cout << "\n";
+                m_Map->OnMove( moveObj.second );
+
+                // Since the previous response most likely output some text, need to
+                // insert an additional new line here to keep the spacing nice.
+                if( needNL )
+                {
+                    std::cout << "\n";
+                }
+                
+                // Player is in a new place, set the scene.
+                DescribeScene();
             }
-            DescribeScene( true );
+            else
+            {
+                int32_t objId = m_ObjectIdToGlobalIdMap.at( moveObj.first );
+
+                // Move the object from it's current location to it's target location
+                int32_t curLoc = m_Map->FindObject( objId );
+                if( InGameObject::INVALID != curLoc )
+                {
+                    m_Map->GetLocation( curLoc ).RemoveObject( objId );
+                }
+
+                if( "invalid" != moveObj.second )
+                {
+                    m_Map->GetLocation( moveObj.second ).AddObject( objId );
+                }
+            }
         }
 
         // Recurse...
@@ -591,14 +613,14 @@ std::ostream& Game::PrintCharacters( std::ostream &os, size_t &numCharacters ) c
             os << m_Objects.at( *cur )->GetDisplayName();
             if( 2 != characterIds.size() )
             {
-                os << ", ";
+                os << ", the ";
             }
             ++cur;
         }
 
         if( 2 == characterIds.size() )
         {
-            os << " and ";
+            os << " and the ";
         }
         os << m_Objects.at( *cur )->GetDisplayName();
 

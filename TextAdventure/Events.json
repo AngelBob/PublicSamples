@@ -2,21 +2,25 @@
   {
     "Id": "OnAssayerOutOfOffice",
     "Repeats": 3,
-    "Action": [
-      { "MakeVisible": "bag" },
-      { "MakeInvisible": "assayer" }
-    ],
-    "Text": "At that moment, the sheriff walks in.  The sheriff and the assayer head into the back office."
+    "Action": {
+      "MoveObject": [
+        { "bag": "assayoffice" },
+        { "assayer": "jailcell2" }
+      ]
+    },
+    "Text": "At that moment, the sheriff walks in.  The sheriff and the assayer head into the back office.  Just as they disappear, you notice something slip from the sheriff's grasp."
   },
   {
     "Id": "OnExamineBag"
   },
   {
     "Id": "OnPayTheLady",
-    "Action": [
-      { "MakeInvisible": "lady" },
-      { "GoTo": "hotelroom1" }
-    ],
+    "Action": {
+      "MoveObject": [
+        { "lady": "invalid" },
+        { "player": "hotelroom1" }
+      ]
+    },
     "TriggersEvent": "OnCabinetKeyVisible"
   },
   {
@@ -24,7 +28,9 @@
   },
   {
     "Id": "OnExamineCabinet",
-    "Action": { "MakeVisible": "key" }
+    "Action": {
+      "MoveObject": { "key": "hotelroom2" }
+    }
   },
   {
     "Id": "OnBlackSmithStartAttack"
@@ -36,26 +42,39 @@
   },
   {
     "Id": "OnGoToJail",
-    "Action": { "GoTo": "jailcell2" },
+    "Action": {
+      "MoveObject": { "player": "jailcell2" }
+    },
     "Text": "The sheriff steps between you and the smithy to break up the fight, and roughly escorts you to jail."
   },
   {
-    "Id": "OnOutOfJail"
+    "Id": "OnOutOfJail",
+    "Action": {
+      "MoveObject": { "assayer": "assayoffice" }
+    }
   },
   {
     "Id": "OnGoToJail2",
     "Text": "The sheriff looks surprised to see you.  He quickly gathers himself, jumps from his chair, and tackles you.",
     "Action": [
-      { "GoTo": "jailcell2" },
-      { "MakeInvisible": "key" },
+      {
+        "MoveObject": [
+          { "player": "jailcell2" },
+          { "key": "invalid" }
+        ]
+      },
       { "UntriggerEvent": [ "OnGoToJail2", "OnGoToJail" ] }
     ]
   },
   {
     "Id": "OnGoToJail3",
     "Action": [
-      { "GoTo": "jailcell2" },
-      { "MakeInvisible": "key" },
+      {
+        "MoveObject": [
+          { "player": "jailcell2" },
+          { "key": "invalid" }
+        ]
+      },
       { "UntriggerEvent": [ "OnGoToJail3", "OnGoToJail" ] }
     ]
   },
@@ -69,7 +88,7 @@
   },
   {
     "Id": "OnGameOver",
-    "Text": "You and the posse have extracted Old West justice on the corrupt sheriff.  The barkeep invites everyone back to the saloon for drinks.  Someone asks who will be the new sheriff?  Almost in unison, the crowd points and yells your name.  Congratulations, there's new sheriff in town, and it's you.",
+    "Text": "You and the posse have extracted Old West justice on the corrupt sheriff.  The barkeep invites everyone back to the saloon for drinks.  Someone asks, \"who will be the new sheriff?\"  Almost in unison, the crowd points and yells your name.  Congratulations, there's a new sheriff in town, and it's you.",
     "Action": { "EndGame": true }
   }
 ]

@@ -27,7 +27,6 @@ void GameLoop( Game& game )
             std::cout << "I didn't understand that, please try again.\n" << std::endl;
             continue;
         }
-
         std::cout << "\n";
 
         // Figure out what the user wants to act on and what should happen.

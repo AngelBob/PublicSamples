@@ -19,66 +19,14 @@ InGameEvent::InGameEvent( const json &eventJson, const int32_t globalId )
 	{
 		if( eventJson.at( "Action" ).is_array() )
 		{
-			for( auto &it : eventJson.at( "Action" ) )
+			for( auto& it : eventJson.at( "Action" ) )
 			{
-				if( it.contains( "GoTo" ) )
-				{
-					m_GoToTarget = it.at( "GoTo" );
-				}
-
-				if( it.contains( "MakeVisible" ) )
-				{
-					m_MakeVisibleTarget = it.at( "MakeVisible" );
-				}
-
-				if( it.contains( "MakeInvisible" ) )
-				{
-					m_MakeInvisibleTarget = it.at( "MakeInvisible" );
-				}
-
-				if( it.contains( "UntriggerEvent" ) )
-				{
-					for( auto &event : it.at( "UntriggerEvent" ) )
-					{
-						m_RewindEvents.emplace_back( event );
-					}
-				}
-
-				if( it.contains( "EndGame" ) )
-				{
-					m_IsEndGame = true;
-				}
+				LoadAction( it );
 			}
 		}
 		else
 		{
-			if( eventJson.at( "Action" ).contains( "GoTo" ) )
-			{
-				m_GoToTarget = eventJson.at( "Action" ).at( "GoTo" );
-			}
-
-			if( eventJson.at( "Action" ).contains( "MakeVisible" ) )
-			{
-				m_MakeVisibleTarget = eventJson.at( "Action" ).at( "MakeVisible" );
-			}
-
-			if( eventJson.at( "Action" ).contains( "MakeInvisible" ) )
-			{
-				m_MakeInvisibleTarget = eventJson.at( "Action" ).at( "MakeInvisible" );
-			}
-
-			if( eventJson.at( "Action" ).contains( "UntriggerEvent" ) )
-			{
-				for( auto& event : eventJson.at( "Action" ).at( "UntriggerEvent" ) )
-				{
-					m_RewindEvents.emplace_back( event );
-				}
-			}
-
-			if( eventJson.at( "Action" ).contains( "EndGame" ) )
-			{
-				m_IsEndGame = true;
-			}
+			LoadAction( eventJson.at( "Action" ) );
 		}
 	}
 
@@ -142,9 +90,9 @@ const std::string& InGameEvent::GetMakeInvisibleTarget( void ) const
 	return m_MakeInvisibleTarget;
 }
 
-const std::string& InGameEvent::GetGoToTarget( void ) const
+const std::map<std::string, std::string>& InGameEvent::GetMoveObjects( void ) const
 {
-	return m_GoToTarget;
+	return m_MoveObjects;
 }
 
 const std::vector<std::string>& InGameEvent::GetEventChain( void ) const
@@ -155,4 +103,52 @@ const std::vector<std::string>& InGameEvent::GetEventChain( void ) const
 const std::vector<std::string> &InGameEvent::GetUntriggerChain( void ) const
 {
 	return m_RewindEvents;
+}
+
+//private:
+void InGameEvent::LoadAction( const json& action )
+{
+	if( action.contains( "MoveObject" ) )
+	{
+		if( action.at( "MoveObject" ).is_array() )
+		{
+			for( auto& moveObj : action.at( "MoveObject" ) )
+			{
+				for( auto& [ key, value ] : moveObj.items() )
+				{
+					m_MoveObjects.insert( std::make_pair( key, value ) );
+				}
+			}
+		}
+		else
+		{
+			for( auto& [ key, value ] : action.at( "MoveObject" ).items() )
+			{
+				m_MoveObjects.insert( std::make_pair( key, value ) );
+			}
+		}
+	}
+
+	if( action.contains( "MakeVisible" ) )
+	{
+		m_MakeVisibleTarget = action.at( "MakeVisible" );
+	}
+
+	if( action.contains( "MakeInvisible" ) )
+	{
+		m_MakeInvisibleTarget = action.at( "MakeInvisible" );
+	}
+
+	if( action.contains( "UntriggerEvent" ) )
+	{
+		for( auto &event : action.at( "UntriggerEvent" ) )
+		{
+			m_RewindEvents.emplace_back( event );
+		}
+	}
+
+	if( action.contains( "EndGame" ) )
+	{
+		m_IsEndGame = true;
+	}
 }

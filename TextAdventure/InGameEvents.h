@@ -18,12 +18,15 @@ public:
 	const std::string& GetEventText( void ) const;
 	const std::string& GetMakeVisibleTarget( void ) const;
 	const std::string& GetMakeInvisibleTarget( void ) const;
-	const std::string& GetGoToTarget( void ) const;
+
+	const std::map<std::string, std::string>& GetMoveObjects( void ) const;
 
 	const std::vector<std::string>& GetEventChain( void ) const;
 	const std::vector<std::string>& GetUntriggerChain( void ) const;
 
 private:
+	void LoadAction( const json &action );
+
 	int32_t		m_GlobalId;
 	std::string m_Name;
 
@@ -35,7 +38,8 @@ private:
 	std::string m_Text;
 	std::string m_MakeVisibleTarget;
 	std::string m_MakeInvisibleTarget;
-	std::string m_GoToTarget;
+
+	std::map<std::string, std::string> m_MoveObjects;
 
 	std::vector<std::string> m_EventChain;
 	std::vector<std::string> m_RewindEvents;

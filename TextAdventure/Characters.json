@@ -17,6 +17,11 @@
           "You were at the saloon, and didn't get back here until nearly sun-up.",
           "Uh huh."
         ]
+      },
+      {
+        "Type": "Interaction",
+        "Text": "I'm not interested.",
+        "RequiresEvent" : "OnOutOfJail"
       }
     ]
   },
@@ -39,6 +44,16 @@
           "Damn Sheriff.",
           "The Blacksmith is muttering under his breath, but you can't make out what he's saying."
         ]
+      },
+      {
+        "Type": "Interaction",
+        "Text": [
+          "Yeah, the sherrif comes in once a week.",
+          "Takes ten percent of my earnings.",
+          "I'd really like do something about it.",
+          "Are you doing this?  Take me with you."
+        ],
+        "RequiresEvent" : "OnOutOfJail"
       },
       {
         "Type": "Transact",
@@ -76,7 +91,7 @@
   {
     "Id": "shopkeeper",
     "DisplayName": "Shop keeper",
-    "AltNames": [ "clerk", "shopkeeper" ],
+    "AltNames": [ "clerk" ],
     "Location": "store",
     "Responses": [
       {
@@ -91,6 +106,16 @@
           "Why don't you wait until after the sheriff comes by.",
           "Have a look around."
         ]
+      },
+      {
+        "Type": "Interaction",
+        "Text": [
+          "Yeah, the sherrif comes in once a week.",
+          "Takes ten percent of my earnings.",
+          "I'm getting really tired of it.",
+          "I'm ready to do something.  Take me with you."
+        ],
+        "RequiresEvent": "OnOutOfJail"
       },
       {
         "Type": "Transact",
@@ -121,13 +146,33 @@
           "Ummm.  The sheriff might know something about that."
         ],
         "TriggersEvent": "OnAssayerOutOfOffice"
+      },
+      {
+        "Type": "Interaction",
+        "Text": [
+          "I've heard from others that the sheriff...",
+          "I... I... don't know if I should tell you...",
+          "The sheriff... he's... he's a bad man.",
+          "He's the one that... that... traded your gold.",
+          "I've heard other things, too.",
+          "The sheriff, he's been shaking down the businesses.",
+          "That's all I'm going to say."
+        ],
+        "RequiresEvent": "OnAssayerOutOfOffice"
+      },
+      {
+        "Type": "Interaction",
+        "Text": [
+          "Come back if you have gold to trade."
+        ],
+        "RequiresEvent": "OnOutOfJail"
       }
     ]
   },
   {
     "Id": "barkeep",
     "DisplayName": "Barkeep",
-    "AltNames": [ "barman" ],
+    "AltNames": [ "barman", "bartender" ],
     "Location": "saloon",
     "Responses": [
       {
@@ -144,6 +189,16 @@
           "I had to kick you out at closing.",
           "Ready for another?"
         ]
+      },
+      {
+        "Type": "Interaction",
+        "Text": [
+          "Yeah, the sherrif comes in once a week.",
+          "Takes ten percent of my earnings.",
+          "I'd really like to crack a bottle over his head.",
+          "If you're going to get him, take me with you."
+        ],
+        "RequiresEvent": "OnOutOfJail"
       },
       { "Type": "Transact" },
       {

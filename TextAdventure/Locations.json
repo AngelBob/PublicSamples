@@ -119,7 +119,7 @@
   {
     "Id": "towneast",
     "DisplayName": "The Road At the east End of Town",
-    "Description": "The main road at the east end of town",
+    "Description": "The main road at the east end of town.",
     "AsSeenDesc": "the east end of town.",
     "Responses": [
       {
@@ -211,7 +211,7 @@
   {
     "Id": "townwest",
     "DisplayName": "The Road At the west End of Town",
-    "Description": "The main road at the west end of town",
+    "Description": "The main road at the west end of town.",
     "AsSeenDesc": "the west end of town.",
     "Responses": [
       {
@@ -237,6 +237,13 @@
         "Type": "Movement",
         "Direction": "south",
         "Destination": "assayoffice"
+      },
+      {
+        "Type": "Movement",
+        "Text": "The assayer's office appears to be closed.",
+        "Direction": "south",
+        "Destination": "townwest",
+        "RequiresEvent": "OnAssayerOutOfOffice"
       },
       {
         "Type": "Movement",
@@ -297,7 +304,7 @@
     "Responses": [
       {
         "Type": "Examine",
-        "Text": "A well-worn grassy area with a large tree growing in the middle"
+        "Text": "A well-worn grassy area with a large tree growing in the middle."
       },
       {
         "Type": "Movement",
@@ -373,12 +380,12 @@
   {
     "Id": "saloon",
     "DisplayName": "Saloon and Hotel",
-    "Description": "The bar is dimly lit and dusty.  There are stairs leading up.  The bartender is here.",
+    "Description": "The bar is dimly lit and dusty.  There are stairs leading up.",
     "AsSeenDesc": "the saloon.",
     "Responses": [
       {
         "Type": "Examine",
-        "Text": "Dimly lit, and a little dusty, in the past this barroom saw a lot of action.  There are rooms available at the top of the stairs.  The bartender asks if you need anything."
+        "Text": "Dimly lit, and a little dusty, in the past this barroom saw a lot of action.  There are rooms available at the top of the stairs."
       },
       {
         "Type": "Movement",
@@ -434,7 +441,7 @@
         "Type": "Movement",
         "Direction": "north",
         "Destination": "sheriffsoffice",
-        "Text": "The sheriff makes a noise in the back of his throat.  You take it to mean you won't be going that way"
+        "Text": "The sheriff makes a noise in the back of his throat.  You take it to mean you won't be going that way."
       },
       {
         "Type": "Movement",
