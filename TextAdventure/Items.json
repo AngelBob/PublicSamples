@@ -1,0 +1,158 @@
+[
+  {
+    "Id": "rope",
+    "DisplayName": "Rope",
+    "AltNames": [ "noose" ],
+    "Location": "meadow",
+    "Description": "a rope hanging from one of the branches of the tree",
+    "Responses": [
+      {
+        "Type": "Discard",
+        "SpecificVerb": "put",
+        "RequiresObject": "sheriff",
+        "RequiresIndirectObject": "sheriff",
+        "TriggersEvent": "OnGameOver"
+      },
+      {
+        "Type": "Examine",
+        "Text": "It's a sturdy piece of hemp, tied to form a noose."
+      }
+    ]
+  },
+  {
+    "Id": "ironbar",
+    "DisplayName": "Iron bar",
+    "AltNames": [ "iron", "bar" ],
+    "Location": "blacksmithshop",
+    "Description": "an iron bar in a pile of dust on the ground",
+    "Responses": [
+      {
+        "Type": "Take",
+        "Text": "The iron bar has been added to your inventory."
+      },
+      {
+        "Type": "Examine",
+        "Text": "It looks to be a good, solid piece of iron.",
+        "RequiresPossession": true
+      },
+      {
+        "Type": "Discard",
+        "Text": "The iron bar lands with a thud at your feet.",
+        "RequiresPossession": true
+      },
+      {
+        "Type": "Throw",
+        "Text": "The iron bar connects squarely with the blacksmith's head.  The blacksmith is none too pleased with you.  He drops his tools, makes his way slowly over to you, and punches you, hard, in the stomach.",
+        "RequiresLocation": "blacksmithshop",
+        "RequiresPossession": true,
+        "TriggersEvent": "OnBlacksmithStartAttack"
+      },
+      {
+        "Type": "Throw",
+        "Text": "The iron bar lands in a cloud of dust several yards away.",
+        "RequiresPossession": true
+      }
+    ]
+  },
+  {
+    "Id": "forge",
+    "DisplayName": "Hot, loud, dirty forge",
+    "AltNames": [ "forge" ],
+    "Location": "blacksmithshop",
+    "Description": "a hot, loud, dirty forge",
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "It's just a forge.  It's hot.  It's loud.  It's covered in soot."
+      },
+      {
+        "Type": "Attack",
+        "Text": [
+          "Why are you attacking the forge?",
+          "It really doesn't have much effect.",
+          "The forge is undamaged by your flailing.",
+          "The small beginning of a scratch might be appearing under the soot.",
+          "No, it's not a scratch after all",
+          "The forge remains undamaged.  Perhaps a different course of action?"
+        ]
+      }
+    ]
+  },
+  {
+    "Id": "bag",
+    "DisplayName": "Empty bag",
+    "AltNames": [ "bag" ],
+    "Location": "assayoffice",
+    "IsVisible": false,
+    "Description": "an empty bag lying on the floor",
+    "Responses": [
+      {
+        "Type": "Take",
+        "Text": "The familiar looking bag has been added to your inventory.",
+        "RequiresEvent": "OnAssayerOutOfOffice"
+      },
+      {
+        "Type": "Examine",
+        "Text": "Looking more closely, you recognize the bag as the one that previously contained your gold.  The bag is empty.",
+        "RequiresPossession": true,
+        "TriggersEvent": "OnExamineBag"
+      },
+      {
+        "Type": "Discard",
+        "Text": "The empty bag floats lightly to the floor.",
+        "RequiresPossession": true
+      },
+      {
+        "Type": "Throw",
+        "Text": "The empty bag lands gently at your feet.",
+        "RequiresPossession": true
+      }
+    ]
+  },
+  {
+    "Id": "cabinet",
+    "DisplayName": "Cabinet",
+    "Location": "hotelroom2",
+    "Description": "a cabinet with a blue velvet runner with a vase of violets sitting on top",
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "A closer look reveals a key hidden under one of the wrinkles in the velvet runner.",
+        "RequiresEvent": "OnCabinetKeyVisible",
+        "TriggersEvent": "OnExamineCabinet"
+      },
+      {
+        "Type": "Examine",
+        "Text": "The runner is quite worn and wrinkled, and the glass vase is yellowed and cracked."
+      }
+    ]
+  },
+  {
+    "Id": "key",
+    "DisplayName": "Key",
+    "Location": "hotelroom2",
+    "IsVisible": false,
+    "Description": "a key",
+    "Responses": [
+      {
+        "Type": "Take",
+        "Text": "The key has been added to your inventory."
+      },
+      {
+        "Type": "Examine",
+        "RequiresPossession": true,
+        "Text": "A closer look reveals no markings, and no indication of what the key may be for."
+      },
+      {
+        "Type": "Discard",
+        "RequiresPossession": true,
+        "Text": "The key makes a metallic ringing as it lands."
+      },
+      {
+        "Type": "Throw",
+        "RequiresPossession": true,
+        "Text": "You hear a faint ringing sound as the key lands several yards away."
+      }
+    ]
+  }
+]

@@ -1,0 +1,705 @@
+[
+  {
+    "Id": "camp",
+    "DisplayName": "49er Camp",
+    "Description": "Your camp.  It's a  mess.",
+    "AsSeenDesc": "your camp.",
+    "IsStartPosition": true,
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "Your camp.  Your stuff is spread all over, like someone was looking for something."
+      },
+      {
+        "Type": "Movement",
+        "Direction": "south west",
+        "Destination": "camptrail"
+      }
+    ]
+  },
+  {
+    "Id": "camptrail",
+    "DisplayName": "Camp Trail",
+    "Description": "A trail leading to your camp.",
+    "AsSeenDesc": "a well-worn pathway leading into the bush.",
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "A well-worn pathway leading from the road to town north into the bush, ending at your mining camp."
+      },
+      {
+        "Type": "Movement",
+        "Direction": "north east",
+        "Destination": "camp"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "south east",
+        "Destination": "roadoutoftown_east"
+      }
+    ]
+  },
+  {
+    "Id": "roadoutoftown_east",
+    "DisplayName": "The Road Out of Town",
+    "Description": "On the road heading east out of town.",
+    "AsSeenDesc": "the main road through town.",
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The main road running through town.  You are out of town to the east."
+      },
+      {
+        "Type": "Movement",
+        "Direction": "north west",
+        "Destination": "camptrail"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "east",
+        "Destination": "mapedge_east"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "west",
+        "Destination": "roadeastoftown"
+      }
+    ]
+  },
+  {
+    "Id": "mapedge_east",
+    "DisplayName": "The Road",
+    "Description": "On the road heading out of town.",
+    "AsSeenDesc": "a rutted road stretching through the sage and dust as far as you can see.",
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The road continues to the east, toward the sunrise."
+      },
+      {
+        "Type": "Movement",
+        "Direction": "east",
+        "Destination": "mapedge_east",
+        "Increments": true
+      },
+      {
+        "Type": "Movement",
+        "Direction": "west",
+        "Destination": "roadoutoftown_east"
+      }
+    ]
+  },
+  {
+    "Id": "roadeastoftown",
+    "DisplayName": "The Road east Of Town",
+    "Description": "The main road just east of town.",
+    "AsSeenDesc": "the main road outside of town.",
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The main road running through town.  You can see the town to the west."
+      },
+      {
+        "Type": "Movement",
+        "Direction": "east",
+        "Destination": "roadoutoftown_east"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "south east",
+        "Destination": "meadow"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "west",
+        "Destination": "towneast"
+      }
+    ]
+  },
+  {
+    "Id": "towneast",
+    "DisplayName": "The Road At the east End of Town",
+    "Description": "The main road at the east end of town.",
+    "AsSeenDesc": "the east end of town.",
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The main road running through town.  You are at the very eastern edge of the town."
+      },
+      {
+        "Type": "Movement",
+        "Direction": "north",
+        "Destination": "saloon"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "east",
+        "Destination": "roadeastoftown"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "south",
+        "Destination": "blacksmithshop"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "west",
+        "Destination": "townmiddle"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "north west",
+        "Destination": "alleyway1"
+      }
+    ]
+  },
+  {
+    "Id": "townmiddle",
+    "DisplayName": "The Road In the Middle of Town",
+    "Description": "The main road in the middle of town.",
+    "AsSeenDesc": "the middle of town.",
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The main road running through town.  You are in the middle of town."
+      },
+      {
+        "Type": "Movement",
+        "Direction": "north",
+        "Destination": "sheriffsoffice",
+        "RequiresEvent": "OnOutOfJail",
+        "TriggersEvent": "OnGoToJail2"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "north",
+        "Destination": "sheriffsoffice",
+        "RequiresEvent": "OnHavePosseComplete"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "north",
+        "Destination": "sheriffsoffice"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "north east",
+        "Destination": "alleyway1"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "east",
+        "Destination": "towneast"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "south",
+        "Destination": "store"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "west",
+        "Destination": "townwest"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "north west",
+        "Destination": "alleyway2"
+      }
+    ]
+  },
+  {
+    "Id": "townwest",
+    "DisplayName": "The Road At the west End of Town",
+    "Description": "The main road at the west end of town.",
+    "AsSeenDesc": "the west end of town.",
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The main road running through town.  You are at the very western edge of the town."
+      },
+      {
+        "Type": "Movement",
+        "Direction": "north",
+        "Destination": "bank"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "north east",
+        "Destination": "alleyway2"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "east",
+        "Destination": "townmiddle"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "south",
+        "Destination": "assayoffice"
+      },
+      {
+        "Type": "Movement",
+        "Text": "The assayer's office appears to be closed.",
+        "Direction": "south",
+        "Destination": "townwest",
+        "RequiresEvent": "OnAssayerOutOfOffice"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "west",
+        "Destination": "roadwestoftown"
+      }
+    ]
+  },
+  {
+    "Id": "roadwestoftown",
+    "DisplayName": "The Road west Of Town",
+    "Description": "The main road just west of town.",
+    "AsSeenDesc": "the main road outside of town.",
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The main road running through town.  You can see the town to the east."
+      },
+      {
+        "Type": "Movement",
+        "Direction": "east",
+        "Destination": "townwest"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "west",
+        "Destination": "roadoutoftown_west"
+      }
+    ]
+  },
+  {
+    "Id": "roadoutoftown_west",
+    "DisplayName": "The Road",
+    "Description": "You are riding off into the sunset.",
+    "AsSeenDesc": "a rutted road stretching through the sage and dust, disappearing into the sunset.",
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The road continues to the west, into the sunset."
+      },
+      {
+        "Type": "Movement",
+        "Direction": "east",
+        "Destination": "roadwestoftown"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "west",
+        "Destination": "roadoutoftown_west"
+      }
+    ]
+  },
+  {
+    "Id": "meadow",
+    "DisplayName": "Meadow",
+    "Description": "A grassy area with a tree in the middle.",
+    "AsSeenDesc": "a meadow with a tree standing in the middle.",
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "A well-worn grassy area with a large tree growing in the middle."
+      },
+      {
+        "Type": "Movement",
+        "Direction": "north east",
+        "Destination": "roadeastoftown"
+      }
+    ]
+  },
+  {
+    "Id": "blacksmithshop",
+    "DisplayName": "The Blacksmith",
+    "Description": "A blacksmith shop, with all the required tools and materials.",
+    "AsSeenDesc": "the blacksmith shop.",
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The blacksmith shop is hot and loud.  The tools and materials are all arranged, the sign of a quality craftsman.  A posting says the smithy has been keeping the local horses in shoes for 20 years."
+      },
+      {
+        "Destination": "towneast",
+        "Direction": "north",
+        "RequiresEvent": "OnGoToJail",
+        "Type": "Movement"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "north",
+        "Destination": "blacksmithshop",
+        "Text": "The blacksmith grabs you and punches you again.  You're not going anywhere until this is finished.",
+        "RequiresEvent": "OnBlackSmithStartAttack"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "north",
+        "Destination": "towneast"
+      }
+    ]
+  },
+  {
+    "Id": "store",
+    "DisplayName": "The General Store",
+    "Description": "A store with everything the townsfolk require.",
+    "AsSeenDesc": "the general store.",
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The general store contains isles, bins, and bags filled to overflowing with everything the townsfolk, ranchers, and miners could ever need."
+      },
+      {
+        "Type": "Movement",
+        "Direction": "north",
+        "Destination": "townmiddle"
+      }
+    ]
+  },
+  {
+    "Id": "assayoffice",
+    "DisplayName": "The Assay Office",
+    "Description": "A small, stuffy office with a single desk and large safe.",
+    "AsSeenDesc": "the assay office.",
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The assay office is well known to you, you've exchanged your gold for cash here on many occassions."
+      },
+      {
+        "Type": "Movement",
+        "Direction": "north",
+        "Destination": "townwest"
+      }
+    ]
+  },
+  {
+    "Id": "saloon",
+    "DisplayName": "Saloon and Hotel",
+    "Description": "The bar is dimly lit and dusty.  There are stairs leading up.",
+    "AsSeenDesc": "the saloon.",
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "Dimly lit, and a little dusty, in the past this barroom saw a lot of action.  There are rooms available at the top of the stairs."
+      },
+      {
+        "Type": "Movement",
+        "Direction": "south",
+        "Destination": "towneast"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "up",
+        "Destination": "topofstairs"
+      }
+    ]
+  },
+  {
+    "Id": "alleyway1",
+    "DisplayName": "Alley Between the Saloon and the Sheriff's Office",
+    "Description": "A dusty alley between two large brick buildings.",
+    "AsSeenDesc": "an alleyway.",
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The alley looks like most alleys.  There are empty crates and barrels, and other bits of rubbish blowing in the wind."
+      },
+      {
+        "Type": "Movement",
+        "Direction": "south east",
+        "Destination": "towneast"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "south west",
+        "Destination": "townmiddle"
+      }
+    ]
+  },
+  {
+    "Id": "sheriffsoffice",
+    "DisplayName": "Sheriff's Office",
+    "Description": "The local sheriff's office, with a single desk.",
+    "AsSeenDesc": "the sheriff's office.",
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The sheriff's office is well kept and nicely furnished.  The single desk is made of expensive imported wood and looks almost new."
+      },
+      {
+        "Type": "Movement",
+        "Direction": "north",
+        "RequiresEvent": "OnOutOfJail",
+        "Destination": "cellblockhallway_east"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "north",
+        "Destination": "sheriffsoffice",
+        "Text": "The sheriff makes a noise in the back of his throat.  You take it to mean you won't be going that way."
+      },
+      {
+        "Type": "Movement",
+        "Direction": "south",
+        "Destination": "townmiddle"
+      }
+    ]
+  },
+  {
+    "Id": "alleyway2",
+    "DisplayName": "Alley Between the Sheriff's Office and the Bank",
+    "Description": "A dusty alley between two large brick buildings.",
+    "AsSeenDesc": "an alleyway.",
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The alley looks like most alleys.  There are empty crates and barrels, and other bits of rubbish blowing in the wind."
+      },
+      {
+        "Type": "Movement",
+        "Direction": "south east",
+        "Destination": "townmiddle"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "south west",
+        "Destination": "townwest"
+      }
+    ]
+  },
+  {
+    "Id": "bank",
+    "DisplayName": "Bank",
+    "Description": "The single table is available and the tellers' window is open.",
+    "AsSeenDesc": "the bank.",
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The bank is sparsely furnished with a single table but no chairs.  There is a single tellers' window set in a heavy wooden wall."
+      },
+      {
+        "Type": "Movement",
+        "Direction": "south",
+        "Destination": "townwest"
+      }
+    ]
+  },
+  {
+    "Id": "topofstairs",
+    "DisplayName": "Top of the Stairs",
+    "Description": "The top of the stairs leading to the hotel rooms.",
+    "AsSeenDesc": "the landing at the top of the stairs.",
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The landing at the top of the stairs overlooks the nearly empty barroom down."
+      },
+      {
+        "Type": "Movement",
+        "Direction": "down",
+        "Destination": "saloon"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "east",
+        "Destination": "balconymiddle"
+      }
+    ]
+  },
+  {
+    "Id": "balconymiddle",
+    "DisplayName": "Middle of the Balcony",
+    "Description": "The balcony above the barroom.",
+    "AsSeenDesc": "the balcony leading to the rooms.",
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The middle of the balcony overlooking the barroom down."
+      },
+      {
+        "Type": "Movement",
+        "Direction": "north",
+        "Destination": "hotelroom1"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "west",
+        "Destination": "topofstairs"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "east",
+        "Destination": "balconyend"
+      }
+    ]
+  },
+  {
+    "Id": "balconyend",
+    "DisplayName": "End of the Balcony",
+    "Description": "The end of the balcony above the barroom.",
+    "AsSeenDesc": "the balcony ends.",
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The end of the balcony.  There is a window overlooking the back of the saloon out into the desert."
+      },
+      {
+        "Type": "Movement",
+        "Direction": "north",
+        "Destination": "hotelroom2"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "west",
+        "Destination": "balconymiddle"
+      }
+    ]
+  },
+  {
+    "Id": "hotelroom1",
+    "DisplayName": "Hotel Room",
+    "Description": "A dingy hotel room.",
+    "AsSeenDesc": "a door with the number 1.",
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The room is decorated in a red velvet and roses motif.  The gas lamp is lit, casting a dirty light across the room.  The window at the back looks out over the desert."
+      },
+      {
+        "Type": "Movement",
+        "Direction": "south",
+        "Destination": "balconymiddle"
+      }
+    ]
+  },
+  {
+    "Id": "hotelroom2",
+    "DisplayName": "Hotel Room",
+    "Description": "A dingy hotel room.",
+    "AsSeenDesc": "a door with the number 2.",
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The room is decorated in a blue velvet and violets motif.  The gas lamp is lit, casting a dirty light across the room.  The window at the back looks out over the desert."
+      },
+      {
+        "Type": "Movement",
+        "Direction": "south",
+        "Destination": "balconyend"
+      }
+    ]
+  },
+  {
+    "Id": "cellblockhallway_east",
+    "DisplayName": "Cellblock Hallway",
+    "Description": "The cellblock hallway allows access to both cells.  There is a window that allows some natural light into the dingy hallway.",
+    "AsSeenDesc": "the hallway.",
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The cellblock hallway is the main passageway between the two cells in the sheriff's office.  There is a window in the wall that overlooks an alley between the sheriff's office and the saloon."
+      },
+      {
+        "Type": "Movement",
+        "Direction": "north",
+        "Destination": "jailcell1"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "south",
+        "Destination": "sheriffsoffice",
+        "RequiresEvent": "OnOutOfJail",
+        "TriggersEvent": "OnGoToJail2"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "south",
+        "RequiresEvent": "OnHavePosseComplete",
+        "Destination": "sheriffsoffice"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "east",
+        "Destination": "alleyway1",
+        "RequiresEvent": "OnOutOfJail",
+        "Text": "You quietly open the window and slip into the alley.  The window slams closed as you drop to the ground outside."
+      },
+      {
+        "Type": "Movement",
+        "Direction": "west",
+        "Destination": "cellblockhallway_west"
+      }
+    ]
+  },
+  {
+    "Id": "cellblockhallway_west",
+    "DisplayName": "Cellblock Hallway",
+    "Description": "The cellblock hallway allows access to both cells.",
+    "AsSeenDesc": "the hallway.",
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The cellblock hallway is the main passageway between the two cells in the sheriff's office."
+      },
+      {
+        "Type": "Movement",
+        "Direction": "north",
+        "Destination": "jailcell2"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "east",
+        "Destination": "cellblockhallway_east"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "west",
+        "Destination": "alleyway2",
+        "RequiresEvent": "OnOutOfJail",
+        "Text": "You quietly open the window and slip into the alley.  The window slams closed as you drop to the ground outside."
+      }
+    ]
+  },
+  {
+    "Id": "jailcell1",
+    "DisplayName": "Jail Cell",
+    "Description": "The jail cell is very dirty.",
+    "AsSeenDesc": "a jail cell.",
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The jail cell is not as nice as the sheriff's office.  There is dirt everywhere, small piles of what one can only assume is human feces, and the mattress on the single cot is covered in stains of unknown origin."
+      },
+      {
+        "Type": "Movement",
+        "Direction": "south",
+        "Destination": "cellblockhallway_east"
+      }
+    ]
+  },
+  {
+    "Id": "jailcell2",
+    "DisplayName": "Jail Cell",
+    "Description": "The jail cell is very dirty.",
+    "AsSeenDesc": "a jail cell.",
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The jail cell is not as nice as the sheriff's office.  There is dirt everywhere, small piles of what one can only assume is human feces, and the mattress on the single cot is covered in stains of unknown origin."
+      },
+      {
+        "Type": "Movement",
+        "Direction": "south",
+        "Destination": "cellblockhallway_west",
+        "RequiresObject": "key",
+        "Text": "You remember the key you found in the hotel room and wonder... It slides roughly into the lock on the cell door, and with just a little effort the key turns, the door unlocks, and slides open.",
+        "TriggersEvent": "OnOutOfJail"
+      }
+    ]
+  }
+]

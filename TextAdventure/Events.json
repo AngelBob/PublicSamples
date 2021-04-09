@@ -1,0 +1,94 @@
+[
+  {
+    "Id": "OnAssayerOutOfOffice",
+    "Repeats": 3,
+    "Action": {
+      "MoveObject": [
+        { "bag": "assayoffice" },
+        { "assayer": "jailcell2" }
+      ]
+    },
+    "Text": "At that moment, the sheriff walks in.  The sheriff and the assayer head into the back office.  Just as they disappear, you notice something slip from the sheriff's grasp."
+  },
+  {
+    "Id": "OnExamineBag"
+  },
+  {
+    "Id": "OnPayTheLady",
+    "Action": {
+      "MoveObject": [
+        { "lady": "invalid" },
+        { "player": "hotelroom1" }
+      ]
+    },
+    "TriggersEvent": "OnCabinetKeyVisible"
+  },
+  {
+    "Id": "OnCabinetKeyVisible"
+  },
+  {
+    "Id": "OnExamineCabinet",
+    "Action": {
+      "MoveObject": { "key": "hotelroom2" }
+    }
+  },
+  {
+    "Id": "OnBlackSmithStartAttack"
+  },
+  {
+    "Id": "OnBlackSmithAttack",
+    "Repeats": 4,
+    "TriggersEvent": "OnGoToJail"
+  },
+  {
+    "Id": "OnGoToJail",
+    "Action": {
+      "MoveObject": { "player": "jailcell2" }
+    },
+    "Text": "The sheriff steps between you and the smithy to break up the fight, and roughly escorts you to jail."
+  },
+  {
+    "Id": "OnOutOfJail",
+    "Action": {
+      "MoveObject": { "assayer": "assayoffice" }
+    }
+  },
+  {
+    "Id": "OnGoToJail2",
+    "Text": "The sheriff looks surprised to see you.  He quickly gathers himself, jumps from his chair, and tackles you.",
+    "Action": [
+      {
+        "MoveObject": [
+          { "player": "jailcell2" },
+          { "key": "invalid" }
+        ]
+      },
+      { "UntriggerEvent": [ "OnGoToJail2", "OnGoToJail" ] }
+    ]
+  },
+  {
+    "Id": "OnGoToJail3",
+    "Action": [
+      {
+        "MoveObject": [
+          { "player": "jailcell2" },
+          { "key": "invalid" }
+        ]
+      },
+      { "UntriggerEvent": [ "OnGoToJail3", "OnGoToJail" ] }
+    ]
+  },
+  {
+    "Id": "OnHavePosseIncrement",
+    "Repeats": 3,
+    "TriggersEvent": "OnHavePosseComplete"
+  },
+  {
+    "Id": "OnHavePosseComplete"
+  },
+  {
+    "Id": "OnGameOver",
+    "Text": "You and the posse have extracted Old West justice on the corrupt sheriff.  The barkeep invites everyone back to the saloon for drinks.  Someone asks, \"who will be the new sheriff?\"  Almost in unison, the crowd points and yells your name.  Congratulations, there's a new sheriff in town, and it's you.",
+    "Action": { "EndGame": true }
+  }
+]

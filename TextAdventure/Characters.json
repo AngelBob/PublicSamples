@@ -1,0 +1,295 @@
+﻿[
+  {
+    "Id": "49er",
+    "DisplayName": "49er",
+    "Location": "camp",
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The 49er is a leather skinned, grizzled old bear of a man.  He looks like he's been in the bush since birth."
+      },
+      {
+        "Type": "Interaction",
+        "Text": [
+          "Feeling better?  You were pretty drunk last night.",
+          "The camp looked like this when we got back yesterday.",
+          "Try retracing your steps, maybe you just left the bag somewhere.",
+          "You were at the saloon, and didn't get back here until nearly sun-up.",
+          "Uh huh."
+        ]
+      },
+      {
+        "Type": "Interaction",
+        "Text": "I'm not interested.",
+        "RequiresEvent" : "OnOutOfJail"
+      }
+    ]
+  },
+  {
+    "Id": "blacksmith",
+    "DisplayName": "Blacksmith",
+    "AltNames": [ "smithy", "smith" ],
+    "Location": "blacksmithshop",
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The smithy is a musclular man, possibly in his mid-30s."
+      },
+      {
+        "Type": "Interaction",
+        "Text": [
+          "Ugh, my head hurts, and I really don't want to be here today.",
+          "I am really tired of that guy.",
+          "One day he'll get his.",
+          "Damn Sheriff.",
+          "The Blacksmith is muttering under his breath, but you can't make out what he's saying."
+        ]
+      },
+      {
+        "Type": "Interaction",
+        "Text": [
+          "Yeah, the sherrif comes in once a week.",
+          "Takes ten percent of my earnings.",
+          "I'd really like do something about it.",
+          "Are you doing this?  Take me with you."
+        ],
+        "RequiresEvent" : "OnOutOfJail"
+      },
+      {
+        "Type": "Transact",
+        "SpecificVerb": "pay",
+        "Text": "The blacksmith refuses your money, saying he is too busy to take on any new work."
+      },
+      {
+        "Type": "Transact",
+        "SpecificVerb": "buy",
+        "Text": "The blacksmith apologizes, and says all of those are spoken for."
+      },
+      {
+        "Type": "Attack",
+        "Text": [
+          "Ooof.  Lucky blow.  The blacksmith lands a punch to your stomach.",
+          "Argh.  Another blow starts your ears ringing.",
+          "Ouch.  An uppercut comes out of nowhere, and you feel your legs start to buckle.",
+          "You manage to recover, and land the final blow.  The blacksmith slumps, unconscience, to the floor."
+        ],
+        "RequiresEvent": "OnBlacksmithStartAttack",
+        "TriggersEvent": "OnBlacksmithAttack"
+      },
+      {
+        "Type": "Attack",
+        "Text": "You can't reach the blacksmith from here, and he doesn't seem interested in a melee"
+      },
+      {
+        "Type": "Take",
+        "RequiresEvent": "OnOutOfJail",
+        "TriggersEvent": "OnHavePosseIncrement",
+        "Text": "The smithy agrees to join your posse."
+      }
+    ]
+  },
+  {
+    "Id": "shopkeeper",
+    "DisplayName": "Shop keeper",
+    "AltNames": [ "clerk" ],
+    "Location": "store",
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The shop keeper is a jovial fellow; his green apron is spotless, and his cap sits just so on his head."
+      },
+      {
+        "Type": "Interaction",
+        "Text": [
+          "Howdy!  Come back for more supplies today?",
+          "You didn't have quite enough money for everything yesterday.",
+          "Why don't you wait until after the sheriff comes by.",
+          "Have a look around."
+        ]
+      },
+      {
+        "Type": "Interaction",
+        "Text": [
+          "Yeah, the sherrif comes in once a week.",
+          "Takes ten percent of my earnings.",
+          "I'm getting really tired of it.",
+          "I'm ready to do something.  Take me with you."
+        ],
+        "RequiresEvent": "OnOutOfJail"
+      },
+      {
+        "Type": "Transact",
+        "Text": "I'm afraid you still don't have any money."
+      },
+      {
+        "Type": "Take",
+        "RequiresEvent": "OnOutOfJail",
+        "TriggersEvent": "OnHavePosseIncrement",
+        "Text": "The shop keeper agrees to join your posse."
+      }
+    ]
+  },
+  {
+    "Id": "assayer",
+    "DisplayName": "Assayer",
+    "Location": "assayoffice",
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The assayer is a slight mouse of a man, with round rimmed spectacles and a rumpled linen shirt."
+      },
+      {
+        "Type": "Interaction",
+        "Text": [
+          "Back to trade out the rest of your gold?",
+          "You didn't trade it all yesterday, the bag was still half full.",
+          "Ummm.  The sheriff might know something about that."
+        ],
+        "TriggersEvent": "OnAssayerOutOfOffice"
+      },
+      {
+        "Type": "Interaction",
+        "Text": [
+          "I've heard from others that the sheriff...",
+          "I... I... don't know if I should tell you...",
+          "The sheriff... he's... he's a bad man.",
+          "He's the one that... that... traded your gold.",
+          "I've heard other things, too.",
+          "The sheriff, he's been shaking down the businesses.",
+          "That's all I'm going to say."
+        ],
+        "RequiresEvent": "OnAssayerOutOfOffice"
+      },
+      {
+        "Type": "Interaction",
+        "Text": [
+          "Come back if you have gold to trade."
+        ],
+        "RequiresEvent": "OnOutOfJail"
+      }
+    ]
+  },
+  {
+    "Id": "barkeep",
+    "DisplayName": "Barkeep",
+    "AltNames": [ "barman", "bartender" ],
+    "Location": "saloon",
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The barkeep is a friendly man of medium build.  His salted hair belies his age, and the wrinkles around his eyes say he's been behind that bar a while."
+      },
+      {
+        "Type": "Interaction",
+        "Text": [
+          "In for some hair of the dog?",
+          "You got pretty far into your cups last night.",
+          "Was just you for a while.",
+          "About 10, Smithy joined you.",
+          "I had to kick you out at closing.",
+          "Ready for another?"
+        ]
+      },
+      {
+        "Type": "Interaction",
+        "Text": [
+          "Yeah, the sherrif comes in once a week.",
+          "Takes ten percent of my earnings.",
+          "I'd really like to crack a bottle over his head.",
+          "If you're going to get him, take me with you."
+        ],
+        "RequiresEvent": "OnOutOfJail"
+      },
+      { "Type": "Transact" },
+      {
+        "Type": "Take",
+        "RequiresEvent": "OnOutOfJail",
+        "TriggersEvent": "OnHavePosseIncrement",
+        "Text": "The barman agrees to join your posse."
+      }
+    ]
+  },
+  {
+    "Id": "sheriff",
+    "DisplayName": "Sheriff",
+    "Location": "sheriffsoffice",
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The sheriff sees you looking at him."
+      },
+      {
+        "Type": "Interaction",
+        "Text": [
+          "Yep",
+          "Nope"
+        ]
+      },
+      {
+        "Type": "Take",
+        "RequiresEvent": "OnHavePosseComplete",
+        "Text": "The sheriff is defiant, but appears resigned to his fate."
+      },
+      {
+        "Type": "Attack",
+        "Text": "The sheriff deftly avoids your attack, turns on you, and pins you to the ground",
+        "TriggersEvent": "OnGoToJail3"
+      },
+      {
+        "Type": "Attack",
+        "RequiresSpecificVerb": "hang",
+        "RequiresLocation": "meadow",
+        "RequiresEvent": "OnHavePosseComplete",
+        "TriggersEvent": "OnGameOver"
+      }
+    ]
+  },
+  {
+    "Id": "bankteller",
+    "DisplayName": "Teller",
+    "Location": "bank",
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The bank teller is a young woman with flowing dark hair.  She is dressed in a slightly out of date manner, and her feathered hat is showing signs of wear."
+      },
+      {
+        "Type": "Interaction",
+        "Text": [
+          "Deposit or withdrawal?",
+          "I can only do a deposit or withdrawal."
+        ]
+      }
+    ]
+  },
+  {
+    "Id": "lady",
+    "DisplayName": "Lady",
+    "Location": "saloon",
+    "Responses": [
+      {
+        "Type": "Examine",
+        "Text": "The lady has curling locks of red hair and bright green eyes.  She is dressed at the height of fashion, but the fit isn't quite right and some of the laces are untied."
+      },
+      {
+        "Type": "Interaction",
+        "Text": [
+          "Couldn't resist me, had to come back the next day, yeah?",
+          "Last night was such fun, we should do that again sometime.",
+          "Hey, this is business you know!"
+        ]
+      },
+      {
+        "Type": "Transact",
+        "Text": "I'm sorry, but I can't right now.  I've got another client waiting.  Maybe later."
+      },
+      {
+        "Type": "Transact",
+        "SpecificVerb": "pay",
+        "Text": "Let's head upstairs, hon.  By the way, when we're finished, you should check out the cabinet in the far room.",
+        "RequiresEvent": "OnExamineBag",
+        "TriggersEvent": "OnPayTheLady"
+      }
+    ]
+  }
+]

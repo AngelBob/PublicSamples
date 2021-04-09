@@ -1,0 +1,84 @@
+[
+  {
+    "Type": "Move",
+    "Verbs": [
+      "go",
+      "g",
+      "walk",
+      "run",
+      "meander",
+      "mosey"
+    ]
+  },
+  {
+    "Type": "Take",
+    "Verbs": [
+      "get",
+      "take",
+      "pick(up)"
+    ]
+  },
+  {
+    "Type": "Examine",
+    "Verbs": [
+      "look",
+      "examine",
+      "peer",
+      "squint",
+      "gaze",
+      "stare"
+    ]
+  },
+  {
+    "Type": "Discard",
+    "Verbs": [
+      "put",
+      "drop",
+      "throw(away)"
+    ]
+  },
+  {
+    "Type": "Throw",
+    "Verbs": [
+      "throw",
+      "toss",
+      "lob",
+      "alley(oop)"
+    ]
+  },
+  {
+    "Type": "Interaction",
+    "Verbs": [
+      "talk"
+    ]
+  },
+  {
+    "Type": "Attack",
+    "Verbs": [
+      "punch",
+      "hit",
+      "kick",
+      "scratch",
+      "hang"
+    ]
+  },
+  {
+    "Type": "Transact",
+    "Verbs": [
+      "give",
+      "hand",
+      "pass",
+      "pay",
+      "buy"
+    ]
+  },
+  {
+    "Type": "Game",
+    "Verbs": [
+      "quit",
+      "save",
+      "load",
+      "inventory"
+    ]
+  }
+]
