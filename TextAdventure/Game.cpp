@@ -20,7 +20,7 @@ void Game::OnLoad( void )
     for( auto& object : m_Objects )
     {
         // Place the characters and items into their starting locations
-        if( object->GetVisibility() )
+        if( object->GetVisibility() || object->GetPresence() )
         {
             // Visible objects get placed in their default locations.
             Location &location = m_Map->GetLocation( object->GetDefaultLocation() );
@@ -180,7 +180,14 @@ void Game::OnDiscard( const GameObjectData& objectData, Response* response )
             const std::string &name = m_Objects.at( objectData.id ).get()->GetDisplayName();
             if( ObjectType::OBJECT_ITEM == objectData.type )
             {
-                std::cout << "You don't have the " << name << " in your pockets." << std::endl;
+                if( objectData.haveIt )
+                {
+                    std::cout << "You don't want to drop the " << name << ".  You're going to need that." << std::endl;
+                }
+                else
+                {
+                    std::cout << "You don't have the " << name << " in your pockets." << std::endl;
+                }
             }
             else if( !objectData.haveIt )
             {
@@ -456,7 +463,9 @@ void Game::OnTrigger( InGameEvent* event, bool needNL )
 
                 if( "invalid" != moveObj.second )
                 {
-                    m_Map->GetLocation( moveObj.second ).AddObject( objId );
+                    // Item/character is moved to a particular location
+                    // on the map.
+                    m_Map->GetLocation(moveObj.second).AddObject(objId);
                 }
             }
         }
@@ -649,7 +658,7 @@ std::ostream& Game::PrintItems( std::ostream &os, size_t &numItems ) const
     std::copy_if( objectIds.begin(),
         objectIds.end(),
         std::back_inserter( itemIds ),
-        [ this ]( const int32_t id ) { return ( ObjectType::OBJECT_ITEM == m_Objects.at( id )->GetType() ); } );
+        [ this ]( const int32_t id ) { return ( ( ObjectType::OBJECT_ITEM == m_Objects.at( id )->GetType() ) && m_Objects.at( id )->GetVisibility() ); } );
 
     if( itemIds.size() )
     {

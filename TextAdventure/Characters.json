@@ -277,18 +277,27 @@
         "Text": [
           "Couldn't resist me, had to come back the next day, yeah?",
           "Last night was such fun, we should do that again sometime.",
-          "Hey, this is business you know!"
+          "Hey, this isn't free, you know, and you have no money!"
         ]
       },
       {
+        "Type": "Interaction",
+        "Text": [
+          "Couldn't resist me, had to come back the next day, yeah?",
+          "Looks like you have more money.",
+          "Hey, this isn't free, you know, you have to pay first!"
+        ],
+        "RequiresEvent": "OnWithdrawMoney"
+      },
+      {
         "Type": "Transact",
-        "Text": "I'm sorry, but I can't right now.  I've got another client waiting.  Maybe later."
+        "Text": "With what?  You have no money.  Sorry, it's just business."
       },
       {
         "Type": "Transact",
         "SpecificVerb": "pay",
-        "Text": "Let's head upstairs, hon.  By the way, when we're finished, you should check out the cabinet in the far room.",
-        "RequiresEvent": "OnExamineBag",
+        "Text": "Let's head upstairs, hon...",
+        "RequiresEvent": "OnWithdrawMoney",
         "TriggersEvent": "OnPayTheLady"
       }
     ]
