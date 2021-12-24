@@ -18,6 +18,7 @@ enum class MoveDirection
     MOVE_NORTH_WEST,
     MOVE_UP,
     MOVE_DOWN,
+    MOVE_ANY,
     MAX_DIRECTIONS
 };
 
@@ -44,7 +45,7 @@ public:
     int32_t FindObject( int32_t obejctId ) const;
 
 private:
-    inline static const MoveDirectionToNameMap m_MoveDirectionToNameMap[ 11 ] = {
+    inline static const MoveDirectionToNameMap m_MoveDirectionToNameMap[ 12 ] = {
         { MoveDirection::MOVE_INVALID, "invalid" },
         { MoveDirection::MOVE_NORTH, "north" },
         { MoveDirection::MOVE_NORTH_EAST, "north east" },
@@ -56,6 +57,7 @@ private:
         { MoveDirection::MOVE_NORTH_WEST, "north west" },
         { MoveDirection::MOVE_UP, "up" },
         { MoveDirection::MOVE_DOWN, "down" },
+        { MoveDirection::MOVE_ANY, "any" },
     };
     std::map<std::string, MoveDirection> m_NameToMoveDirectionMap;
 

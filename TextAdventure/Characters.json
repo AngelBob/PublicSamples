@@ -158,7 +158,8 @@
           "The sheriff, he's been shaking down the businesses.",
           "That's all I'm going to say."
         ],
-        "RequiresEvent": "OnAssayerOutOfOffice"
+        "RequiresEvent": "OnAssayerOutOfOffice",
+        "TriggersEvent": "OnStuckJailCount"
       },
       {
         "Type": "Interaction",

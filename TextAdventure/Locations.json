@@ -690,7 +690,26 @@
     "Responses": [
       {
         "Type": "Examine",
-        "Text": "The jail cell is not as nice as the sheriff's office.  There is dirt everywhere, small piles of what one can only assume is human feces, and the mattress on the single cot is covered in stains of unknown origin."
+        "Text": "The jail cell is not as nice as the sheriff's office.  There is dirt everywhere, small piles of what one can only assume is human feces, and the mattress on the single cot is covered in stains of unknown origin.",
+        "TriggersEvent": "OnStuckJailCount"
+      },
+      {
+        "Type": "Movement",
+        "Direction": "any",
+        "Destination": "jailcell2",
+        "Text": [
+           "You are starting to feel a bit alone.",
+           "You might try pacing.",
+           "The floor is getting a bit worn.",
+           "Your mouth is getting parched.",
+           "You begin to think the sheriff has forgotten about you.",
+           "Your stomach is getting a bit grumbly.",
+           "Your energy is really starting to wane.",
+           "You should probably lie down.",
+           "You no longer have any energy.",
+           "Your breathing has become very shallow."
+        ],
+        "TriggersEvent": "OnStuckJailCount"
       },
       {
         "Type": "Movement",

@@ -114,7 +114,8 @@ void GameLoop( Game& game )
         case Parser::ParsedType::PARSED_TYPE_GAME:
             // Game directive is to do one of:
             // quit, save, or load (currently only quit is supported)
-            if( 0 == comparitor.compare( parser->GetLastVerb(), "quit" ) )
+            if( 0 == comparitor.compare( parser->GetLastVerb(), "quit" ) ||
+                0 == comparitor.compare( parser->GetLastVerb(), "exit" ) )
             {
                 quit = true;
             }
