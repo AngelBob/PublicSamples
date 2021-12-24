@@ -155,6 +155,9 @@ InGameObject::InGameObject(
 	}
 	m_IsVisible = objectJson.value( "IsVisible", true );
 
+	// Objects can be invisible, but still present
+	// These objects require a transaction to acquire
+	m_IsPresent = objectJson.value( "IsPresent", false );
 
 	assert( objectJson.at( "Responses" ).is_array() );
 	for( auto& it : objectJson.at( "Responses" ) )
@@ -321,4 +324,9 @@ std::vector<std::shared_ptr<Response>>& InGameObject::GetResponses( ResponseType
 bool InGameObject::GetVisibility( void ) const
 {
 	return m_IsVisible;
+}
+
+bool InGameObject::GetPresence(void) const
+{
+	return m_IsPresent;
 }

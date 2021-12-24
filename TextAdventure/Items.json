@@ -117,7 +117,7 @@
     "Responses": [
       {
         "Type": "Examine",
-        "Text": "A closer look reveals a key hidden under one of the wrinkles in the velvet runner.",
+        "Text": "A closer look reveals a key misplaced under the old cabinet.",
         "RequiresEvent": "OnCabinetKeyVisible",
         "TriggersEvent": "OnExamineCabinet"
       },
@@ -152,6 +152,32 @@
         "Type": "Throw",
         "RequiresPossession": true,
         "Text": "You hear a faint ringing sound as the key lands several yards away."
+      }
+    ]
+  },
+  {
+    "Id": "money",
+    "DisplayName": "$10",
+    "AltNames": [ "money", "cash", "$10" ],
+    "Location": "bank",
+    "IsVisible": false,
+    "IsPresent": true,
+    "Description": "a nice, crisp $10 bill",
+    "Responses": [
+      {
+        "Type": "Take",
+        "Text": "The teller hands you $10.",
+        "RequiresLocation": "bank",
+        "RequiresVerb": "withdraw",
+        "TriggersEvent": "OnWithdrawMoney"
+      },
+      {
+        "Type": "Discard",
+        "Text": "You hand the teller your cash.",
+        "RequiresLocation": "bank",
+        "RequiresVerb": "deposit",
+        "RequiresPossession": true,
+        "TriggersEvent": "OnDepositMoney"
       }
     ]
   }

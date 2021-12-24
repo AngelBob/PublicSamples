@@ -15,7 +15,8 @@
     "Verbs": [
       "get",
       "take",
-      "pick(up)"
+      "pick(up)",
+      "withdraw"
     ]
   },
   {
@@ -34,7 +35,8 @@
     "Verbs": [
       "put",
       "drop",
-      "throw(away)"
+      "throw(away)",
+      "deposit"
     ]
   },
   {

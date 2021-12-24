@@ -14,13 +14,29 @@
     "Id": "OnExamineBag"
   },
   {
+    "Id": "OnWithdrawMoney",
+    "Action": {
+        "UntriggerEvent": "OnDepositMoney"
+    },
+    "Text": "The teller says this is that last of your cash."
+  },
+  {
+    "Id": "OnDepositMoney",
+    "Action": {
+        "UntriggerEvent": "OnWithdrawMoney"
+    },
+    "Text": "The teller says your money is safe in the bank."
+  },
+  {
     "Id": "OnPayTheLady",
     "Action": {
       "MoveObject": [
         { "lady": "invalid" },
-        { "player": "hotelroom1" }
-      ]
+        { "player": "hotelroom2" }
+      ],
+      "MakeInvisible": "money"
     },
+    "Text": "Time passes...  The lady leaves you.  While relaxing you notice something under the cabinet.",
     "TriggersEvent": "OnCabinetKeyVisible"
   },
   {

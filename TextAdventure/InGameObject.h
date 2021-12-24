@@ -107,6 +107,7 @@ public:
 	std::vector<std::shared_ptr<Response>>& GetResponses( ResponseType type );
 
 	bool GetVisibility( void ) const;
+	bool GetPresence( void ) const;
 
 protected:
 	int32_t		m_GlobalId;
@@ -118,6 +119,7 @@ protected:
 	std::string m_DefaultLocation;
 
 	bool m_IsVisible;
+	bool m_IsPresent;
 
 	// Responses
 	std::array<std::vector<std::shared_ptr<Response>>, static_cast<size_t>( ResponseType::RESPONSE_TYPE_MAX )> m_Responses;
