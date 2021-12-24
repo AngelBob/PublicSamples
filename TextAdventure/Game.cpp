@@ -857,7 +857,7 @@ Response* Game::GetBestResponse( const GameObjectData& objectData, const std::st
         {
             // Movement requires matching direction as well
             MoveDirection moveDir = m_Map->GetDirectionEnum( thisResponse->GetMoveDirection() );
-            if( objectData.dir != moveDir )
+            if( ( objectData.dir != moveDir ) && ( moveDir != MoveDirection::MOVE_ANY ) )
             {
                 // Movement is in the wrong direction for this response
                 continue;

@@ -79,6 +79,11 @@
     ]
   },
   {
+    "Id": "OnStuckJailCount",
+    "Repeats": 10,
+    "TriggersEvent": "OnGameReset"
+  },
+  {
     "Id": "OnHavePosseIncrement",
     "Repeats": 3,
     "TriggersEvent": "OnHavePosseComplete"
@@ -89,6 +94,11 @@
   {
     "Id": "OnGameOver",
     "Text": "You and the posse have extracted Old West justice on the corrupt sheriff.  The barkeep invites everyone back to the saloon for drinks.  Someone asks, \"who will be the new sheriff?\"  Almost in unison, the crowd points and yells your name.  Congratulations, there's a new sheriff in town, and it's you.",
+    "Action": { "EndGame": true }
+  },
+  {
+    "Id": "OnGameReset",
+    "Text": "You never thought it would end this way.  Stuck in a dirty jail cell.  The last thing your tired eyes see is the cracked, peeled paint of the cell ceiling.  \r\n**** You have died ****",
     "Action": { "EndGame": true }
   }
 ]
