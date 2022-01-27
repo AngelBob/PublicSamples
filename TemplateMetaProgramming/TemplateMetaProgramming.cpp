@@ -49,14 +49,14 @@ struct SpreadSheetColumnName<0>
     static const uint64_t result = 0;
 };
 
-// 3) has_a_thing
+// 3) has_thing
 // If it's necessary to do determine if the member "thing" exists in the incoming type T.
 // Can use template meta-programming to do this.
 // This bit requires C++17 standard to compile (static_assert & if constexpr).
 // Didn't come up with this on my own; both methods come from the link here
 // see https://stackoverflow.com/questions/1005476/how-to-detect-whether-there-is-a-specific-member-variable-in-class
-#if 1
 
+/*
 template <typename T>
 struct has_thing
 {
@@ -66,10 +66,9 @@ struct has_thing
     static_assert( sizeof( yes_thing ) != sizeof( no_thing ) );
 
     // Here's the first part of the magic:
-    // If the incoming type has member m_RenderTargetMask, then the compiler
-    // will choose the first test() function implementation.  If there is no
-    // m_RenderTargetMask member, then the second, variadic override will be
-    // used.
+    // If the incoming type has member "thing", then the compiler will choose
+    // the first test() function implementation.  If there is no "thing" member
+    // then the second, variadic override will be used.
     template <typename C> static yes_thing test( decltype( C::thing ) );
     template <typename C> static  no_thing test( ... );
 
@@ -80,16 +79,14 @@ struct has_thing
     static const int value = ( sizeof( test< T >( 0 ) ) == sizeof( yes_thing ) );
 };
 
-#else
-
+/*/
 // A much simpler version of the stuff above
 template <typename T, typename = int>
 struct has_thing : std::false_type {};
 
 template <typename T>
 struct has_thing<T, decltype( ( void ) T::thing, 0 )> : std::true_type {};
-
-#endif
+//*/
 
 template <typename T>
 static inline void DoesTHaveThing( T p )
@@ -104,9 +101,28 @@ static inline void DoesTHaveThing( T p )
     }
 }
 
+/*
+// This implementation of the macro results in a compile error.
+#define DoesTHaveThingMacro( p )                                               \
+{                                                                              \
+    if constexpr( has_thing<decltype(p)>::value )                              \
+    {                                                                          \
+        std::cout << "Thing was present in type T: " << p.thing << "\n\t"; \
+    }                                                                          \
+    else                                                                       \
+    {                                                                          \
+        std::cout << "No Thing was present in type T" << "\n\t";               \
+    }                                                                          \
+}
+/*/
+// This implementation of the "macro" works.
+#define DoesTHaveThingMacro( p )  DoesTHaveThing( p )
+//*/
+
 struct IHaveThing
 {
     uint64_t thing;
+
     IHaveThing() : thing( 16 )
     {}
 };
@@ -114,6 +130,7 @@ struct IHaveThing
 struct NoThingHere
 {
     uint64_t no_thing;
+
     NoThingHere() : no_thing( 32 )
     {}
 };
@@ -233,7 +250,11 @@ int main()
     NoThingHere b;
 
     DoesTHaveThing( a );
+    DoesTHaveThingMacro( a );
+
     DoesTHaveThing( b );
+    DoesTHaveThingMacro( b );
+
     std::cout << "\n====\n\n";
 
     // 4) bit mask and bit mask range test
