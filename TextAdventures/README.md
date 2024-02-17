@@ -13,4 +13,9 @@ Throughout the game you will need to acquire some objects in order to complete t
 Use the `help` command to remind you of the game's operation  
 
 # Seems Kinda Dumb, is it Fun?
+
 Well, I think so.  
+
+# But Why?
+
+Several years ago my son had a computer science class in highschool, and his final project there was to write an adventure game.  I had instant flashbacks to the old Infocom&trade; days, and decided to try my hand.  How hard could it be?  The old Apple&nbsp;]\[&trade; games fit on a 1.5MB floppy disk, it should be simple, right?  Fast forward some several years, and I think I finally have the first game playable.  At least it's possible to finish now, which the very first version wasn't.  It turns out that natural language parsing, even in this simplified format, is tricky, because humans are tricky and will always do something unexpected.  
