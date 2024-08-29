@@ -134,7 +134,8 @@ public:
         // cells in an attempt to create a cell with only a single
         // possible value.
         bool strategies_exhausted = false;
-        size_t search_type = SEARCH_STRATEGY::STRATEGY_HIDDEN_SINGLE;
+        size_t search_type = parameters.test_strategy;
+
 
         if( parameters.annotations.test( ANNOTATION_BITS::ANNOTATIONS_BASIC ) )
         {
@@ -203,7 +204,14 @@ public:
                 }
             }
 
-            if( was_successful )
+            if( parameters.is_test )
+            {
+                // Test run should try once using only the requested strategy
+                // and that attempt should have found a match.
+                ASSERT( was_successful );
+                strategies_exhausted = true;
+            }
+            else if( was_successful )
             {
                 // Something worked, restart the search strategies.
                 search_type = SEARCH_STRATEGY::STRATEGY_HIDDEN_SINGLE;

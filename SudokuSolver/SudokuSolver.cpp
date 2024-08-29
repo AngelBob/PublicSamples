@@ -16,11 +16,48 @@
 #include "cell.hpp"
 #include "grid.hpp"
 
+static const std::array<const char*, SEARCH_STRATEGY::STRATEGY_END> strategy_test_files = {
+    "test0_hidden_single.txt",
+    "test1_pointing_pair.txt",
+    "test2_naked_pair.txt",
+    "test3_hidden_pair.txt",
+    "test4_naked_triplet.txt",
+    "test5_hidden_triplet.txt",
+    "test6_x_wing.txt",
+    "test7_xy_wing.txt",
+    "test8_swordfish.txt"
+};
+
 void print_grid( const size_t round, const grid& grid );
 
-static bool parse_args( std::vector<std::string> parameter_strings, PROGRAM_ARGS& parsed_parameters )
+bool get_strategy( char this_number, uint32_t& strategy )
 {
-    size_t param_type = 0;
+    bool have_value = false;
+
+    if( ( '0' <= this_number ) && ( this_number <= '9' ) )
+    {
+        strategy *= 10;
+        strategy += ( this_number - '0' );
+
+        have_value = true;
+    }
+
+    return ( have_value &&
+             ( ( SEARCH_STRATEGY::STRATEGY_HIDDEN_SINGLE <= strategy ) &&
+               ( strategy < SEARCH_STRATEGY::STRATEGY_END )
+             )
+           );
+}
+
+bool parse_args( std::vector<std::string> parameter_strings, PROGRAM_ARGS& parsed_parameters )
+{
+    uint32_t param_type = 0;
+    uint32_t annotation_bits = 0;
+
+    uint32_t start_strategy = SEARCH_STRATEGY::STRATEGY_HIDDEN_SINGLE;
+    bool have_strategy = false;
+
+    char last_parameter = '\0';
     for( std::string& parameter : parameter_strings )
     {
         while( '-' == parameter[ 0 ] )
@@ -32,41 +69,70 @@ static bool parse_args( std::vector<std::string> parameter_strings, PROGRAM_ARGS
         switch( param_type )
         {
         case 0:
-            // No leading dash, so probably a file name
-            parsed_parameters.input_file = parameter;
+            // No leading dash, either a file name or a test parameter
+            if( 't' == last_parameter )
+            {
+                for( char this_character : parameter )
+                {
+                    have_strategy = get_strategy( this_character, start_strategy );
+                    if( !have_strategy )
+                    {
+                        start_strategy = 0;
+                    }
+                }
+            }
+            else
+            {
+                parsed_parameters.input_file = parameter;
+            }
             break;
 
         case 1:
             {
                 // Single leading dash, so a list of short parameters
-                char last_parameter = '\0';
-                for( char this_parameter : parameter )
+                for( char this_character : parameter )
                 {
-                    switch( this_parameter )
+                    switch( this_character )
                     {
                     case 'v':
-                        if( 'v' == this_parameter )
+                        if( 'v' == this_character )
                         {
                             if( 'v' == last_parameter )
                             {
-                                parsed_parameters.annotations.set( ANNOTATION_BITS::ANNOTATIONS_EXTENDED );
+                                annotation_bits <<= 1;
+                                annotation_bits |= 1;
                             }
                             else
                             {
-                                parsed_parameters.annotations.set( ANNOTATION_BITS::ANNOTATIONS_BASIC );
+                                annotation_bits = 1;
                             }
-
                             last_parameter = 'v';
                         }
                         break;
 
+                    case 't':
+                        // Test run; which test?
+                        last_parameter = 't';
+                        break;
+                    
                     case '?':
                     case 'h':
                         // Print the help text and exit
                         return false;
 
                     default:
-                        last_parameter = '\0';
+                        if( 't' == last_parameter )
+                        {
+                            have_strategy = get_strategy( this_character, start_strategy );
+                            if( !have_strategy )
+                            {
+                                start_strategy = 0;
+                            }
+                        }
+                        else
+                        {
+                            last_parameter = '\0';
+                        }
                         break;
                     }
                 }
@@ -77,12 +143,15 @@ static bool parse_args( std::vector<std::string> parameter_strings, PROGRAM_ARGS
             // Double leading dash, so a long parameter
             if( "verbose" == parameter )
             {
-                parsed_parameters.annotations.set( ANNOTATION_BITS::ANNOTATIONS_BASIC );
+                annotation_bits = 1;
             }
             else if( "noisy" == parameter )
             {
-                parsed_parameters.annotations.set( ANNOTATION_BITS::ANNOTATIONS_BASIC );
-                parsed_parameters.annotations.set( ANNOTATION_BITS::ANNOTATIONS_EXTENDED );
+                annotation_bits = 3;
+            }
+            else if( "test" == parameter )
+            {
+                last_parameter = 't';
             }
             else if( "help" == parameter )
             {
@@ -93,6 +162,25 @@ static bool parse_args( std::vector<std::string> parameter_strings, PROGRAM_ARGS
 
         param_type = 0;
     }
+
+    // Parsed the params, now translate them into the parameters structure.
+    if( have_strategy )
+    {
+        parsed_parameters.input_file = strategy_test_files[ start_strategy ];
+        parsed_parameters.test_strategy = start_strategy;
+        parsed_parameters.is_test = true;
+
+        // Testing turns on verbose output for validation
+        annotation_bits = 3;
+    }
+
+    uint32_t bit = 0;
+    while( annotation_bits )
+    {
+        parsed_parameters.annotations.set( bit++ );
+        annotation_bits >>= 1;
+    }
+
 
     return true;
 }
@@ -292,11 +380,7 @@ static void print_table_header( const size_t round, const size_t box_size )
     {
         std::cout << "Starting grid:\n";
     }
-    else if( static_cast<size_t>( -1 ) == round )
-    {
-        std::cout << "Solved grid:\n";
-    }
-    else
+    else if( static_cast<size_t>( -1 ) != round )
     {
         std::cout << "Solver round " << round << "\n";
     }
@@ -388,20 +472,19 @@ static void print_grid( const size_t round, const grid& board )
     std::cout << std::endl;
 }
 
-static bool solve_grid( grid& board, size_t known_value_count )
+static bool solve_grid( grid& board, size_t known_value_count, bool is_test )
 {
     // Move through each of the cells looking for
     // a cell that can take exactly one value.
     const size_t total_value_count = board.get_grid_size() * board.get_grid_size();
 
-    size_t round = 1;
+    size_t round = 0;
     bool found_value = true;
 
     do
     {
-#ifdef _DEBUG
+        print_grid( round++, board );
         board.dump_possibles();
-#endif
 
         std::vector<std::pair<cell*, cell_value_t>> solved_cells;
         board.update_possibles( solved_cells );
@@ -422,17 +505,12 @@ static bool solve_grid( grid& board, size_t known_value_count )
 
         known_value_count += solved_cells.size();
 
-#ifdef _DEBUG
-        print_grid( round++, board );
-
         board.validate_cells();
         if( !found_value )
         {
             board.dump_possibles();
-            ASSERT( found_value );
         }
-#endif
-    } while( ( total_value_count != known_value_count ) && found_value );
+    } while( ( total_value_count != known_value_count ) && found_value && !is_test );
 
     return ( total_value_count == known_value_count );
 }
@@ -463,7 +541,7 @@ int main( int argc, char* argv[] )
 
     // First parameter string is the executable name, just burn that one.
     std::vector<std::string> program_args( argv + 1, argv + argc );
-    PROGRAM_ARGS parsed_parameters;
+    PROGRAM_ARGS parsed_parameters{};
     if( !parse_args( program_args, parsed_parameters ) )
     {
         print_help();
@@ -474,9 +552,7 @@ int main( int argc, char* argv[] )
 
     fill_grid( board, known_value_count, parsed_parameters.input_file );
 
-    print_grid( 0, board );
-
-    bool solved = solve_grid( board, known_value_count );
+    bool solved = solve_grid( board, known_value_count, parsed_parameters.is_test );
     if( solved )
     {
         std::cout << "\nFound a solution:" << std::endl;

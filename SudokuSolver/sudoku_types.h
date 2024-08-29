@@ -37,7 +37,9 @@ typedef enum _ANNOTATION_BITS
 typedef struct _PROGRAM_ARGS
 {
     std::bitset<8> annotations;
+    uint32_t       test_strategy;
     std::string    input_file;
+    bool           is_test;
 } PROGRAM_ARGS;
 
 class cell;
