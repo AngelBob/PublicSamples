@@ -1,8 +1,5 @@
 #pragma once
 
-#include <array>
-#include <list>
-
 #include "debug.h"
 #include "sudoku_types.h"
 #include "cell.hpp"

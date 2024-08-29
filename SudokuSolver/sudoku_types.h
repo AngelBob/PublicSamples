@@ -1,8 +1,16 @@
 #pragma once
 
+#include <algorithm>
+#include <array>
 #include <bitset>
+#include <conio.h>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <limits>
 #include <list>
 #include <memory>
+#include <sstream>
 #include <vector>
 
 typedef enum _BLOCK_TYPE

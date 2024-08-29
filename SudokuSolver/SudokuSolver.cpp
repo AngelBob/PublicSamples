@@ -2,13 +2,6 @@
 //
 #define __STDC_WANT_LIB_EXT1__ 1
 
-#include <algorithm>
-#include <conio.h>
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <sstream>
-
 #include "debug.h"
 #include "sudoku_types.h"
 

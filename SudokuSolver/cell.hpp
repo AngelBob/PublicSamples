@@ -1,8 +1,5 @@
 #pragma once
 
-#include <cassert>
-#include <list>
-
 #include "debug.h"
 #include "sudoku_types.h"
 
@@ -43,7 +40,7 @@ public:
     {
         // known_value is either unset or was set at cell creation time.
         // Engine will call set_value with the known value at grid init time.
-        assert( 0 == known_value  || value == known_value );
+        ASSERT( 0 == known_value  || value == known_value );
         known_value = value;
 
         // No other values are possible once the cell value is known.

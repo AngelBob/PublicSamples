@@ -54,13 +54,13 @@ public:
         size_t col = new_cell->get_column();
         size_t box = ( ( row / box_size ) * box_size ) + ( col / box_size );
 
-        assert( row < block_arrays[BLOCK_TYPE::BLOCK_TYPE_ROW].size() );
+        ASSERT( row < block_arrays[BLOCK_TYPE::BLOCK_TYPE_ROW].size() );
         block_arrays[ BLOCK_TYPE::BLOCK_TYPE_ROW ][ row ]->emplace_back( new_cell );
 
-        assert( col < block_arrays[ BLOCK_TYPE::BLOCK_TYPE_COL ].size() );
+        ASSERT( col < block_arrays[ BLOCK_TYPE::BLOCK_TYPE_COL ].size() );
         block_arrays[ BLOCK_TYPE::BLOCK_TYPE_COL ][ col ]->emplace_back( new_cell );
 
-        assert( box < block_arrays[ BLOCK_TYPE::BLOCK_TYPE_BOX ].size() );
+        ASSERT( box < block_arrays[ BLOCK_TYPE::BLOCK_TYPE_BOX ].size() );
         block_arrays[ BLOCK_TYPE::BLOCK_TYPE_BOX ][ box ]->emplace_back( new_cell );
     }
 
@@ -69,12 +69,12 @@ public:
         // Set the possible values on each cell.
         for( std::shared_ptr<block>& row : block_arrays[ BLOCK_TYPE::BLOCK_TYPE_ROW ] )
         {
-            assert( BLOCK_TYPE::BLOCK_TYPE_ROW == row->get_type() );
+            ASSERT( BLOCK_TYPE::BLOCK_TYPE_ROW == row->get_type() );
 
             cell_array_t& cells = row->get_cells();
             for( std::shared_ptr<cell>& cell : cells )
             {
-                assert( cell->get_row() == row->get_index() );
+                ASSERT( cell->get_row() == row->get_index() );
                 cell->init_possible_values( grid_size );
             }
         }
@@ -84,7 +84,7 @@ public:
         {
             for( std::shared_ptr<block>& block_array : block_arrays[ block_type ] )
             {
-                assert( static_cast<BLOCK_TYPE>( block_type ) == block_array->get_type() );
+                ASSERT( static_cast<BLOCK_TYPE>( block_type ) == block_array->get_type() );
 
                 // Set the needed values for each block.
                 block_array->init_needed_values( grid_size );
