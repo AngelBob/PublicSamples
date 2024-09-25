@@ -103,6 +103,18 @@ public:
         return possible_values;
     }
 
+    void print_value( size_t col_width ) const
+    {
+        if( known_value )
+        {
+            std::cout << std::setw( col_width ) << std::right << static_cast<char>( known_value + '0' );
+        }
+        else
+        {
+            std::cout << std::setw( col_width ) << std::right << "_";
+        }
+    }
+
     void dump_possibles( size_t grid_size, size_t box_size ) const
     {
         std::vector<char> value_text;
@@ -115,15 +127,6 @@ public:
             value_text[ possible_value - 1 ] = static_cast<char>( possible_value + '0' );
         }
         std::cout << value_text.data();
-
-        if( 0 == ( col_idx % box_size ) )
-        {
-            std::cout << "|";
-        }
-        else
-        {
-            std::cout << ":";
-        }
     }
 
     cell_value_t has_exactly_one_value( void )

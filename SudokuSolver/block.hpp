@@ -61,13 +61,41 @@ public:
         return needed_values;
     }
 
-    void dump_possibles( size_t grid_size, size_t box_size ) const
+    void print_row( size_t box_size, size_t leader_width, size_t col_width ) const
     {
-        std::cout << static_cast<char>( block_index + 'A' ) << " |";
+        std::cout << std::setw( leader_width ) << std::left << static_cast<char>( block_index + 'A' ) << "|";
 
+        size_t col_idx = 0;
+        for( const std::shared_ptr<cell>& row_cell : block_cells )
+        {
+            row_cell->print_value( col_width );
+
+            if( 0 == ( ++col_idx % box_size ) )
+            {
+                std::cout << " |";
+            }
+        }
+
+        std::cout << std::endl;
+    }
+
+    void dump_possibles( size_t grid_size, size_t box_size, size_t leader_width ) const
+    {
+        std::cout << std::setw( leader_width ) << std::left << static_cast< char >( block_index + 'A' ) << "|";
+
+        size_t col_idx = 0;
         for( const std::shared_ptr<cell>& row_cell : block_cells )
         {
             row_cell->dump_possibles( grid_size, box_size );
+
+            if( 0 == ( ++col_idx % box_size ) )
+            {
+                std::cout << "|";
+            }
+            else
+            {
+                std::cout << ":";
+            }
         }
 
         std::cout << std::endl;
@@ -224,6 +252,13 @@ public:
     }
 
 private:
+    void print_row_leader( size_t leader_width )
+    {
+        ASSERT( BLOCK_TYPE::BLOCK_TYPE_ROW == block_type );
+
+        std::cout << std::setw( leader_width ) << std::left << static_cast<char>( block_index + 'A' ) << "|";
+    }
+
     BLOCK_TYPE   block_type;
     size_t       block_index;
 

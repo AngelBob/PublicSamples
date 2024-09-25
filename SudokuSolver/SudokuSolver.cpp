@@ -21,8 +21,6 @@ static const std::array<const char*, SEARCH_STRATEGY::STRATEGY_END> strategy_tes
     "test8_swordfish.txt"
 };
 
-void print_grid( const size_t round, const grid& grid );
-
 bool get_strategy( char this_number, uint32_t& strategy )
 {
     bool have_value = false;
@@ -318,153 +316,6 @@ static void fill_grid( grid& board, size_t& known_value_count, const std::string
     initialize_grid_data( board );
 }
 
-static size_t print_row_leader( const size_t grid_size, const size_t row = static_cast<size_t>( -1 ) )
-{
-    size_t row_width = 0;
-    size_t row_divisor = grid_size / 10;
-    do
-    {
-        ++row_width;
-        row_divisor /= 10;
-    } while( row_divisor );
-
-    char row_name = ' ';
-    if( static_cast<size_t>( -1 ) != row )
-    {
-        row_name = static_cast<char>( row + 'A' );
-    }
-    std::cout << std::setw( row_width ) << row_name;
-
-    // Add one space between row numbers and grid
-    std::cout << " ";
-
-    return row_width + 1; // Add an extra space between the numbers
-}
-
-static void print_col_separator( const size_t col, const size_t box_size, const bool is_separator_row )
-{
-    std::string spacer( " " );
-    std::string separator( "|" );
-    if( is_separator_row )
-    {
-        spacer = "-";
-        separator = "+";
-    }
-
-    if( 0 == ( col % box_size ) )
-    {
-        if( 0 != col )
-        {
-            std::cout << spacer;
-        }
-        std::cout << separator;
-    }
-}
-
-static void print_table_header( const size_t round, const size_t box_size )
-{
-    size_t grid_size = box_size * box_size;
-
-    // Print a blank line first
-    std::cout << std::endl;
-
-    // Print the round
-    if( 0 == round )
-    {
-        std::cout << "Starting grid:\n";
-    }
-    else if( static_cast<size_t>( -1 ) != round )
-    {
-        std::cout << "Solver round " << round << "\n";
-    }
-
-    // Offset for row number width
-    size_t row_width = print_row_leader( grid_size );
-
-    // Write the column number and skip the separator if necessary
-    for( size_t col = 0; col < grid_size; ++col )
-    {
-        if( 0 == ( col % box_size ) )
-        {
-            if( 0 != col )
-            {
-                std::cout << " ";
-            }
-            std::cout << " ";
-        }
-
-        std::cout << std::setw( row_width ) << ( col + 1 );
-    }
-
-    // Move to the next line
-    std::cout << "\n";
-}
-
-static void print_row_separator( const size_t box_size )
-{
-    size_t grid_size = box_size * box_size;
-
-    size_t row_width = print_row_leader( grid_size );
-
-    for( size_t col = 0; col < grid_size; ++col )
-    {
-        print_col_separator( col, box_size, true );
-
-        std::cout << std::string( row_width, '-' );
-    }
-    std::cout << "-+\n";
-}
-
-static void print_value( const cell_value_t value, const size_t row_width )
-{
-    if( 0 != value )
-    {
-        std::cout << std::setw( row_width ) << static_cast<uint16_t>( value );
-    }
-    else
-    {
-        ASSERT( row_width >= 2 );
-        std::cout << " ";
-        std::cout << std::string( row_width - 1 , '_' );
-    }
-}
-
-static void print_grid( const size_t round, const grid& board )
-{
-    size_t grid_size = board.get_grid_size();
-    size_t box_size = board.get_box_size();
-
-    print_table_header( round, box_size );
-
-    const block_array_t& rows = board.get_rows();
-    size_t row_idx = 0;
-    for( const std::shared_ptr<block>& row : rows )
-    {
-        if( 0 == ( row_idx % box_size ) )
-        {
-            print_row_separator( box_size );
-        }
-
-        size_t row_width = print_row_leader( grid_size, row_idx );
-
-        cell_array_t cells = row.get()->get_cells();
-        size_t col_idx = 0;
-        for( std::shared_ptr<cell>& cell : cells )
-        {
-            print_col_separator( col_idx, box_size, false );
-            print_value( cell.get()->get_value(), row_width );
-            ++col_idx;
-        }
-
-        std::cout << " |\n";
-        ++row_idx;
-    }
-
-    print_row_separator( box_size );
-
-    std::cout << std::endl;
-}
-
 static bool solve_grid( grid& board, size_t known_value_count, bool is_test )
 {
     // Move through each of the cells looking for
@@ -476,7 +327,7 @@ static bool solve_grid( grid& board, size_t known_value_count, bool is_test )
 
     do
     {
-        print_grid( round++, board );
+        board.print_grid( round++ );
         board.dump_possibles();
 
         std::vector<std::pair<cell*, cell_value_t>> solved_cells;
@@ -555,7 +406,7 @@ int main( int argc, char* argv[] )
         std::cout << "\nDid not find a solution:" << std::endl;
     }
 
-    print_grid( static_cast<size_t>( -1 ), board );
+    board.print_grid( static_cast<size_t>( -1 ) );
 
     return ( solved ) ? 0 : -2;
 }

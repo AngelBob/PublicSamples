@@ -288,34 +288,63 @@ public:
     {
         if( parameters.annotations.test( ANNOTATION_BITS::ANNOTATIONS_EXTENDED ) )
         {
-            size_t row_width = 0;
-            size_t row_divisor = grid_size / 10;
-            do
-            {
-                ++row_width;
-                row_divisor /= 10;
-            } while( row_divisor );
-
-            size_t col_width = grid_size + row_width;
+            // Print possible values grid two line header.
+            std::cout << "Possible values grid:\n";
 
             // Print a blank line and a leader
-            print_possibles_grid_header( row_width, col_width );
+            size_t leader_width = get_row_leader_width();
+            print_grid_row_separator( leader_width, grid_size, true, true );
 
             size_t row_index = 0;
             for( std::shared_ptr<block>& block_array : block_arrays[ BLOCK_TYPE::BLOCK_TYPE_ROW ] )
             {
                 if( 0 == ( row_index++ % box_size ) )
                 {
-                    print_possibles_grid_divider( row_width, col_width );
+                    print_grid_row_separator( leader_width, grid_size, true, false );
                 }
 
-                block_array->dump_possibles( grid_size, box_size );
+                block_array->dump_possibles( grid_size, box_size, leader_width );
             }
 
-            print_possibles_grid_divider( row_width, col_width );
+            print_grid_row_separator( leader_width, grid_size, true, false );
 
             std::cout << std::endl;
         }
+    }
+
+    void print_grid( const size_t round )
+    {
+        // Print the round
+        if( 0 == round )
+        {
+            std::cout << "Starting grid:\n";
+        }
+        else if( static_cast< size_t >( -1 ) == round )
+        {
+            std::cout << "Solved grid:\n";
+        }
+        else
+        {
+            std::cout << "Solver round " << round << "\n";
+        }
+
+        size_t leader_width = get_row_leader_width();
+        print_grid_row_separator( leader_width, 2, false, true );
+
+        size_t row_idx = 0;
+        for( const std::shared_ptr<block>& block_array : block_arrays[ BLOCK_TYPE::BLOCK_TYPE_ROW ] )
+        {
+            if( 0 == ( row_idx++ % box_size ) )
+            {
+                print_grid_row_separator( leader_width, 2, false, false );
+            }
+
+            block_array->print_row( box_size, leader_width, 2 );
+        }
+
+        print_grid_row_separator( leader_width, 2, false, false );
+
+        std::cout << std::endl;
     }
 
 private:
@@ -1256,46 +1285,68 @@ private:
         return block_type_to_name[ block_type ].c_str();
     }
 
-    void print_possibles_grid_header( size_t row_width, size_t col_width )
+    void print_grid_row_separator( size_t row_width, size_t col_width, bool cell_divider, bool is_header )
     {
-        // Print possible values grid two line header.
-        std::cout << "Possible values grid:\n";
-
-        for( size_t console_col = 0; console_col < row_width + 1; ++console_col )
+        // Allow space for row header.
+        for( size_t console_col = 0; console_col < row_width; ++console_col )
         {
             std::cout << " ";
         }
+
+        // Calculate the zero-based offset for printing the column index value
+        const size_t rounded_column = get_column_offset_index( col_width );
+
         for( size_t column_index = 0; column_index < grid_size; ++column_index )
         {
-            for( size_t cell_column = 0; cell_column < col_width; ++cell_column )
+            // Flag set when a separator is needed.
+            bool box_start = ( 0 == ( column_index % box_size ) );
+            bool box_end   = ( ( box_size - 1 ) == ( column_index % box_size ) );
+
+            // Add character to skip the start of box or cell separator.
+            // Print '+' characters at box or cell separator in non-header rows
+            // and space characters in header rows.
+            if( box_start || cell_divider )
             {
-                if( ( col_width / 2 ) == cell_column )
+                if( !is_header )
                 {
-                    std::cout << static_cast<char>( column_index + 1 + '0' );
+                    std::cout << "+";
                 }
                 else
                 {
                     std::cout << " ";
                 }
             }
-        }
-        std::cout << "\n";
-    }
 
-    void print_possibles_grid_divider( size_t row_width, size_t col_width )
-    {
-        for( size_t console_col = 0; console_col < row_width + 1; ++console_col )
-        {
-            std::cout << " ";
-        }
-
-        for( size_t column_index = 0; column_index < grid_size; ++column_index )
-        {
-            for( size_t cell_column = 0; cell_column < col_width; ++cell_column )
+            if( is_header )
             {
-                if( 0 == cell_column )
+                // Center the column index over the column by adding spaces before
+                // and after the column index value.
+                for( size_t cell_column = 0; cell_column < col_width; ++cell_column )
                 {
-                    std::cout << '+';
+                    if( rounded_column == cell_column )
+                    {
+                        std::cout << static_cast< char >( column_index + 1 + '0' );
+                    }
+                    else
+                    {
+                        std::cout << " ";
+                    }
+                }
+            }
+            else
+            {
+                // For non-header rows, just print the appropriate number of
+                // dash characters.
+                std::cout << std::string( col_width, '-' );
+            }
+
+            if( box_end && !cell_divider )
+            {
+                // If there's no cell divider add a single character before the
+                // box divider for readability.
+                if( is_header )
+                {
+                    std::cout << " ";
                 }
                 else
                 {
@@ -1303,7 +1354,41 @@ private:
                 }
             }
         }
-        std::cout << "+\n";
+
+        // And, the final box separator at the end of non-header lines.
+        if( !is_header )
+        {
+            std::cout << "+";
+        }
+
+        std::cout << "\n";
+    }
+
+    size_t get_row_leader_width( void )
+    {
+        size_t row_width = 0;
+        size_t row_divisor = grid_size / 10;
+        do
+        {
+            ++row_width;
+            row_divisor /= 10;
+        } while( row_divisor );
+
+        return row_width + 1;
+    }
+
+    size_t get_column_offset_index( size_t col_width )
+    {
+        // Calculate the zero-based offset for printing the column index value
+        size_t rounded_column = static_cast<size_t>( ( static_cast<float>( col_width ) / 2.0 ) + 0.5 );
+
+        // Bias left for odd sized columns
+        if( 0 != ( col_width % 2 ) )
+        {
+            rounded_column -= 1;
+        }
+
+        return rounded_column;
     }
 
     size_t grid_size;
