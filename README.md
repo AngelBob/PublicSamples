@@ -1,4 +1,4 @@
-# PublicSamples
+# AngelBob's Public Samples Repository
 
 Samples of my code available for public consumption
 
@@ -8,7 +8,7 @@ This code says a lot about my coding style and much less about The Right Way&tra
 
 Play the games. Tic-Tac-Toe is fun and may (or may not) surprise you, and I really enjoyed building the Text Adventure game.
 
-Check out the 3-Door Test. I didn't even need to run it to see what the result would be.
+Check out the 3-Door Test. I didn't even need to run it to see what the result would be. I already knew the answer, but that's not what I mean when I say I didn't need to run it. Check out the code comments.
 
 The Sudoku Solver is incomplete and a work-in-progress, but it does okay even without the more advanced solution techniques. This one surprised me, I thought I was pretty good at Sudoku. Coding some of the more advanced techniques will be interesting. Maybe I'll consult with ChatGPT on those.
 
