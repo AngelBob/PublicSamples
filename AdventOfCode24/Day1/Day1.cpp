@@ -95,19 +95,65 @@ static size_t calculate_distance( std::list<int32_t>& list1_sorted, std::list<in
 static size_t calculate_similarity( std::list<int32_t>& list1, std::list<int32_t>& list2 )
 {
     // Compare the "similarity" between the lists.
-    // Assumes list 1 is sorted.
+    // Assumes both lists:
+    // 1) are sorted smallest to largest.
+    bool done = false;
     size_t similarity = 0;
 
-    std::list<int32_t>::iterator iter = list1.begin();
-    while( list1.end() != iter )
+    std::list<int32_t>::iterator iter1 = list1.begin();
+    std::list<int32_t>::iterator iter2 = list2.begin();
+    while( !done )
     {
-        int32_t val1 = *iter;
-        size_t count1 = std::count( list1.begin(), list1.end(), val1 );
-        size_t count2 = std::count( list2.begin(), list2.end(), val1 );
+        while( (*iter1) != (*iter2) )
+        {
+            if( (*iter1) < (*iter2) )
+            {
+                ++iter1;
+            }
+            else if( (*iter1) > (*iter2) )
+            {
+                ++iter2;
+            }
 
-        similarity += val1 * count1 * count2;
+            if( ( list1.end() == iter1 ) || ( list2.end() == iter2 ) )
+            {
+                done = true;
+                break;
+            }
+        }
 
-        std::advance( iter, count1 );
+        if( !done )
+        {
+            int32_t val = *iter1;
+            assert( val == *iter2 );
+
+            size_t count1 = 0;
+            while( val == *iter1 )
+            {
+                ++count1;
+                ++iter1;
+                if( list1.end() == iter1 )
+                {
+                    done = true;
+                    break;
+                }
+            }
+
+            size_t count2 = 0;
+            while( val == *iter2 )
+            {
+                ++count2;
+                ++iter2;
+
+                if( list2.end() == iter2 )
+                {
+                    done = true;
+                    break;
+                }
+            }
+
+            similarity += val * count1 * count2;
+        }
     }
 
     return similarity;
