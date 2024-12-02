@@ -35,15 +35,18 @@ static bool read_input( std::vector<std::vector<int32_t>>& reports )
     return ( 0 != reports.size() );
 }
 
-static size_t count_safe( std::vector<std::vector<int32_t>>& reports )
+static void count_safe(
+    std::vector<std::vector<int32_t>>& reports,
+    std::vector<std::vector<int32_t>>& problems )
 {
     // A report is valid if:
     // 1) the levels are all increasing or all decreasing, and
     // 2) adjacent levels differ by at least one and at most three.
-    size_t valid_cnt = 0;
 
-    for( std::vector<int32_t> levels : reports )
+    std::vector<std::vector<int32_t>>::iterator iter = reports.begin();
+    while( reports.end() != iter )
     {
+        std::vector<int32_t>& levels = *iter;
         size_t level_cnt = levels.size();
         assert( level_cnt > 1 );
 
@@ -57,16 +60,35 @@ static size_t count_safe( std::vector<std::vector<int32_t>>& reports )
                         ( 3 >= std::abs( levels[ index ] - levels[ index + 1 ] ) );
         }
 
-        valid_cnt += is_valid ? 1 : 0;
-    }
+        if( is_valid )
+        {
+            ++iter;
+        }
+        else
+        {
+            // Move the problem report into the problem list.
+            std::move( iter, std::next( iter ), std::back_inserter( problems ) );
+            iter = reports.erase( iter );
+        }
 
-    return valid_cnt;
+    }
+}
+
+static void apply_problem_dampener(
+    std::vector<std::vector<int32_t>>& reports,
+    std::vector<std::vector<int32_t>>& problems )
+{
+    // The problem dampener will remove a single problematic value from each
+    // report in an attempt to make the report valid.
+    // Need to look ahead and behind to determine which value may be
+    // problematic.
 }
 
 int main()
 {
     // Step 1: Read the input CSV
     std::vector<std::vector<int32_t>> reports;
+    std::vector<std::vector<int32_t>> problems;
 
     if( !read_input( reports ) )
     {
@@ -74,6 +96,13 @@ int main()
     }
 
     // Step 2: Count valid reports
-    size_t valid_cnt = count_safe( reports );
-    std::cout << "Valid report count = " << valid_cnt << "\n";
+    count_safe( reports, problems );
+    std::cout << "Valid report count = " << reports.size() << "\n";
+
+    // Step 3: Apply the Problem Dampener and recount
+    apply_problem_dampener( reports, problems );
+
+    count_safe( reports, problems );
+    std::cout << "Valid report count = " << reports.size() << "\n";
+
 }
