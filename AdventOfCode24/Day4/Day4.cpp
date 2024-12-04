@@ -63,8 +63,8 @@ static size_t do_word_search(
     const std::string word )
 {
     size_t word_count = 0;
-    int32_t row_base = 0;
 
+    int32_t row_base = 0;
     while( row_base < grid.size() )
     {
         int32_t col_base = 0;
@@ -116,6 +116,70 @@ static size_t do_word_search(
     return word_count;
 }
 
+static bool have_diagonal(
+    std::vector<std::string>& grid,
+    const std::string word,
+    int32_t row_base,
+    int32_t col_base,
+    enum SCAN_DIR dir )
+{
+    int32_t half_size = static_cast<int32_t>( word.length() ) / 2;
+
+    std::string diag_f;
+    int32_t col = col_base - ( scan_data[ dir ].x_inc * half_size );
+    int32_t row = row_base - ( scan_data[ dir ].y_inc * half_size );
+    for( size_t letter = 0; letter < word.length(); ++letter )
+    {
+        diag_f += grid[ row ][ col ];
+        row += scan_data[ dir ].y_inc;
+        col += scan_data[ dir ].x_inc;
+    }
+
+    std::string diag_r( diag_f.rbegin(), diag_f.rend() );
+
+    return ( word == diag_f || word == diag_r );
+}
+
+static size_t do_cross_search(
+    std::vector<std::string>& grid,
+    const std::string word )
+{
+    // Only works with odd length words...
+    if( 0 == ( word.length() % 2 ) )
+    {
+        return 0;
+    }
+
+    size_t cross_count = 0;
+
+    int32_t row_base = 1;
+    while( row_base < grid.size() - 1 )
+    {
+        int32_t col_base = 1;
+        while( col_base < grid.size() - 1 )
+        {
+            std::string::const_iterator w_it = word.cbegin();
+            size_t half_size = word.length() / 2;
+            std::advance( w_it, half_size );
+
+            if( *w_it == grid[ row_base ][ col_base ] )
+            {
+                // Middle letter found, look for the word on the diagonal.
+                if( have_diagonal( grid, word, row_base, col_base, SCAN_NORTHEAST ) &&
+                    have_diagonal( grid, word, row_base, col_base, SCAN_NORTHWEST ) )
+                {
+                    // Have the full cross
+                    ++cross_count;
+                }
+            }
+            ++col_base;
+        }
+        ++row_base;
+    }
+
+    return cross_count;
+}
+
 int main()
 {
     std::vector<std::string> grid;
@@ -126,4 +190,7 @@ int main()
 
     size_t count = do_word_search( grid, "XMAS" );
     std::cout << "Word appears " << count << " times.\n";
+
+    count = do_cross_search( grid, "MAS" );
+    std::cout << "Cross word appears " << count << " times." << std::endl;
 }
