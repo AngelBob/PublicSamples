@@ -11,7 +11,7 @@ static bool read_input( std::vector<std::string>& grid )
 {
     // Open the input file and read the data.
     // Step 1: open the input file.
-    std::ifstream file( ".\\WordSearch_full.txt" );
+    std::ifstream file( ".\\WordSearch.txt" );
 
     // Step 2: read each line and insert individual characters into the grid.
     size_t width = 0, height = 0;

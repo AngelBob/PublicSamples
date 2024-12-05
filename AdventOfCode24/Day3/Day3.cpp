@@ -39,7 +39,9 @@ static std::string::const_iterator get_next_enable(
     return enable_start;
 }
 
-static bool read_input( std::vector<std::pair<int32_t, int32_t>>& mul_values )
+static bool read_input(
+    std::vector<std::pair<int32_t, int32_t>>& mul_values,
+    const bool do_control = false )
 {
     // Open the input file and read the data.
     // Step 1: open the input file.
@@ -59,12 +61,15 @@ static bool read_input( std::vector<std::pair<int32_t, int32_t>>& mul_values )
         std::string::const_iterator line_start( line.cbegin() );
         std::string::const_iterator disable_start( line.cend() );
 
-        if( !is_enabled )
+        if( do_control )
         {
-            line_start = get_next_enable( line.cbegin(), line.cend() );
-            is_enabled = true;
+            if( !is_enabled )
+            {
+                line_start = get_next_enable( line.cbegin(), line.cend() );
+                is_enabled = true;
+            }
+            disable_start = get_next_disable( line_start, line.cend() );
         }
-        disable_start = get_next_disable( line_start, line.cend() );
 
         std::smatch reg_match;
         while( std::regex_search( line_start, line.cend(), reg_match, mul_regex ) )
@@ -118,11 +123,20 @@ static int64_t do_mul( std::vector<std::pair<int32_t, int32_t>>& mul_values )
 int main()
 {
     std::vector<std::pair<int32_t, int32_t>> mul_values;
-    if( !read_input( mul_values) )
+    if( !read_input( mul_values ) )
     {
         return -1;
     }
 
     int64_t result = do_mul( mul_values );
     std::cout << "Extracted result = " << result << "\n";
+
+    mul_values.clear();
+    if( !read_input( mul_values, true ) )
+    {
+        return -1;
+    }
+
+    result = do_mul( mul_values );
+    std::cout << "Extracted result with controls = " << result << std::endl;
 }
