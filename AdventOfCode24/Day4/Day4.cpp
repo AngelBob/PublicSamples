@@ -58,86 +58,62 @@ static const std::array<scan_data_t, SCAN_END> scan_data{{
     { SCAN_DIR::SCAN_NORTHWEST, -1, -1 },
 }};
 
+static bool have_match(
+    std::vector<std::string>& grid,
+    const std::string word,
+    const int32_t row_base,
+    const int32_t col_base,
+    const enum SCAN_DIR dir,
+    const bool forward_only = true
+    )
+{
+    int32_t col = col_base;
+    int32_t row = row_base;
+
+    std::string diag_f;
+    for( size_t letter = 0; letter < word.length(); ++letter )
+    {
+        if( col < 0 || grid.size() <= col ||
+            row < 0 || grid.size() <= row )
+        {
+            // Walked off the edge of the grid, unable to match
+            return false;
+        }
+
+        diag_f += grid[ row ][ col ];
+        row += scan_data[ dir ].y_inc;
+        col += scan_data[ dir ].x_inc;
+    }
+    std::string diag_r( diag_f.rbegin(), diag_f.rend() );
+
+    return ( ( word == diag_f ) || ( !forward_only && ( word == diag_r ) ) );
+}
+
 static size_t do_word_search(
     std::vector<std::string>& grid,
     const std::string word )
 {
     size_t word_count = 0;
 
-    int32_t row_base = 0;
-    while( row_base < grid.size() )
+    int32_t row = 0;
+    while( row < grid.size() )
     {
-        int32_t col_base = 0;
-        while( col_base < grid.size() )
+        int32_t col = 0;
+        while( col < grid.size() )
         {
             for( const scan_data_t& scan : scan_data )
             {
-                std::string::const_iterator w_it = word.cbegin();
-
-                int32_t col = col_base;
-                int32_t row = row_base;
-                bool have_match = true;
-                while( 1 )
+                if( have_match( grid, word, row, col, scan.dir ) )
                 {
-                    if( *w_it != grid[ row ][ col ] )
-                    {
-                        have_match = false;
-                        break;
-                    }
-
-                    if( ++w_it == word.end() )
-                    {
-                        // Have a full match
-                        break;
-                    }
-
-                    col += scan.x_inc;
-                    row += scan.y_inc;
-                    if( col < 0 || grid.size() <= col ||
-                        row < 0 || grid.size() <= row )
-                    {
-                        // Walked off the edge of the grid, bail
-                        have_match = false;
-                        break;
-                    }
-                }
-
-                if( have_match )
-                {
-                    // Found a match
                     ++word_count;
                 }
             }
-            ++col_base;
+            ++col;
         }
-        ++row_base;
+        ++row;
     }
 
     return word_count;
-}
-
-static bool have_diagonal(
-    std::vector<std::string>& grid,
-    const std::string word,
-    int32_t row_base,
-    int32_t col_base,
-    enum SCAN_DIR dir )
-{
-    int32_t half_size = static_cast<int32_t>( word.length() ) / 2;
-
-    std::string diag_f;
-    int32_t col = col_base - ( scan_data[ dir ].x_inc * half_size );
-    int32_t row = row_base - ( scan_data[ dir ].y_inc * half_size );
-    for( size_t letter = 0; letter < word.length(); ++letter )
-    {
-        diag_f += grid[ row ][ col ];
-        row += scan_data[ dir ].y_inc;
-        col += scan_data[ dir ].x_inc;
-    }
-
-    std::string diag_r( diag_f.rbegin(), diag_f.rend() );
-
-    return ( word == diag_f || word == diag_r );
 }
 
 static size_t do_cross_search(
@@ -152,21 +128,21 @@ static size_t do_cross_search(
 
     size_t cross_count = 0;
 
-    int32_t row_base = 1;
-    while( row_base < grid.size() - 1 )
+    const int32_t half_size = static_cast<int32_t>( word.length() ) / 2;
+    int32_t row_base = half_size;
+    while( row_base < grid.size() - half_size )
     {
         int32_t col_base = 1;
-        while( col_base < grid.size() - 1 )
+        while( col_base < grid.size() - half_size )
         {
             std::string::const_iterator w_it = word.cbegin();
-            size_t half_size = word.length() / 2;
             std::advance( w_it, half_size );
 
             if( *w_it == grid[ row_base ][ col_base ] )
             {
                 // Middle letter found, look for the word on the diagonal.
-                if( have_diagonal( grid, word, row_base, col_base, SCAN_NORTHEAST ) &&
-                    have_diagonal( grid, word, row_base, col_base, SCAN_NORTHWEST ) )
+                if( have_match( grid, word, row_base + half_size, col_base - half_size, SCAN_NORTHEAST, false ) &&
+                    have_match( grid, word, row_base - half_size, col_base - half_size, SCAN_SOUTHEAST, false ) )
                 {
                     // Have the full cross
                     ++cross_count;
