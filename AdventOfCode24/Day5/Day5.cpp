@@ -1,8 +1,10 @@
 // Day5.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
+#include <algorithm>
 #include <array>
 #include <fstream>
 #include <iostream>
+#include <list>
 #include <map>
 #include <string>
 #include <sstream>
@@ -10,7 +12,7 @@
 
 static bool read_input(
     std::multimap<int32_t, int32_t>& rules,
-    std::vector<std::vector<int32_t>>& pages
+    std::vector<std::list<int32_t>>& pages
     )
 {
     // Open the input files and read the data.
@@ -19,6 +21,7 @@ static bool read_input(
         { ".\\PageUpdates.txt", ',' }
     }};
 
+    std::multimap<int32_t, int32_t> sorted_rules;
     for( auto& input : inputs )
     {
         // Step 1: open the input file.
@@ -40,13 +43,30 @@ static bool read_input(
 
             if( '|' == input.second )
             {
-                rules.insert( std::make_pair( values[ 0 ], values[ 1 ] ) );
+                std::multimap<int32_t, int32_t>::iterator upper_b = sorted_rules.upper_bound( values[ 1 ] );
+                std::multimap<int32_t, int32_t>::iterator lower_b = sorted_rules.lower_bound( values[ 1 ] );
+                while( lower_b != upper_b )
+                {
+                    if( sorted_rules.end() != std::next(lower_b) &&
+                        (*lower_b).first == values[ 1 ] &&
+                        (*lower_b).second > values[ 0 ] )
+                    {
+                        break;
+                    }
+                    ++lower_b;
+                }
+                 sorted_rules.emplace_hint( lower_b, std::make_pair( values[ 1 ], values[ 0 ] ) );
             }
             else
             {
-                pages.emplace_back( values );
+                pages.emplace_back( values.begin(), values.end() );
             }
         }
+    }
+
+    for( auto& rule : sorted_rules )
+    {
+        rules.insert( std::make_pair( rule.second, rule.first ) );
     }
 
     // Step 3: return success or failure.
@@ -55,44 +75,57 @@ static bool read_input(
 
 static void check_page_order(
     const std::multimap<int32_t, int32_t>& rules,
-    const std::vector<std::vector<int32_t>>& pages_list,
-    std::vector<std::vector<int32_t>>& ordered_pages
+    std::vector<std::list<int32_t>>& unordered_pages,
+    std::vector<std::list<int32_t>>& ordered_pages
 )
 {
-    for( auto& pages : pages_list )
+    std::vector<std::list<int32_t>>::iterator pages_iter = unordered_pages.begin();
+    while( unordered_pages.end() != pages_iter )
     {
+        bool do_move = true;
         std::multimap<int32_t, int32_t>::const_iterator rule_iter = rules.begin();
         while( rules.end() != rule_iter )
         {
-            std::vector<int32_t>::const_iterator first_page =
-                std::find( pages.begin(), pages.end(), (*rule_iter).first );
-            std::vector<int32_t>::const_iterator second_page =
-                std::find( pages.begin(), pages.end(), (*rule_iter).second );
-            if( pages.end() != first_page &&
-                pages.end() != second_page &&
-                first_page >= second_page )
+            std::list<int32_t>::iterator second_page =
+                std::find( (*pages_iter).begin(), (*pages_iter).end(), (*rule_iter).second );
+            if( (*pages_iter).end() != second_page)
             {
-                break;
+                std::list<int32_t>::iterator first_page =
+                    std::find( second_page, (*pages_iter).end(), (*rule_iter).first );
+                if( (*pages_iter).end() != first_page )
+                {
+                    // This rule is violated; move the first page in front of the second.
+                    (*pages_iter).insert( second_page, ( *first_page ) );
+                    (*pages_iter).erase( first_page );
+                    do_move = false;
+                }
             }
             ++rule_iter;
         }
 
-        if( rules.end() == rule_iter )
+        if( do_move )
         {
             // All rules matched
-            ordered_pages.emplace_back( pages );
+            ordered_pages.emplace_back( std::move( *pages_iter ) );
+            pages_iter = unordered_pages.erase( pages_iter );
+        }
+        else
+        {
+            ++pages_iter;
         }
     }
 }
 
-static size_t sum_middle_pages( const std::vector<std::vector<int32_t>>& ordered_pages )
+static size_t sum_middle_pages( const std::vector<std::list<int32_t>>& ordered_pages )
 {
     size_t sum = 0;
 
     for( auto& pages : ordered_pages )
     {
         size_t middle_index = pages.size() / 2;
-        sum += pages[ middle_index ];
+        std::list<int32_t>::const_iterator value = std::next( pages.begin(), middle_index );
+
+        sum += *value;
     }
 
     return sum;
@@ -101,16 +134,19 @@ static size_t sum_middle_pages( const std::vector<std::vector<int32_t>>& ordered
 int main()
 {
     std::multimap<int32_t, int32_t> rules;
-    std::vector<std::vector<int32_t>> pages;
+    std::vector<std::list<int32_t>> pages;
 
     if( !read_input( rules, pages ) )
     {
         return -1;
     }
 
-    std::vector<std::vector<int32_t>> ordered_pages;
+    std::vector<std::list<int32_t>> ordered_pages;
     check_page_order( rules, pages, ordered_pages );
 
     size_t total = sum_middle_pages( ordered_pages );
     std::cout << "Page sum = " << total << "\n";
+
+    total = sum_middle_pages( pages );
+    std::cout << "Fixed page sum = " << total << std::endl;
 }
