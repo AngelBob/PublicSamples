@@ -67,7 +67,7 @@ static bool read_input(
 
 static std::pair<size_t, size_t> do_guard_walk(
     std::vector<std::string>& grid,
-    std::tuple<size_t, size_t, enum WALK_DIR>& guard_status
+    std::tuple<size_t, size_t, enum WALK_DIR> guard_status
 )
 {
     const size_t max_idx = grid.size();
@@ -175,6 +175,103 @@ static std::pair<size_t, size_t> do_guard_walk(
     return std::make_pair( location_count, route_loop_count );
 }
 
+static size_t do_brute_force_check(
+    std::vector<std::string>& grid,
+    std::tuple<size_t, size_t, enum WALK_DIR> guard_status
+)
+{
+    const std::tuple<size_t, size_t, enum WALK_DIR> guard_status_c = guard_status;
+    const size_t max_idx = grid.size();
+    size_t route_loop_count = 0; // Count the number of route loop options.
+
+    for( size_t y = 0; y < max_idx; ++y )
+    {
+        for( size_t x = 0; x < max_idx; ++x )
+        {
+            if( '#' == grid[ y ][ x ] )
+            {
+                // Grid blockage is part of the normal layout, skip it.
+                continue;
+            }
+            else if( x == std::get<0>( guard_status_c ) &&
+                     y == std::get<1>( guard_status_c ) )
+            {
+                // Guard starting point, can't put a new blockage here.
+                continue;
+            }
+
+            // Keep track of the directions in which the guard crosses each location.
+            std::vector<std::vector<std::array<bool, WALK_DIR::WALK_END>>> visited_dir;
+            for( size_t row = 0; row < grid.size(); ++row )
+            {
+                std::vector<std::array<bool, WALK_DIR::WALK_END>> col_dirs;
+                for( size_t col = 0; col < grid.size(); ++col )
+                {
+                    col_dirs.emplace_back( std::array<bool, WALK_DIR::WALK_END>{{ false, false, false, false }} );
+                }
+
+                visited_dir.emplace_back( col_dirs );
+            }
+
+            // Reset the guard's starting position and direction.
+            guard_status = guard_status_c;
+
+            // Insert a blockage here.
+            grid[ y ][ x ] = '#';
+            while( 1 )
+            {
+                const walk_data_t this_walk = walk_data[ std::get<2>( guard_status ) ];
+                size_t col = std::get<0>( guard_status );
+                size_t row = std::get<1>( guard_status );
+
+                // Mark the guard's current location as visited.
+                grid[ row ][ col ] = this_walk.dir_indicator;
+
+                // Mark the direction in which the guard is traveling.
+                if( visited_dir[ row ][ col ][ this_walk.dir ] )
+                {
+                    // Route loop created by this new blockage
+                    ++route_loop_count;
+                    break;
+                }
+                visited_dir[ row ][ col ][ this_walk.dir ] = true;
+
+                // Try to move the guard
+                col += this_walk.x_inc;
+                row += this_walk.y_inc;
+
+                if( col < 0 || max_idx <= col ||
+                    row < 0 || max_idx <= row )
+                {
+                    // Guard is going to move off the map
+                    break;
+                }
+                else if( '#' == grid[ row ][ col ] )
+                {
+                    // Guard is about to hit an obstacle, rotate path 90 degrees and
+                    // try stepping in the new direction.
+                    size_t dir = std::get<2>( guard_status );
+                    dir = ( dir + 1 ) % WALK_DIR::WALK_END;
+
+                    std::get<2>( guard_status ) = static_cast<WALK_DIR>( dir );
+
+                    continue;
+                }
+                else
+                {
+                    // Move the guard
+                    std::get<0>( guard_status ) = col;
+                    std::get<1>( guard_status ) = row;
+                }
+            }
+
+            grid[ y ][ x ] = '.';
+        }
+    }
+
+    return route_loop_count;
+}
+
 int main()
 {
     std::vector<std::string> grid;
@@ -187,4 +284,7 @@ int main()
     std::pair<size_t, size_t> counts = do_guard_walk( grid, guard_status );
     std::cout << "Guard touches " << counts.first << " distinct locations and\n";
     std::cout << "there are " << counts.second << " route loop options." << std::endl;
+
+    counts.second = do_brute_force_check( grid, guard_status );
+    std::cout << "Brute force says: " << counts.second << " route loop options." << std::endl;
 }
