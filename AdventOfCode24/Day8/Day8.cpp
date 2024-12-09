@@ -55,12 +55,17 @@ static void find_antinodes(
     while( antenna_locations.cend() != std::next( start, 2 ) )
     {
         // Find a pair of antennae
-        while( antenna_locations.cend() == next ||
-               next->first != start->first )
+        while( ( antenna_locations.cend() == next ||
+                 next->first != start->first ) &&
+               antenna_locations.cend() != std::next( start ) )
         {
             ++start;
             next = std::next( start );
         }
+
+        // Both locations are also resonant antinodes
+        antinodes.try_emplace( std::make_pair( start->second.first, start->second.second ) );
+        antinodes.try_emplace( std::make_pair( next->second.first, next->second.second ) );
 
         // Calculate the slope between the two locations
         int32_t delta_y = next->second.second - start->second.second;
@@ -68,25 +73,43 @@ static void find_antinodes(
         int32_t multiplier_x = start->second.first > next->second.first ? 1 : -1;
         int32_t multiplier_y = start->second.second > next->second.second ? 1 : -1;
 
-        // Calculate the locations of the two antinodes
-        int32_t node0_x, node0_y, node1_x, node1_y;
-
-        node0_x = start->second.first + ( std::abs( delta_x ) * multiplier_x );
-        node0_y = start->second.second + ( std::abs( delta_y ) * multiplier_y );
-
-        node1_x = next->second.first - ( std::abs( delta_x ) * multiplier_x );
-        node1_y = next->second.second - ( std::abs( delta_y ) * multiplier_y );
-
-        if( 0 <= node0_x && node0_x < max_idx &&
-            0 <= node0_y && node0_y < max_idx )
+        // Calculate the locations of all resonant antinodes
+        int32_t node_x = start->second.first;
+        int32_t node_y = start->second.second;
+        int32_t node0_x = 0, node0_y = 0;
+        while( 0 <= node0_x && node0_x < max_idx &&
+               0 <= node0_y && node0_y < max_idx )
         {
-            antinodes.try_emplace( std::make_pair( node0_x, node0_y ), true );
+            node0_x = node_x + ( std::abs( delta_x ) * multiplier_x );
+            node0_y = node_y + ( std::abs( delta_y ) * multiplier_y );
+
+            if( 0 <= node0_x && node0_x < max_idx &&
+                0 <= node0_y && node0_y < max_idx )
+            {
+                antinodes.try_emplace( std::make_pair( node0_x, node0_y ), true );
+            }
+
+            node_x = node0_x;
+            node_y = node0_y;
         }
 
-        if( 0 <= node1_x && node1_x < max_idx &&
-            0 <= node1_y && node1_y < max_idx )
+        node_x = next->second.first;
+        node_y = next->second.second;
+        node0_x = 0; node0_y = 0;
+        while( 0 <= node0_x && node0_x < max_idx &&
+               0 <= node0_y && node0_y < max_idx )
         {
-            antinodes.try_emplace( std::make_pair( node1_x, node1_y ), true );
+            node0_x = node_x - ( std::abs( delta_x ) * multiplier_x );
+            node0_y = node_y - ( std::abs( delta_y ) * multiplier_y );
+
+            if( 0 <= node0_x && node0_x < max_idx &&
+                0 <= node0_y && node0_y < max_idx )
+            {
+                antinodes.try_emplace( std::make_pair( node0_x, node0_y ), true );
+            }
+
+            node_x = node0_x;
+            node_y = node0_y;
         }
 
         ++next;
