@@ -35,14 +35,18 @@ static bool read_input(
 static int32_t find_path_step(
     std::vector<std::vector<int32_t>>& topo_map,
     const size_t start_row,
-    const size_t start_col
+    const size_t start_col,
+    const bool calc_rating
 )
 {
     // Is the trail at the top?
     if( 9 == topo_map[ start_row ][ start_col ] )
     {
-        // Don't count this one again...
-        topo_map[ start_row ][ start_col ] = -1;
+        if( !calc_rating )
+        {
+            // Don't count this one again...
+            topo_map[ start_row ][ start_col ] = -1;
+        }
 
         // Add this to the reachable peaks count
         return 1;
@@ -55,7 +59,7 @@ static int32_t find_path_step(
         if( topo_map[ start_row - 1 ][ start_col ] ==
             ( topo_map[ start_row ][ start_col ] + 1 ) )
         {
-            sum_scores += find_path_step( topo_map, start_row - 1, start_col );
+            sum_scores += find_path_step( topo_map, start_row - 1, start_col, calc_rating );
         }
     }
 
@@ -65,7 +69,7 @@ static int32_t find_path_step(
         if( topo_map[ start_row + 1 ][ start_col ] ==
             ( topo_map[ start_row ][ start_col ] + 1 ) )
         {
-            sum_scores += find_path_step( topo_map, start_row + 1, start_col );
+            sum_scores += find_path_step( topo_map, start_row + 1, start_col, calc_rating );
         }
     }
 
@@ -75,7 +79,7 @@ static int32_t find_path_step(
         if( topo_map[ start_row ][ start_col + 1 ] ==
             ( topo_map[ start_row ][ start_col ] + 1 ) )
         {
-            sum_scores += find_path_step( topo_map, start_row, start_col + 1 );
+            sum_scores += find_path_step( topo_map, start_row, start_col + 1, calc_rating );
         }
     }
 
@@ -85,7 +89,7 @@ static int32_t find_path_step(
         if( topo_map[ start_row ][ start_col - 1 ] ==
             ( topo_map[ start_row ][ start_col ] + 1 ) )
         {
-            sum_scores += find_path_step( topo_map, start_row, start_col - 1 );
+            sum_scores += find_path_step( topo_map, start_row, start_col - 1, calc_rating );
         }
     }
 
@@ -101,6 +105,7 @@ int main()
     }
 
     int32_t sum_scores = 0;
+    int32_t sum_ratings = 0;
     for( size_t row = 0; row < topo_map.size(); ++row )
     {
         for( size_t col = 0; col < topo_map[ 0 ].size(); ++col )
@@ -109,10 +114,14 @@ int main()
             {
                 // Send a copy of the map - find path step will modify.
                 std::vector<std::vector<int32_t>> temp_map = topo_map;
-                sum_scores += find_path_step( temp_map, row, col );
+                sum_scores += find_path_step( temp_map, row, col, false );
+
+                temp_map = topo_map;
+                sum_ratings += find_path_step( temp_map, row, col, true );
             }
         }
     }
 
     std::cout << "The sum of the path scores is: " << sum_scores << "\n";
+    std::cout << "The sum of the path ratings is: " << sum_ratings << "\n";
 }
