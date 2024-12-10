@@ -131,9 +131,21 @@ static std::pair<size_t, size_t> do_guard_walk(
         }
 
         // Check if the guard can be placed in a route loop. Route loops occur
-        // if the guard's direction can be changed and the new route includes
-        // a location that the guard has already visited while traveling in the
-        // same direction.
+        // if the guard's direction can be changed before arriving at a
+        // location and the new route includes a location that the guard has
+        // already visited while traveling in the same direction.
+        if( '.' != grid[ row ][ col ] )
+        {
+            // Can't place an obstacle if the guard has already patrolled this
+            // location.
+            continue;
+        }
+
+        // Guard has already moved, so reset to previous location and place an
+        // obstacle. No need to restore this, it's modified at the beginning of
+        // the next loop.
+        grid[ row ][ col ] = '#';
+
         std::vector<std::vector<std::array<bool, WALK_DIR::WALK_END>>> visited_loop_dir = visited_dir;
 
         size_t dir_t = ( static_cast<size_t>( std::get<2>( guard_status ) ) + 1 ) % WALK_DIR::WALK_END;
@@ -154,15 +166,18 @@ static std::pair<size_t, size_t> do_guard_walk(
             }
             else if( '#' == grid[ row_t ][ col_t ] )
             {
-                // Guard is about to hit an obstacle, rotate path 90 degrees and
-                // try stepping in the new direction.
+                // Guard hit an obstacle, reset location and rotate path 90
+                // degrees. Try stepping in the new direction.
+                col_t -= walk_data[ dir_t ].x_inc;
+                row_t -= walk_data[ dir_t ].y_inc;
+
                 dir_t = ( dir_t + 1 ) % WALK_DIR::WALK_END;
                 continue;
             }
             else if( visited_loop_dir[ row_t ][ col_t ][ dir_t ] )
             {
                 // Route loop created!
-#ifdef _DEBUG
+#if 0
                 // Print the location
                 std::cout << row << "," << col << std::endl;
 #endif
@@ -284,7 +299,8 @@ int main()
     std::pair<size_t, size_t> counts = do_guard_walk( grid, guard_status );
     std::cout << "Guard touches " << counts.first << " distinct locations and\n";
     std::cout << "there are " << counts.second << " route loop options." << std::endl;
-
+#if 0
     counts.second = do_brute_force_check( grid, guard_status );
     std::cout << "Brute force says: " << counts.second << " route loop options." << std::endl;
+#endif
 }
