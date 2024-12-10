@@ -8,15 +8,26 @@
 class map_node_t
 {
 public:
-    map_node_t( const size_t id, const bool is_f ) :
+    map_node_t( const int32_t id, const int32_t cont_size, const bool is_f ) :
         file_id( id ),
+        contiguous_size( cont_size ),
         is_file( is_f )
     {
     }
 
-    size_t get_file_id( void ) const
+    int32_t get_file_id( void ) const
     {
         return file_id;
+    }
+
+    int32_t get_contiguous_size( void ) const
+    {
+        return contiguous_size;
+    }
+
+    void set_contiguous_size( int32_t new_size )
+    {
+        contiguous_size = new_size;
     }
 
     bool get_is_file( void ) const
@@ -26,12 +37,13 @@ public:
 
     void clear_is_file( void )
     {
-        file_id = static_cast<size_t>( -1 );
+        file_id = -1;
         is_file = false;
     }
 
 private:
-    size_t file_id;
+    int32_t file_id;
+    int32_t contiguous_size;
     bool   is_file;
 };
 
@@ -41,7 +53,7 @@ static bool read_input(
 {
     // Open the input file and read the data.
     // Step 1: open the input file.
-    std::ifstream file( ".\\DiskMap_full.txt" );
+    std::ifstream file( ".\\DiskMap.txt" );
 
     // Step 2: read the single line of input.
     std::getline( file, condensed_disk_map );
@@ -56,11 +68,14 @@ static void expand_disk_map(
 )
 {
     bool is_file = true;
-    size_t id = 0;
+    int32_t id = 0;
     for( const char c : condensed_disk_map )
     {
-        size_t count = static_cast<size_t>( c ) - '0';
-        disk_map.insert( disk_map.end(), count, map_node_t( ( is_file ? id++ : static_cast< size_t >( -1 ) ), is_file ) );
+        int32_t count = static_cast< int32_t >( c ) - '0';
+        disk_map.insert(
+            disk_map.end(),
+            count,
+            map_node_t( is_file ? id++ : -1, count, is_file ) );
 
         is_file = !is_file;
     }
@@ -71,35 +86,62 @@ static void move_files(
 )
 {
     // Move files from the end to the empty disk slots at the beginning.
-    size_t empty_idx = 0;
-    size_t file_idx = disk_map.size() - 1;
+    int32_t file_idx = static_cast<int32_t>( disk_map.size() ) - 1;
 
-    while( 1 )
+    // Try moving all of the files into left most space into which they fit.
+    while( 0 <= file_idx )
     {
-        // Find next empty slot
-        while( disk_map[ empty_idx ].get_is_file() &&
-               empty_idx < disk_map.size() )
-        {
-            ++empty_idx;
-        }
-
-        // Find next file to move
+        // Find the next file to move
         while( !disk_map[ file_idx ].get_is_file() &&
                0 <= file_idx )
         {
-            --file_idx;
+            file_idx -= disk_map[ file_idx ].get_contiguous_size();
         }
 
-        if( file_idx <= empty_idx )
+        int32_t file_size = disk_map[ file_idx ].get_contiguous_size();
+        int32_t empty_idx = 0;
+        while( 0 <= file_idx )
         {
-            // Processed all of the files at the end of the disk.
-            break;
-        }
+            while( disk_map[ empty_idx ].get_is_file() &&
+                   empty_idx < disk_map.size() )
+            {
+                empty_idx += disk_map[ empty_idx ].get_contiguous_size();
+            }
 
-        // Have an empty space and a file, move the file into the empty space
-        // and replace the file with empty space
-        disk_map[ empty_idx ] = disk_map[ file_idx ];
-        disk_map[ file_idx ].clear_is_file();
+            int32_t empty_size = disk_map[ empty_idx ].get_contiguous_size();
+            if( file_idx <= empty_idx )
+            {
+                // This file can't move left, skip it and continue.
+                file_idx -= disk_map[ file_idx ].get_contiguous_size();
+                break;
+            }
+            else if( file_size <= empty_size )
+            {
+                // Have an empty space big enough to hold the entire file.
+                // Move the file into the empty space and replace the file with
+                // empty space.
+                for( int32_t move_idx = 0; move_idx < file_size; ++move_idx )
+                {
+                    disk_map[ empty_idx++ ] = disk_map[ file_idx ];
+                    disk_map[ file_idx-- ].clear_is_file();
+                }
+
+                // Update the size of the empty space
+                int32_t remainder = empty_size - file_size;
+                for( int32_t clear_idx = 0; clear_idx < remainder; ++clear_idx )
+                {
+                    disk_map[ empty_idx ].set_contiguous_size( remainder );
+                }
+
+                // Move to the next file.
+                break;
+            }
+            else
+            {
+                // Skip this empty space, it wasn't big enough.
+                empty_idx += disk_map[ empty_idx ].get_contiguous_size();
+            }
+        }
     }
 }
 
