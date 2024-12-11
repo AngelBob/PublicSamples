@@ -3,6 +3,7 @@
 #include <array>
 #include <fstream>
 #include <iostream>
+#include <map>
 #include <regex>
 #include <vector>
 
@@ -47,36 +48,40 @@ static bool has_even_length( const uint64_t value, uint64_t& length )
 
 static uint64_t do_blink(
     const uint64_t value,
-    const int32_t blink )
+    const int32_t blink,
+    std::map<std::pair<uint64_t, int32_t>, uint64_t>& cache )
 {
     // Return the number stones that this stone splits into.
-    uint64_t stone_count = 0;
     if( 0 == blink )
     {
         // Stone is only itself
         return 1;
     }
 
-    // Calculate the number of stones this value will spawn.
-    uint64_t length;
-    if( 0 == value )
+    uint64_t& stone_count = cache[ { value, blink } ];
+    if( !stone_count )
     {
-        stone_count = do_blink( 1, blink - 1 );
-    }
-    else if( has_even_length( value, length ) )
-    {
-        // Split the stone in two, left stone gets high digits right
-        // stone gets low digits.
-        uint64_t divisor = static_cast<uint64_t>( std::pow( 10, ( length / 2 ) ) );
-        uint64_t left_digits = value / divisor;
-        uint64_t right_digits = value % divisor;
+        // Calculate the number of stones this value will spawn.
+        uint64_t length;
+        if( 0 == value )
+        {
+            stone_count = do_blink( 1, blink - 1, cache );
+        }
+        else if( has_even_length( value, length ) )
+        {
+            // Split the stone in two, left stone gets high digits right
+            // stone gets low digits.
+            uint64_t divisor = static_cast< uint64_t >( std::pow( 10, ( length / 2 ) ) );
+            uint64_t left_digits = value / divisor;
+            uint64_t right_digits = value % divisor;
 
-        stone_count = ( do_blink( left_digits, blink - 1 ) +
-                       do_blink( right_digits, blink - 1 ) );
-    }
-    else
-    {
-        stone_count = do_blink( value * 2024, blink - 1 );
+            stone_count = ( do_blink( left_digits, blink - 1, cache ) +
+                do_blink( right_digits, blink - 1, cache ) );
+        }
+        else
+        {
+            stone_count = do_blink( value * 2024, blink - 1, cache );
+        }
     }
 
     return stone_count;
@@ -90,10 +95,15 @@ int main()
         return -1;
     }
 
-    uint64_t count = 0;
-    for( uint64_t& value : stones )
+    static const std::array<int32_t, 2> blinks{{ 25, 75 }};
+    for( int32_t blink : blinks )
     {
-        count += do_blink( value, 25 );
+        std::map<std::pair<uint64_t, int>, uint64_t> cache;
+        uint64_t count = 0;
+        for( uint64_t& value : stones )
+        {
+            count += do_blink( value, blink, cache );
+        }
+        std::cout << "After " << blink << " blinks there are " << count << " stones.\n";
     }
-    std::cout << "After 25 blinks there are " << count << " stones.\n";
 }
