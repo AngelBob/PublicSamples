@@ -1,5 +1,6 @@
 // Day14.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
+#include <array>
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -120,6 +121,40 @@ static uint64_t calculate_safety_factor(
     return safety_factor;
 }
 
+static bool find_christmas_tree(
+    const std::map<std::pair<int64_t, int64_t>, int64_t>& locations
+)
+{
+    // Look for a Christmas tree pattern inside of a square.
+    // Basically, just find a big square, that's probably close enough.
+    // The map key is pairs of x,y values, so there should be a pattern of
+    // several keys with the same x values and y values increasing by one.
+    size_t consecutive_x_count = 0;
+    std::map<std::pair<int64_t, int64_t>, int64_t>::const_iterator iter = locations.begin();
+    ++iter;
+    while( locations.end() != iter )
+    {
+        if( iter->first.first == std::prev( iter )->first.first &&
+            iter->first.second == std::prev( iter )->first.second + 1 )
+        {
+            ++consecutive_x_count;
+        }
+        else
+        {
+            consecutive_x_count = 0;
+        }
+
+        if( 25 == consecutive_x_count )
+        {
+            return true;
+        }
+
+        ++iter;
+    }
+
+    return false;
+}
+
 int main()
 {
     std::vector<std::tuple<int64_t, int64_t, int64_t, int64_t>> robots;
@@ -135,4 +170,38 @@ int main()
 
     int64_t safety = calculate_safety_factor( locations, grid );
     std::cout << "The safety factor is " << safety << "\n";
+
+    std::array<std::array<char, 101>, 103> picture;
+    int64_t elapsed = 1;
+    while( 1 )
+    {
+        locations = move_robots( robots, grid, elapsed++ );
+
+        if( find_christmas_tree( locations ) )
+        {
+            for( auto& location : locations )
+            {
+                picture[ location.first.second ][ location.first.first ] = '*';
+            }
+            break;
+        }
+    }
+
+    std::cout << "The Christmas Tree appears at time " << elapsed - 1 << " seconds" << std::endl;
+    for( size_t y = 0; y < 103; ++y )
+    {
+        for( size_t x = 0; x < 101; ++x )
+        {
+            if( picture[ y ][ x ] == '*' )
+            {
+                std::cout << "*";
+            }
+            else
+            {
+                std::cout << " ";
+            }
+        }
+        std::cout << std::endl;
+    }
+    std::cout << std::endl;
 }
