@@ -59,7 +59,8 @@ static const uint64_t cost_A = 3;
 static const uint64_t cost_B = 1;
 
 static uint64_t find_path(
-    std::array<std::pair<uint64_t, uint64_t>, 3> machine
+    std::array<std::pair<uint64_t, uint64_t>, 3> machine,
+    bool is_way_off
 )
 {
     // Solve the 2x2 matrix
@@ -86,6 +87,12 @@ static uint64_t find_path(
     M[0][1] /= determinant;
     M[1][0] /= determinant;
     M[1][1] /= determinant;
+
+    if( is_way_off )
+    {
+        machine[2].first  += 10000000000000;
+        machine[2].second += 10000000000000;
+    }
 
     // Multiply the matrix by the prize location to find the X,Y
     double prize_x = static_cast<double>( machine[2].first );
@@ -119,7 +126,7 @@ static uint64_t find_optimized_cost(
     for( const auto& this_machine : machine_data )
     {
         // Find all paths, if any.
-        total_tokens += find_path( this_machine );
+        total_tokens += find_path( this_machine, true );
     }
 
     return total_tokens;
