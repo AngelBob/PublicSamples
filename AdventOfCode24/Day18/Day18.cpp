@@ -254,6 +254,7 @@ int32_t main()
 {
     static const int32_t simulation_depth = 12;
     static const int32_t map_dimension = 7;
+    static const bool find_blockage = true;
 
     std::vector<std::pair<int32_t, int32_t>> simulation_coordinates;
     if( !read_input( simulation_coordinates ) )
@@ -264,40 +265,61 @@ int32_t main()
     std::vector<std::vector<char>> map;
     make_map( simulation_coordinates, simulation_depth, map_dimension, map );
 
-#ifdef _DEBUG
-    // Dump the starting map
-    for( auto& row : map )
+    int32_t next_drop = simulation_depth;
+    while( 1 )
     {
-        for( auto& cell : row )
+        if( find_blockage )
         {
-            std::cout << cell;
+            add_blockage( map, simulation_coordinates, next_drop++ );
         }
-        std::cout << std::endl;
-    }
-#endif
-
-    std::vector<std::pair<int32_t, int32_t>> path = a_star(
-        map,
-        { 0, 0 },
-        { map_dimension - 1, map_dimension - 1 }
-    );
-
-    if( !path.empty() )
-    {
-        std::cout << "Path found:\n";
-        std::cout << "Minimum steps = " << path.size() - 1 << "\n";
-
-#ifdef _DEBUG
-        // Dump the path
-        for( const auto& p : path )
+        else
         {
-            std::cout << "(" << p.second << ", " << p.first << ") ";
-        }
-        std::cout << std::endl;
+#ifdef _DEBUG
+            // Dump the starting map
+            for( auto& row : map )
+            {
+                for( auto& cell : row )
+                {
+                    std::cout << cell;
+                }
+                std::cout << std::endl;
+            }
 #endif
-    }
-    else
-    {
-        std::cout << "No path found.\n";
+        }
+
+        std::vector<std::pair<int32_t, int32_t>> path = a_star(
+            map,
+            { 0, 0 },
+            { map_dimension - 1, map_dimension - 1 }
+        );
+
+        if( !path.empty() )
+        {
+            std::cout << "Path found:\n";
+            std::cout << "Minimum steps = " << path.size() - 1 << "\n";
+
+            if( !find_blockage )
+            {
+#ifdef _DEBUG
+            // Dump the path
+                for( const auto& p : path )
+                {
+                    std::cout << "(" << p.second << ", " << p.first << ") ";
+                }
+                std::cout << std::endl;
+
+                break;
+#endif
+            }
+        }
+        else
+        {
+            std::cout << "No path found.\n";
+            std::cout << "First blocker: " <<
+                         std::to_string( simulation_coordinates[ next_drop - 1 ].first ) <<
+                         ","
+                         << simulation_coordinates[ next_drop - 1 ].second << "\n";
+            break;
+        }
     }
 }
