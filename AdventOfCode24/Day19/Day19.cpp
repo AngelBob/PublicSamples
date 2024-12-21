@@ -76,7 +76,7 @@ static uint64_t count_possibles(
                     if( pattern.length() == design.length() )
                     {
                         ++cache[ design ];
-                        break;
+                        continue;
                     }
 
                     uint64_t possibles = count_possibles(
@@ -102,21 +102,24 @@ static uint64_t count_possibles(
     return cache[ design ];
 }
 
-static uint64_t count_possible(
+static std::pair<uint64_t,uint64_t> count_possible(
     const std::map<char, std::vector<std::string>>& patterns,
     const std::vector<std::string> designs
 )
 {
     uint64_t possible_designs = 0;
+    uint64_t possible_combinations = 0;
     for( const auto& design : designs )
     {
-        if( -1 != count_possibles( patterns, design ) )
+        uint64_t design_combinations = count_possibles( patterns, design );
+        if( -1 != design_combinations )
         {
             ++possible_designs;
+            possible_combinations += design_combinations;
         }
     }
 
-    return possible_designs;
+    return std::make_pair( possible_designs, possible_combinations );
 }
 
 int main()
@@ -128,7 +131,8 @@ int main()
         return -1;
     }
 
-    uint64_t possibles = count_possible( patterns, designs );
+    std::pair<uint64_t, uint64_t> possibles = count_possible( patterns, designs );
 
-    std::cout << "Possible designs = " << std::to_string( possibles ) << std::endl;
+    std::cout << "Possible designs = " << std::to_string( possibles.first ) << "\n";
+    std::cout << "Total combinations = " << std::to_string( possibles.second) << std::endl;
 }
