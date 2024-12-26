@@ -6,8 +6,6 @@
 #include <iostream>
 #include <list>
 #include <map>
-#include <queue>
-#include <regex>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -38,9 +36,9 @@ static constexpr std::array<walk_data_t, WALK_END> walk_data{ {
 } };
 
 static bool read_input(
-    std::vector<std::vector<std::pair<char, uint32_t>>>& map,
-    std::pair<uint32_t, uint32_t>& start,
-    std::pair<uint32_t, uint32_t>& end
+    std::vector<std::string>& map,
+    std::pair<int32_t, int32_t>& start,
+    std::pair<int32_t, int32_t>& end
 )
 {
     // Open the input file and read the data.
@@ -52,12 +50,7 @@ static bool read_input(
     std::string line;
     while( std::getline( file, line ) )
     {
-        std::vector<std::pair<char, uint32_t>> line_data;
-        for( const char c : line )
-        {
-            line_data.emplace_back( std::make_pair( c, 0 ) );
-        }
-        map.emplace_back( line_data );
+        map.emplace_back( line );
 
         // See if this line contains the runner start location.
         size_t start_x = line.find( 'S' );
@@ -80,129 +73,174 @@ static bool read_input(
     return true;
 }
 
-static std::array<uint32_t, 4> get_cheat_values(
-    const std::vector<std::vector<std::pair<char, uint32_t>>>& map,
-    const std::pair<uint32_t, uint32_t>& current_location
+static std::map<uint32_t, uint32_t> check_cheat_mask(
+    std::map<std::pair<int32_t, int32_t>, uint32_t>& path,
+    const std::pair<int32_t, int32_t>& start,
+    const std::pair<std::pair<int32_t, int32_t>, uint32_t>& current_location,
+    const std::list<std::pair<int32_t, int32_t>>& cheat_mask
+
 )
 {
-    std::array<uint32_t, 4> savings{{
-        static_cast<uint32_t>( -1 ),
-        static_cast<uint32_t>( -1 ),
-        static_cast<uint32_t>( -1 ),
-        static_cast<uint32_t>( -1 )
-    }};
-    uint32_t row = current_location.second;
-    uint32_t col = current_location.first;
+    std::map<uint32_t, uint32_t> savings;
 
-    uint32_t this_step = map[ row ][ col ].second;
+    uint32_t row = current_location.first.second;
+    uint32_t col = current_location.first.first;
 
-    // Check for cheat possibilities in every direction.
-    for( const auto& walk : walk_data )
+    // Check for cheat possibilities based on the cheat mask.
+    for( const auto& cheat_loc : cheat_mask )
     {
-        if( 0 <= ( row + ( 2 * walk.y_inc ) ) &&
-            ( row + ( 2 * walk.y_inc ) ) < map.size() &&
-            0 <= ( col + ( 2 * walk.x_inc ) ) &&
-            ( col + ( 2 * walk.x_inc ) ) < map[ row ].size()
-          )
+        int32_t new_row = row + cheat_loc.second;
+        int32_t new_col = col + cheat_loc.first;
+
+        uint32_t target_step = path[ { new_col, new_row } ];
+        if( target_step )
         {
-            if( '#' == map[ row + walk.y_inc ][ col + walk.x_inc ].first &&
-                ( '.' == map[ row + ( 2 * walk.y_inc ) ][ col + ( 2 * walk.x_inc ) ].first ||
-                  'S' == map[ row + ( 2 * walk.y_inc ) ][ col + ( 2 * walk.x_inc ) ].first ||
-                  'E' == map[ row + ( 2 * walk.y_inc ) ][ col + ( 2 * walk.x_inc ) ].first ) &&
-                this_step > map[ row + ( 2 * walk.y_inc ) ][ col + ( 2 * walk.x_inc ) ].second
-              )
+            int32_t cheat_distance = std::abs( cheat_loc.first ) + std::abs( cheat_loc.second );
+            if (current_location.second + cheat_distance < target_step)
             {
-                savings[ walk.dir ] = this_step - map[ row + ( 2 * walk.y_inc ) ][ col + ( 2 * walk.x_inc ) ].second - 2;
+                uint32_t delta = target_step - (current_location.second + cheat_distance);
+                savings[delta]++;
             }
         }
+        else if( std::make_pair( new_col, new_row ) != start )
+        {
+            path.erase( { new_col, new_row } );
+        }
+
     }
 
     return savings;
 }
 
-static uint32_t walk_path(
-    std::vector<std::vector<std::pair<char, uint32_t>>>& map,
-    const std::pair<uint32_t, uint32_t>& start,
+static uint32_t build_path(
+    std::vector<std::string>& map,
+    const std::pair<int32_t, int32_t>& start,
     const WALK_DIR came_from,
-    std::map<uint32_t, uint32_t>& cheat_savings,
-    const bool do_cheat
+    std::map<std::pair<int32_t, int32_t>, uint32_t>& path
 )
 {
     uint32_t steps = 1;
 
-    uint32_t x = start.first;
-    uint32_t y = start.second;
-    for( size_t idx = 0; idx < WALK_DIR::WALK_END; ++idx )
+    int32_t x, y;
+    for( const auto& walk : walk_data )
     {
-        if( came_from == idx )
+        if( came_from == walk.dir )
         {
             continue;
         }
 
-        const walk_data_t& walk = walk_data[ idx ];
-        x += walk.x_inc;
-        y += walk.y_inc;
-
-        if( (  do_cheat && map[ y ][ x ].first == 'E' ) ||
-            ( !do_cheat && map[ y ][ x ].first == 'S' )
-          )
+        x = start.first + walk.x_inc;
+        y = start.second + walk.y_inc;
+        if( map[ y ][ x ] == 'S' )
         {
             break;
         }
-        else if( map[ y ][ x ].first != '#' )
+        else if( map[ y ][ x ] != '#' )
         {
-            WALK_DIR from = static_cast<WALK_DIR>( ( idx + ( WALK_DIR::WALK_END / 2 ) ) % WALK_DIR::WALK_END );
-            steps += walk_path( map, { x, y }, from,
-                                cheat_savings, do_cheat );
+            WALK_DIR from = static_cast<WALK_DIR>( ( walk.dir + ( WALK_DIR::WALK_END / 2 ) ) % WALK_DIR::WALK_END );
+            steps += build_path( map, { x, y }, from, path );
+
             break; // only one path through the maze
         }
-
-        x -= walk.x_inc;
-        y -= walk.y_inc;
     }
 
-    if( do_cheat )
-    {
-        std::array<uint32_t, 4> savings = get_cheat_values( map, { x, y } );
-        for( uint32_t saving : savings )
-        {
-            if( -1 != saving )
-            {
-                ++cheat_savings[ saving ];
-            }
-        }
-    }
-
-    if( 0 == map[ y ][ x ].second )
-    {
-        // Note the step number for this location.
-        map[ y ][ x ].second = steps - 1;
-    }
+    path.insert( std::make_pair(std::make_pair( x, y ), steps - 1 ) );
 
     return steps;
 }
 
+static void build_cheat_mask(
+    std::list<std::pair<int32_t, int32_t>>& mask,
+    const int32_t mask_size,
+    const bool straight_only
+)
+{
+    for( int32_t y = mask_size; y >= -mask_size; --y )
+    {
+        if (y >= 0)
+        {
+            for (int32_t x = -(mask_size - y); x <= mask_size - y; ++x)
+            {
+                // Skip the origin and the spaces directly around it.
+                if( ( 0 == x && 1 == y ) ||
+                    ( 0 == y && ( -1 == x || 0 == x || 1 == x ) )
+                  )
+                {
+                    continue;
+                }
+
+                if( straight_only && ( x != 0 && y != 0 ) )
+                {
+                    continue;
+                }
+
+                mask.emplace_back(std::make_pair(x, y));
+            }
+        }
+        else
+        {
+            for (int32_t x = -( mask_size + y ); x <= mask_size + y; ++x)
+            {
+                // Skip space below the origin.
+                if( 0 == x && -1 == y )
+                {
+                    continue;
+                }
+
+                if( straight_only && ( x != 0 ) )
+                {
+                    continue;
+                }
+
+                mask.emplace_back(std::make_pair(x, y));
+            }
+        }
+    }
+}
+
+static void get_cheat_values(
+    std::map<std::pair<int32_t, int32_t>, uint32_t>& path,
+    const std::pair<int32_t, int32_t> start,
+    const std::list<std::pair<int32_t, int32_t>>& cheat_mask,
+    std::map<uint32_t, uint32_t>& cheat_savings
+)
+{
+    for( const auto& location : path )
+    {
+        std::map<uint32_t, uint32_t> cheat_values = check_cheat_mask( path, start, location, cheat_mask );
+        for( auto cheat_it = cheat_values.begin(); cheat_values.end() != cheat_it; ++cheat_it )
+        {
+            cheat_savings[ cheat_it->first ] += cheat_it->second;
+        }
+    }
+}
+
 int32_t main()
 {
-    std::vector<std::vector<std::pair<char, uint32_t>>> map;
-    std::pair<uint32_t, uint32_t> start;
-    std::pair<uint32_t, uint32_t> end;
+    std::vector<std::string> map;
+    std::pair<int32_t, int32_t> start;
+    std::pair<int32_t, int32_t> end;
     if( !read_input( map, start, end ) )
     {
         return -1;
     }
 
-    // Get the base line time through the maze.
-    // Need to walk from end to start to properly number the steps.
-    std::map<uint32_t, uint32_t> cheat_savings;
-    uint32_t base_t = walk_path( map, end, WALK_DIR::WALK_END, cheat_savings, false );
-    map[ end.second ][ end.first ].second = base_t;
+    // Get the base line time and a map through the maze.
+    std::map<std::pair<int32_t, int32_t>, uint32_t> path;
+    uint32_t base_t = build_path( map, end, WALK_DIR::WALK_END, path );
+    path[ end ] = base_t;
     std::cout << "Baseline time = " << std::to_string( base_t ) << " picoseconds.\n";
 
+    // Build the cheat mask
+    std::list<std::pair<int32_t, int32_t>> cheat_mask;
+    build_cheat_mask( cheat_mask, 20, false );
+
     // Check the savings with the cheats.
-    static const uint32_t min_savings = 40;
+    std::map<uint32_t, uint32_t> cheat_savings;
+    get_cheat_values( path, start, cheat_mask, cheat_savings );
+
+    static const uint32_t min_savings = 100;
     uint32_t total_cheats = 0;
-    walk_path( map, start, WALK_DIR::WALK_END, cheat_savings, true );
     for( const auto& saving : cheat_savings )
     {
         if( saving.first >= min_savings )
