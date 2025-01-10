@@ -4,7 +4,7 @@
 #include <array>
 #include <fstream>
 #include <iostream>
-#include <list>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -80,18 +80,60 @@ static bool is_perimeter(
     return perimeter;
 }
 
-static std::pair<size_t, size_t> flood_plot(
+static std::pair<size_t, size_t> count_perimeter_and_corners(
+    const char plot_id,
+    const std::vector<std::vector<std::pair<char, bool>>>& plot_map,
+    const int32_t row,
+    const int32_t col
+)
+{
+    std::pair<size_t, size_t> perimeter_corners( 0, 0 );
+
+    const std::array<std::pair<int32_t, int32_t>, WALK_DIR::WALK_END> neighbors{{
+        std::make_pair( row + walk_data[ WALK_DIR::WALK_NORTH ].y_inc, col + walk_data[ WALK_DIR::WALK_NORTH ].x_inc ),
+        std::make_pair( row + walk_data[ WALK_DIR::WALK_EAST  ].y_inc, col + walk_data[ WALK_DIR::WALK_EAST  ].x_inc ),
+        std::make_pair( row + walk_data[ WALK_DIR::WALK_SOUTH ].y_inc, col + walk_data[ WALK_DIR::WALK_SOUTH ].x_inc ),
+        std::make_pair( row + walk_data[ WALK_DIR::WALK_WEST  ].y_inc, col + walk_data[ WALK_DIR::WALK_WEST  ].x_inc ),
+    }};
+
+    // Check for perimeters
+    bool n_perim = is_perimeter( plot_id, plot_map, neighbors[ WALK_DIR::WALK_NORTH ].first, neighbors[ WALK_DIR::WALK_NORTH ].second );
+    bool e_perim = is_perimeter( plot_id, plot_map, neighbors[ WALK_DIR::WALK_EAST  ].first, neighbors[ WALK_DIR::WALK_EAST  ].second );
+    bool s_perim = is_perimeter( plot_id, plot_map, neighbors[ WALK_DIR::WALK_SOUTH ].first, neighbors[ WALK_DIR::WALK_SOUTH ].second );
+    bool w_perim = is_perimeter( plot_id, plot_map, neighbors[ WALK_DIR::WALK_WEST  ].first, neighbors[ WALK_DIR::WALK_WEST  ].second );
+
+    perimeter_corners.first += n_perim ? 1 : 0;
+    perimeter_corners.first += e_perim ? 1 : 0;
+    perimeter_corners.first += s_perim ? 1 : 0;
+    perimeter_corners.first += w_perim ? 1 : 0;
+
+    // Check for corners
+    // Concave
+    perimeter_corners.second += ( n_perim && w_perim ) ? 1 : 0;
+    perimeter_corners.second += ( n_perim && e_perim ) ? 1 : 0;
+    perimeter_corners.second += ( s_perim && e_perim ) ? 1 : 0;
+    perimeter_corners.second += ( s_perim && w_perim ) ? 1 : 0;
+
+    // Convex
+    perimeter_corners.second += ( !n_perim && !w_perim && ( 0 <= row - 1 ) && ( 0 <= col - 1 ) && ( plot_map[ row - 1 ][ col - 1 ].first != plot_id ) ) ? 1 : 0;
+    perimeter_corners.second += ( !n_perim && !e_perim && ( 0 <= row - 1 ) && ( col + 1 < plot_map[ row - 1 ].size() ) && ( plot_map[ row - 1 ][ col + 1 ].first != plot_id ) ) ? 1 : 0;
+    perimeter_corners.second += ( !s_perim && !e_perim && ( row + 1 < plot_map.size() ) && ( col + 1 < plot_map[ row + 1 ].size() ) && ( plot_map[ row + 1 ][ col + 1 ].first != plot_id ) ) ? 1 : 0;
+    perimeter_corners.second += ( !s_perim && !w_perim && ( row + 1 < plot_map.size() ) && ( 0 <= col - 1 ) && ( plot_map[ row + 1 ][ col - 1 ].first != plot_id ) ) ? 1 : 0;
+
+    return perimeter_corners;
+}
+
+static std::pair<std::pair<size_t, size_t>, size_t> flood_plot(
     std::vector<std::vector<std::pair<char, bool>>>& plot_map,
     const char plot_id,
     const int32_t start_row,
     const int32_t start_col
 )
 {
-    size_t perimeter = 0;
-    size_t area = 0;
+    std::pair<size_t, size_t> total_perimeter_and_corners( 0, 0 );
 
-    std::list<std::pair<int32_t, int32_t>> flood_wave{{ start_row, start_col }};
-    std::list<std::pair<int32_t, int32_t>>::iterator flood_front = flood_wave.begin();
+    std::set<std::pair<int32_t, int32_t>> flood_wave = {{ start_row, start_col }};
+    std::set<std::pair<int32_t, int32_t>>::iterator flood_front = flood_wave.begin();
     while( flood_wave.end() != flood_front )
     {
         // Add area and perimeter for this section of the plot.
@@ -100,24 +142,25 @@ static std::pair<size_t, size_t> flood_plot(
 
         if( !plot_map[ this_row ][ this_col ].second )
         {
+            std::pair<size_t, size_t> perimeter_corners = count_perimeter_and_corners( plot_id, plot_map, this_row, this_col );
+            total_perimeter_and_corners.first += perimeter_corners.first;
+            total_perimeter_and_corners.second += perimeter_corners.second;
+
             const std::array<std::pair<int32_t, int32_t>, WALK_DIR::WALK_END> flood_paths{{
-                std::make_pair( this_row + walk_data[ WALK_DIR::WALK_NORTH ].y_inc, this_col + walk_data[ WALK_DIR::WALK_NORTH ].x_inc ),
                 std::make_pair( this_row + walk_data[ WALK_DIR::WALK_EAST  ].y_inc, this_col + walk_data[ WALK_DIR::WALK_EAST  ].x_inc ),
                 std::make_pair( this_row + walk_data[ WALK_DIR::WALK_SOUTH ].y_inc, this_col + walk_data[ WALK_DIR::WALK_SOUTH ].x_inc ),
                 std::make_pair( this_row + walk_data[ WALK_DIR::WALK_WEST  ].y_inc, this_col + walk_data[ WALK_DIR::WALK_WEST  ].x_inc ),
+                std::make_pair( this_row + walk_data[ WALK_DIR::WALK_NORTH ].y_inc, this_col + walk_data[ WALK_DIR::WALK_NORTH ].x_inc ),
             }};
 
-            ++area;
             for( const auto& flood_path : flood_paths )
             {
                 int32_t check_row = flood_path.first;
                 int32_t check_col = flood_path.second;
 
-                if( is_perimeter( plot_id, plot_map, check_row, check_col ) )
-                {
-                    ++perimeter;
-                }
-                else if( plot_map[ check_row ][ check_col ].first == plot_id )
+                if( !is_perimeter( plot_id, plot_map, check_row, check_col ) &&
+                    plot_map[ check_row ][ check_col ].first == plot_id &&
+                    !plot_map[ check_row ][ check_col ].second )
                 {
                     flood_wave.insert( flood_wave.end(), std::make_pair( flood_path.first, flood_path.second ) );
                 }
@@ -125,14 +168,18 @@ static std::pair<size_t, size_t> flood_plot(
 
             // Mark this section as counted.
             plot_map[ this_row ][ this_col ].second = true;
-        }
 
-        // Move to the next plot section
-        flood_wave.pop_front();
-        flood_front = flood_wave.begin();
+            // Reset, since insert may have inserted at the front
+            flood_front = flood_wave.begin();
+        }
+        else
+        {
+            // Move to the next plot section
+            ++flood_front;
+        }
     }
 
-    return std::make_pair( perimeter, area );
+    return std::make_pair( total_perimeter_and_corners, flood_wave.size() );
 }
 
 int main()
@@ -144,6 +191,7 @@ int main()
     }
 
     size_t fence_cost = 0;
+    size_t discount_cost = 0;
     int32_t row = 0, col = 0;
 
     while( row < plot_map.size() &&
@@ -151,8 +199,9 @@ int main()
     {
         char plot_id = plot_map[ row ][ col ].first;
 
-        std::pair<size_t, size_t> plot_data = flood_plot( plot_map, plot_id, row, col );
-        fence_cost += plot_data.first * plot_data.second;
+        std::pair<std::pair<size_t, size_t>, size_t> plot_data = flood_plot( plot_map, plot_id, row, col );
+        fence_cost += plot_data.first.first * plot_data.second;
+        discount_cost += plot_data.first.second * plot_data.second;
 
         while( plot_map[ row ][ col ].second )
         {
@@ -169,5 +218,6 @@ int main()
         }
     }
 
-    std::cout << "Total fence cost is " << fence_cost << "\n";
+    std::cout << "Total base fence cost is " << fence_cost << "\n";
+    std::cout << "Total discount cost is " << discount_cost << std::endl;
 }
