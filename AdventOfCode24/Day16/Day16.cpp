@@ -7,9 +7,9 @@
 #include <list>
 #include <map>
 #include <queue>
-#include <set>
 #include <string>
 #include <tuple>
+#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
@@ -152,6 +152,28 @@ private:
     enum WALK_DIR dir;
 };
 
+struct pair_hash
+{
+    inline std::size_t operator()( const std::pair<size_t, size_t>& v ) const
+    {
+        size_t pair_hash = 0;
+        if constexpr ( sizeof( size_t ) == sizeof( uint64_t ) )
+        {
+            pair_hash = v.first;
+            pair_hash <<= 32;
+            pair_hash |= v.second & 0xFFFFFFFF;
+        }
+        else
+        {
+            pair_hash = v.first;
+            pair_hash <<= 16;
+            pair_hash |= v.second & 0xFFFF;
+        }
+
+        return pair_hash;
+    }
+};
+
 static bool read_input(
     std::vector<std::string>& map,
     std::tuple<size_t, size_t, enum WALK_DIR>& start_pos,
@@ -191,7 +213,52 @@ static bool read_input(
     return true;
 }
 
-void solve_maze(
+static void do_backtrack(
+    std::unordered_map<
+        state,
+        std::pair<size_t, std::unordered_set<state, state::state_hash>>,
+        state::state_hash>& visited,
+    const std::pair<size_t, size_t> end
+)
+{
+    std::unordered_set<state, state::state_hash> backtracked;
+    std::unordered_set<std::pair<size_t, size_t>, pair_hash> positions;
+    std::deque<state> backtrack{
+        { end.first, end.second, WALK_NORTH },
+        { end.first, end.second, WALK_EAST },
+        { end.first, end.second, WALK_SOUTH },
+        { end.first, end.second, WALK_WEST }
+    };
+
+    while( !backtrack.empty() )
+    {
+        state b_state = backtrack[ 0 ];
+        backtrack.pop_front();
+
+        positions.insert( b_state.get_position() );
+
+        backtracked.insert( b_state );
+
+        auto it = visited.find( b_state );
+        if( visited.end() == it )
+        {
+            continue;
+        }
+
+        auto& prev_states = (*it).second.second;
+        for( const state& prev_state : prev_states )
+        {
+            if( !backtracked.contains( prev_state ) )
+            {
+                backtrack.push_back( prev_state );
+            }
+        }
+    }
+
+    std::cout << "The number of prime seats is " <<
+                 std::to_string( positions.size() ) << std::endl;
+}
+static void solve_maze(
     const std::vector<std::string>& map,
     const state& start,
     std::pair<size_t, size_t> end
@@ -200,36 +267,72 @@ void solve_maze(
     std::priority_queue<std::pair<size_t, state>,
                         std::vector<std::pair<size_t, state>>,
                         std::greater<std::pair<size_t, state>>> pq;
-    std::unordered_set<state, state::state_hash> visited;
+    std::unordered_map<state,
+                       std::pair<size_t, std::unordered_set<state, state::state_hash>>,
+                       state::state_hash> visited;
+
+    size_t end_score = std::numeric_limits<size_t>::max();
 
     pq.push( { 0, start } ); // ( distance, node )
     while( !pq.empty() )
     {
-        auto& [ score, state ] = pq.top();
+        auto [ score, state ] = pq.top();
+        pq.pop();
 
         if( end == state.get_position() )
         {
-            std::cout << "The best score through the maze is " <<
-                std::to_string( score ) << std::endl;
-
-            return;
+            // Found the end, update the final score.
+            end_score = score;
+            break;
         }
 
-        visited.insert( state );
-
-        for( auto& [ cost, t_state ] : state.get_neighbors() )
+        for( auto& [ cost, n_state ] : state.get_neighbors() )
         {
-            const std::pair<size_t, size_t>& pos_n = t_state.get_position();
-            if( ( '#' != map[ pos_n.second ][ pos_n.first ] ) &&
-                !visited.contains( t_state )
-              )
+            const std::pair<size_t, size_t>& pos_n = n_state.get_position();
+            if( '#' == map[ pos_n.second ][ pos_n.first ] )
             {
-                pq.push( { score + cost, std::move( t_state ) } );
+                // Not a viable move, so skip it.
+                continue;
             }
-        }
 
-        pq.pop();
+            size_t neighbor_score = score + cost;
+            if( end_score < neighbor_score )
+            {
+                // Already a more expensive path to the end, so skip it.
+                continue;
+            }
+
+            auto it = visited.find( n_state );
+            if( visited.end() != it )
+            {
+                auto& [ prev_score, prev_states ] = (*it).second;
+                if( prev_score < neighbor_score )
+                {
+                    // Already a more expensive path to this tile, skip it.
+                    continue;
+                }
+                else if( prev_score == neighbor_score )
+                {
+                    // Another path to this tile with a low score.
+                    prev_states.insert( state );
+                }
+            }
+            else
+            {
+                // Update the low score for this tile.
+                visited[ n_state ] = { neighbor_score, { state } };
+            }
+
+            pq.push( { neighbor_score, std::move( n_state ) } );
+        }
     }
+
+    std::cout << "The lowest path score is " <<
+        std::to_string( end_score ) << std::endl;
+
+    // Found the end, now walk backwards to find all of the locations with the
+    // same low score.
+    do_backtrack( visited, end );
 }
 
 int main()
