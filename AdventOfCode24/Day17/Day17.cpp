@@ -30,6 +30,19 @@ public:
         }
     }
 
+    void run_once(
+        const std::vector<uint8_t>& op_codes
+    )
+    {
+        do
+        {
+            uint8_t a = op_codes[ ip ];
+            uint8_t b = op_codes[ ip + 1 ];
+
+            exec( a, b );
+        } while( ( 0 < ip ) && ( ip < op_codes.size() ) );
+    }
+
     const std::vector<uint64_t>& get_output( void ) const
     {
         return output;
@@ -218,6 +231,51 @@ static bool read_input(
     return true;
 }
 
+static void reverse_op(
+    const std::vector<uint8_t>& op_codes,
+    const std::vector<uint8_t>& op_codes_r,
+    uint64_t& best,
+    uint64_t index,
+    uint64_t value
+)
+{
+    if( value > best )
+    {
+        return;
+    }
+    else if( op_codes_r.size() == index )
+    {
+        best = std::min( best, value >> 3 );
+        return;
+    }
+
+    for( uint64_t i = 0; i < 8; ++i )
+    {
+        computer comp( std::array<uint64_t, 3>( { value + i, 0, 0 } ) );
+        comp.run_once( op_codes );
+        const std::vector<uint64_t>& output = comp.get_output();
+
+        if( output.back() != op_codes_r[ index ] )
+        {
+            continue;
+        }
+
+        reverse_op( op_codes, op_codes_r, best, index + 1, ( value + i ) << 3 );
+    }
+}
+
+static uint64_t reverse_engineer(
+    const std::vector<uint8_t>& op_codes
+)
+{
+    std::vector<uint8_t> op_codes_r{ op_codes.rbegin(), op_codes.rend() };
+    uint64_t best = std::numeric_limits<uint64_t>::max();
+
+    reverse_op( op_codes, op_codes_r, best, 0, 0 );
+
+    return best;
+}
+
 int main()
 {
     std::array<uint64_t, 3> registers;
@@ -235,4 +293,9 @@ int main()
         std::cout << std::to_string( v ) << ",";
     }
     std::cout << std::endl;
+
+    uint64_t start_reg = reverse_engineer( op_codes );
+
+    std::cout << "The program will replicate with a starting register of " <<
+        std::to_string( start_reg ) << std::endl;
 }
