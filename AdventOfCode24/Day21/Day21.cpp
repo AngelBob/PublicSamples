@@ -173,6 +173,59 @@ static const std::map<std::pair<char, char>, std::string> direction_pad{{
     {{'<','<'}, "A"},
 }};
 
+template<size_t D>
+class pad_handler
+{
+public:
+    pad_handler()
+    {
+        std::fill( pad_pos.begin(), pad_pos.end(), 'A' );
+    }
+
+    uint64_t do_pad(
+        const char end,
+        const size_t depth
+    )
+    {
+        // Final depth always starts at the A key.
+        char start = pad_pos[ depth ];
+        pad_pos[ depth ] = end;
+
+        std::tuple<char, char, size_t> cache_key{ start, end, depth };
+        auto it = cache.find( cache_key );
+        if( cache.end() != it )
+        {
+            pad_pos[ depth ] = cache[ cache_key ].second;
+            return cache[ cache_key ].first;
+        }
+
+        uint64_t length = 0;
+
+        std::string moves = ( depth == 0 ) ?
+            number_pad.at( std::make_pair( start, end ) ) :
+            direction_pad.at( std::make_pair( start, end ) );
+
+        if( D == depth )
+        {
+            length = moves.length();
+        }
+        else
+        {
+            for( const char m : moves )
+            {
+                length += do_pad( m, depth + 1 );
+            }
+        }
+
+        cache[ std::tuple( start, end, depth ) ] = std::make_pair( length, end );
+
+        return length;
+    }
+private:
+    std::map<std::tuple<char, char, size_t>, std::pair<uint64_t, char>> cache;
+    std::array<char, D+1> pad_pos;
+};
+
 static bool read_input(
     std::vector<std::string>& codes
 )
@@ -192,40 +245,6 @@ static bool read_input(
     return true;
 }
 
-static void do_pad(
-    const std::vector<std::string>& input,
-    const std::map<std::pair<char, char>, std::string>& pad,
-    std::vector<std::string>& movements
-)
-{
-    movements.clear();
-
-    for( const std::string target : input )
-    {
-        // Movement always starts at the 'A' key.
-        movements.emplace_back( pad.at( std::make_pair( 'A', target[ 0 ] ) ) );
-
-        for( size_t idx = 0; idx < target.length() - 1; ++idx )
-        {
-            movements.emplace_back( pad.at( std::make_pair( target[ idx ], target[ idx + 1 ] ) ) );
-        }
-    }
-}
-
-static void output_strings(
-    const std::vector<std::vector<std::string>>& strings_v
-)
-{
-    for( const auto& strings : strings_v )
-    {
-        for (const auto& string : strings)
-        {
-            std::cout << string;
-        }
-        std::cout << "\n\t";
-    }
-}
-
 int main()
 {
     std::vector<std::string> codes;
@@ -234,33 +253,21 @@ int main()
         return -1;
     }
 
+    pad_handler<2> p2;
+
     uint64_t complexity = 0;
-    for (const auto& code : codes)
+    for( const std::string& code : codes )
     {
-        // Figure out the movements required to enter the code.
-        std::vector<std::string> code_v{{ code }};
-        std::vector<std::string> move_strings;
-        do_pad( code_v, number_pad, move_strings );
-
-        // Translate the code movements across the two intervening robots.
-        std::vector<std::string> tx_string;
-        do_pad( move_strings, direction_pad, tx_string );
-
-        std::vector<std::string> tx_string1;
-        do_pad( tx_string, direction_pad, tx_string1 );
-
-        // Output the calculated strings.
-        output_strings( {{ code_v, move_strings, tx_string, tx_string1 }} );
-
-        // Calculate the complexity value for this code.
         uint64_t length = 0;
-        for( const std::string& command : tx_string1 )
+        for( const char c : code )
         {
-            length += static_cast<uint64_t>( command.length() );
+            // Figure out the movements required to enter the code.
+            length += p2.do_pad( c, 0 );
         }
 
-        uint64_t value = ( code[ 0 ] - '0' ) * 100 + ( code[ 1 ] - '0' ) * 10 + ( code[ 2 ] - '0' );
+        uint64_t value = std::stoull( code );
         complexity += ( length * value );
+
         std::cout << "(" << std::to_string( length ) << " * " << std::to_string( value ) << ")\n";
     }
 
