@@ -254,22 +254,30 @@ int main()
     }
 
     pad_handler<2> p2;
+    pad_handler<25> p25;
 
-    uint64_t complexity = 0;
+    uint64_t complexity2 = 0;
+    uint64_t complexity25 = 0;
     for( const std::string& code : codes )
     {
-        uint64_t length = 0;
+        uint64_t length2 = 0;
+        uint64_t length25 = 0;
         for( const char c : code )
         {
             // Figure out the movements required to enter the code.
-            length += p2.do_pad( c, 0 );
+            length25 += p25.do_pad( c, 0 );
+            length2 += p2.do_pad( c, 0 );
         }
 
         uint64_t value = std::stoull( code );
-        complexity += ( length * value );
+        complexity2 += ( length2 * value );
+        complexity25 += ( length25 * value );
 
-        std::cout << "(" << std::to_string( length ) << " * " << std::to_string( value ) << ")\n";
+        std::cout << "(" << std::to_string( length2 ) << ", " <<
+                            std::to_string( length25 ) << " * " <<
+                            std::to_string( value ) << ")\n";
     }
 
-    std::cout << "The code complexity is " << std::to_string( complexity ) << "\n";
+    std::cout << "The depth  2 code complexity is " << std::to_string( complexity2 ) << "\n";
+    std::cout << "The depth 25 code complexity is " << std::to_string( complexity25 ) << "\n";
 }
