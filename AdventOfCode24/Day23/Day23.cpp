@@ -14,7 +14,7 @@ static bool read_input(
 {
     // Open the input file and read the data.
     // Step 1: open the input file.
-    std::ifstream file(".\\Lan.txt");
+    std::ifstream file(".\\Lan_full.txt");
 
     // Step 2: read each line and insert individual characters into the grid.
     std::string line;
@@ -64,6 +64,46 @@ static void map_t_lans(
     }
 }
 
+static void build_max_clique(
+    const std::map<std::string, std::set<std::string>>& lan_maps,
+    std::vector<std::string>& max_clique
+)
+{
+    for( const std::pair<std::string, std::set<std::string>>& lan_map : lan_maps )
+    {
+        std::vector<std::string> clique{ lan_map.first };
+        for( const std::pair<std::string, std::set<std::string>>& connection : lan_maps )
+        {
+            if( connection == lan_map )
+            {
+                continue;
+            }
+
+            bool contains_all = true;
+            for( const auto& clique_member : clique )
+            {
+                if( !connection.second.contains( clique_member ) )
+                {
+                    contains_all = false;
+                    break;
+                }
+            }
+
+            if( contains_all )
+            {
+                clique.push_back( connection.first );
+            }
+        }
+
+        if( max_clique.size() < clique.size() )
+        {
+            std::swap( clique, max_clique );
+        }
+    }
+
+    std::sort( max_clique.begin(), max_clique.end() );
+}
+
 int main()
 {
     std::map<std::string, std::set<std::string>> lan_maps;
@@ -75,4 +115,11 @@ int main()
     std::set<std::vector<std::string>> lans_with_t;
     map_t_lans( lan_maps, lans_with_t );
     std::cout << "There are " << std::to_string( lans_with_t.size() ) << " LANs with a t? computer.\n";
+
+    std::vector<std::string> largest_set;
+    build_max_clique( lan_maps, largest_set );
+    for( const auto& comp : largest_set )
+    {
+        std::cout << comp << ",";
+    }
 }
