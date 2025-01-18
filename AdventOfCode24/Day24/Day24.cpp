@@ -4,117 +4,252 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <list>
 #include <map>
 #include <string>
-#include <sstream>
 #include <tuple>
-#include <vector>
 
-class operation_node
+class reg_n
 {
 public:
-    operation_node() = delete;
+    reg_n() = delete;
 
-    operation_node(
-        const std::string& out,
-        std::shared_ptr<operation_node> in1,
-        std::shared_ptr<operation_node> in2,
-        const std::string& op ) :
-            reg_name( out ),
-            operands( { in1, in2 } ),
-            operation( op ),
-            result( false )
+    reg_n(
+        size_t id,
+        bool is_set,
+        bool value,
+        const std::string& name
+    ) :
+        id( id ),
+        set( is_set ),
+        val( value ),
+        reg( name )
     {
-        resolve_operation( in1->get_result(), in2->get_result(), operation );
     }
 
-    operation_node(
-        const std::string& out,
-        const bool& in1,
-        const bool& in2,
-        const std::string& op ) :
-        reg_name( out ),
-        operands( { nullptr, nullptr } ),
-        operation( op ),
-        result( false )
+    inline size_t get_id( void ) const
     {
-        resolve_operation( in1, in2, operation );
+        return id;
     }
 
-    const std::string& get_reg_name( void ) const
+    inline const std::string& get_out_symbol( void ) const
     {
-        return reg_name;
+        return reg;
     }
 
-    const std::shared_ptr<operation_node> get_operand( size_t idx ) const
+    inline void set_value( bool v )
     {
-        if( idx < 2 )
+        if( set && ( val != v ) )
         {
-            return operands[ idx ];
+            std::cout << reg << " reset." << std::endl;
+            __debugbreak();
         }
 
-        __debugbreak(); // out of bounds
-        return operands[ 0 ];
+        val = v;
+        set = true;
     }
 
-    bool get_result( void ) const
+    inline bool get_value( void ) const
     {
-        return result;
+        if( !set )
+        {
+            __debugbreak();
+        }
+
+        return val;
+    }
+
+    static size_t calc_register_id( const std::string& reg_name )
+    {
+        size_t shift = 0;
+        size_t id = 0;
+        for( size_t idx = 0; idx < reg_name.size(); ++idx, shift += 8 )
+        {
+            char c = reg_name[ idx ];
+            if( 'a' <= c && c <= 'z' )
+            {
+                c -= 'a';
+                c += 10; /* ensure 0-9 sort before a-z */
+            }
+            else if( '0' <= c && c <= '9' )
+            {
+                c -= '0';
+            }
+
+            id |= ( static_cast<size_t>( c ) << shift );
+        }
+
+        return id;
+    }
+
+    static size_t calc_xyz_reg_id( const char xyz, size_t idx )
+    {
+        size_t id = ( static_cast<size_t>( xyz ) - 'a' ) + 10;
+        id |= ( ( idx / 10 ) << 8 );
+        id |= ( ( idx % 10 ) << 16 );
+
+        return id;
     }
 
 private:
-    void resolve_operation( const bool in1, const bool in2, const std::string& op )
-    {
-        if( op == "AND" )
-        {
-            result = ( in1 && in2 );
-        }
-        else if( op == "XOR" )
-        {
-            result = ( in1 && !in2 ) || ( !in1 && in2 );
-        }
-        else if( op == "OR" )
-        {
-            result = ( in1 || in2 );
-        }
-        else if( op == "ASSIGN" )
-        {
-            if( in1 != in2 )
-            {
-                __debugbreak();
-            }
+    std::string reg;
+    size_t id{ 0 };
+    bool set{ false };
+    bool val{ false };
+};
 
-            result = in1;
+class gate_n
+{
+public:
+    enum OP
+    {
+        OP_XOR = 0,
+        OP_AND,
+        OP_OR,
+        OP_ASSIGN,
+        OP_NONE = 0xFF
+    };
+
+    gate_n() = delete;
+
+    gate_n(
+        std::shared_ptr<reg_n> out,
+        std::shared_ptr<reg_n> a,
+        std::shared_ptr<reg_n> b,
+        const OP op ) :
+            out( out ),
+            ab( { a, b } ),
+            op( op )
+    {
+    }
+
+    inline const std::string& get_a_symbol( void ) const
+    {
+        return ab[ 0 ]->get_out_symbol();
+    }
+
+    inline std::shared_ptr<reg_n> get_a_reg( void ) const
+    {
+        return ab[ 0 ];
+    }
+
+    inline const std::string& get_b_symbol( void ) const
+    {
+        return ab[ 1 ]->get_out_symbol();
+    }
+
+    inline std::shared_ptr<reg_n> get_b_reg( void ) const
+    {
+        return ab[ 1 ];
+    }
+
+    inline const std::string& get_out_symbol( void ) const
+    {
+        return out->get_out_symbol();
+    }
+
+    inline std::shared_ptr<reg_n> get_out_reg( void ) const
+    {
+        return out;
+    }
+
+    inline void execute( void )
+    {
+        resolve_gate();
+    }
+
+    inline bool get_result( void ) const
+    {
+        return out->get_value();
+    }
+
+    inline static OP resolve_op_string( const std::string& op )
+    {
+        OP resolved_op = OP::OP_NONE;
+        if( "XOR" == op )
+        {
+            resolved_op = OP::OP_XOR;
+        }
+        else if( "AND" == op )
+        {
+            resolved_op = OP::OP_AND;
+        }
+        else if( "OR" == op )
+        {
+            resolved_op = OP::OP_OR;
+        }
+        else if( "ASSIGN" == op )
+        {
+            resolved_op = OP::OP_ASSIGN;
         }
         else
         {
             // Unknown operation
             __debugbreak();
         }
+
+        return resolved_op;
     }
 
-    std::string reg_name;
-    std::array<std::shared_ptr<operation_node>, 2> operands;
-    std::string operation;
-    bool result;
+private:
+    void resolve_gate( void )
+    {
+        // Ensure the register booleans are exactly 1 bit in size.
+        uint8_t a_val = ab[ 0 ]->get_value() ? 0x1 : 0x0;
+        uint8_t b_val = ab[ 1 ]->get_value() ? 0x1 : 0x0;
+        uint8_t o;
+
+        switch( op )
+        {
+        case OP::OP_XOR:
+            o = ( a_val ^ b_val );
+            break;
+
+        case OP::OP_AND:
+            o = ( a_val & b_val );
+            break;
+
+        case OP::OP_OR:
+            o = ( a_val | b_val );
+            break;
+
+        case OP::OP_ASSIGN:
+            if( a_val != b_val )
+            {
+                __debugbreak();
+            }
+
+            o = a_val ? 1 : 0;
+            break;
+
+        default:
+            // Unknown operation
+            __debugbreak();
+        }
+
+        out->set_value( 0 == o ? false : true );
+    }
+
+    std::shared_ptr<reg_n> out;
+    std::array<std::shared_ptr<reg_n>, 2> ab;
+    OP op;
 };
 
 static bool read_input(
-    std::map<std::string, bool>& registers,
-    std::map<std::string, std::tuple<std::string, std::string, std::string>>& operations
+    std::map<size_t, std::shared_ptr<reg_n>>& registers,
+    std::map<size_t, std::tuple<std::string, std::string, std::string, gate_n::OP>>& gates
 )
 {
     // Open the input file and read the data.
     // Step 1: open the input file.
     std::ifstream file(".\\Logic_full.txt");
 
-    // Step 2: read each line and insert operations into the map.
+    // Step 2: read each line and insert registers and gates into the map.
     bool have_registers = false;
+
     std::string line;
     while( std::getline( file, line ) )
     {
-        if (0 == line.length())
+        if( 0 == line.length() )
         {
             have_registers = true;
             continue;
@@ -123,121 +258,120 @@ static bool read_input(
         if( !have_registers )
         {
             std::string reg( line.substr( 0, line.find( ':' ) ) );
+            size_t reg_id = reg_n::calc_register_id( reg );
+
+            size_t idx = std::stoull( reg.substr( 1 ) );
             bool val = std::stoi( line.substr( line.find( ':' ) + 2, line.length() - 1 ) ) ? true : false;
 
-            registers.insert( std::make_pair( reg, val ) );
+            registers.emplace( std::make_pair( reg_id, std::make_shared<reg_n>( reg_id, true, val, reg ) ) );
         }
         else
         {
-            std::string first_input( line.substr( 0, 3 ) );
-            std::string operation( line.substr( 4, line.find( ' ', 4 ) - 4 ) );
-            std::string second_input( line.substr( line.find( ' ', 4 ) + 1, 3 ) );
+            std::string a( line.substr( 0, 3 ) );
+            std::string b( line.substr( line.find( ' ', 4 ) + 1, 3 ) );
 
-            std::string output( line.substr( line.length() - 3, line.length() - 1 ) );
+            size_t reg_a_id = reg_n::calc_register_id( a );
+            size_t reg_b_id = reg_n::calc_register_id( b );
 
-            if( 0 != operations.count( output ) )
-            {
-                // Assert any given output is only used once.
-                __debugbreak();
-            }
-            operations.insert( std::make_pair( output, std::make_tuple( first_input, second_input, operation ) ) );
+            registers.emplace( std::make_pair( reg_a_id, std::make_shared<reg_n>( reg_a_id, false, false, a ) ) );
+            registers.emplace( std::make_pair( reg_b_id, std::make_shared<reg_n>( reg_b_id, false, false, b ) ) );
+
+            std::string op( line.substr( 4, line.find( ' ', 4 ) - 4 ) );
+            std::string out( line.substr( line.length() - 3, line.length() - 1 ) );
+
+            size_t out_id = reg_n::calc_register_id( out );
+            registers.emplace( std::make_pair( out_id, std::make_shared<reg_n>( out_id, false, false, out ) ) );
+
+            gates.emplace( std::make_pair( out_id, std::make_tuple( a, b, out, gate_n::resolve_op_string( op ) ) ) );
         }
     }
 
     // Step 3: return success or failure.
-    return( 0 != registers.size() && 0 != operations.size() );
+    return( 0 != registers.size() && 0 != gates.size() );
 }
 
-static std::shared_ptr<operation_node> build_dependency_tree(
-    const std::string& reg,
-    const std::map<std::string, std::tuple<std::string, std::string, std::string>>& operations,
-    std::map<std::string, bool>& registers
+static void build_gates(
+    const std::map<size_t, std::tuple<std::string, std::string, std::string, gate_n::OP>>& op_descriptions,
+    const std::map<size_t, std::shared_ptr<reg_n>>& r,
+    std::map<size_t, std::shared_ptr<gate_n>>& ops
 )
 {
-    std::string operand1 = std::get<0>( operations.at( reg ) );
-    std::string operand2 = std::get<1>( operations.at( reg ) );
-
-    if( 'x' == operand1[ 0 ] || 'y' == operand1[ 0 ] )
+    for( const auto& op_desc : op_descriptions )
     {
-        if( 'x' != operand2[ 0 ] && 'y' != operand2[ 0 ] )
+        size_t out_id = reg_n::calc_register_id( std::get<2>( op_desc.second ) );
+        size_t a_id   = reg_n::calc_register_id( std::get<0>( op_desc.second ) );
+        size_t b_id   = reg_n::calc_register_id( std::get<1>( op_desc.second ) );
+        gate_n::OP x    = std::get<3>( op_desc.second );
+
+        ops.emplace( std::make_pair( out_id, std::make_shared<gate_n>( r.at( out_id ), r.at( a_id ), r.at( b_id ), x ) ) );
+    }
+}
+
+static void resolve_registers(
+    const size_t reg,
+    const std::map<size_t, std::shared_ptr<reg_n>>& r,
+    std::map<size_t, std::shared_ptr<gate_n>>& ops
+)
+{
+    std::shared_ptr<reg_n> a = ops.at( reg )->get_a_reg();
+    std::shared_ptr<reg_n> b = ops.at( reg )->get_b_reg();
+
+    if( 'x' == a->get_out_symbol()[ 0 ] || 'y' == a->get_out_symbol()[ 0 ] )
+    {
+        if( 'x' != b->get_out_symbol()[ 0 ] && 'y' != b->get_out_symbol()[ 0 ] )
         {
             __debugbreak();
         }
 
-        // Bottom of the dependency tree, can resolve this node
-        std::shared_ptr<operation_node> static_reg1(new operation_node(
-                operand1,
-                registers.at( operand1 ),
-                registers.at( operand1 ),
-                "ASSIGN"
-            )
-        );
-
-        std::shared_ptr<operation_node> static_reg2(new operation_node(
-                operand2,
-                registers.at( operand2 ),
-                registers.at( operand2 ),
-                "ASSIGN"
-            )
-        );
-
-        return std::make_shared<operation_node>( reg, static_reg1, static_reg2, std::get<2>( operations.at( reg ) ) );
+        // Bottom of the dependency tree, start resolving bottoms-up.
     }
     else
     {
-        return std::shared_ptr<operation_node>( new operation_node(
-                reg,
-                build_dependency_tree( operand1, operations, registers ),
-                build_dependency_tree( operand2, operations, registers ),
-                std::get<2>( operations.at( reg ) )
-            )
-        );
-    }
-}
-
-static uint64_t calculate_z(
-    std::vector<std::shared_ptr<operation_node>>& z_dep_trees
-)
-{
-    uint64_t z_value = 0;
-
-    for( auto& z_reg : z_dep_trees )
-    {
-        uint32_t shift = std::stoul( z_reg->get_reg_name().substr( 1, 2 ) );
-        z_value |= ( static_cast<uint64_t>( z_reg->get_result() ? 1 : 0 ) << shift );
+        resolve_registers( a->get_id(), r, ops );
+        resolve_registers( b->get_id(), r, ops );
     }
 
-    return z_value;
+    // All registers below should be fully resolved
+    ops.at( reg )->execute();
 }
 
 int main()
 {
-    std::map<std::string, bool> registers;
-    std::map<std::string, std::tuple<std::string, std::string, std::string>> operations;
-    if( !read_input( registers, operations ) )
+    // Read input will create a full list of registers and resolve the values
+    // for the input x & y. Can not fully resolve the gates at this time
+    // due to ordering of register creation, so build a map of data per output
+    // register.
+    std::map<size_t, std::shared_ptr<reg_n>> r;
+    std::map<size_t, std::tuple<std::string, std::string, std::string, gate_n::OP>> ops;
+    if( !read_input( r, ops ) )
     {
         return -1;
     }
 
-    std::vector<std::shared_ptr<operation_node>> z_dep_trees;
+    // Have all of the the registers now, create the map of gate objects.
+    std::map<size_t, std::shared_ptr<gate_n>> gates;
+    build_gates( ops, r, gates );
+
+    // Execute the ripple adder from LSB to MSB.
+    // For each gate with a z register output, resolve the gates from
+    // bottom to top.
     uint32_t z_idx = 0;
+    uint64_t output = 0;
     while( 1 )
     {
-        std::stringstream z_reg;
-        z_reg << "z" << std::setfill('0') << std::setw( 2 ) << z_idx;
-        if( !operations.contains( z_reg.str() ) )
+        size_t z_id = reg_n::calc_xyz_reg_id( 'z', z_idx );
+        if( !ops.contains( z_id ) )
         {
             break;
         }
 
-        std::shared_ptr<operation_node> reg_tree =
-            build_dependency_tree( z_reg.str(), operations, registers );
-
-        z_dep_trees.emplace_back( std::move( reg_tree ) );
+        resolve_registers( z_id, r, gates );
+        bool result = gates.at( z_id )->get_result();
+        uint64_t r_long = result ? 1 : 0;
+        output |= ( r_long << z_idx );
 
         ++z_idx;
     }
 
-    uint64_t output = calculate_z( z_dep_trees );
     std::cout << "The decimal output is " << std::to_string( output ) << "\n";
 }
