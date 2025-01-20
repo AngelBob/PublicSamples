@@ -1,5 +1,6 @@
 // Day24.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
+#include <algorithm>
 #include <array>
 #include <fstream>
 #include <iomanip>
@@ -7,6 +8,7 @@
 #include <map>
 #include <string>
 #include <tuple>
+#include <vector>
 
 class reg_n
 {
@@ -152,6 +154,11 @@ public:
         return out;
     }
 
+    inline OP get_op( void ) const
+    {
+        return op;
+    }
+
     inline void execute( void )
     {
         resolve_gate();
@@ -189,6 +196,34 @@ public:
 
         return resolved_op;
     }
+
+    struct find_input
+    {
+    public:
+        find_input(
+            const std::shared_ptr<reg_n> r1,
+            const std::shared_ptr<reg_n> r2,
+            const gate_n::OP op ) :
+            ab{ r1, r2 },
+            op( op )
+        {
+        }
+
+        inline bool operator()( const std::pair<size_t, std::shared_ptr<gate_n>>& g )
+        {
+            std::shared_ptr<reg_n> r1 = g.second->get_a_reg();
+            std::shared_ptr<reg_n> r2 = g.second->get_b_reg();
+            gate_n::OP g_op = g.second->get_op();
+
+            return ( ( ( ab[ 0 ] == r1 && ab[ 1 ] == r2 ) ||
+                       ( ab[ 0 ] == r2 && ab[ 1 ] == r1 ) ) &&
+                     op == g_op );
+        }
+
+    private:
+        std::array<std::shared_ptr<reg_n>, 2> ab;
+        gate_n::OP op;
+    };
 
 private:
     void resolve_gate( void )
@@ -335,6 +370,221 @@ static void resolve_registers(
     ops.at( reg )->execute();
 }
 
+static std::shared_ptr<reg_n> get_c0_reg(
+    const std::map<size_t, std::shared_ptr<reg_n>>& r,
+    const std::map<size_t, std::shared_ptr<gate_n>>& gates,
+    std::vector<size_t>& swaps
+)
+{
+    // First step - validate the "half-adder" at x00 / y00. The half-adder has
+    // only two operations - an XOR to output z00 and an AND to create the
+    // carry value to send to stage 1.
+    // Find the gate with inputs x00 & y00 and an XOR operation.
+    const size_t x_id = reg_n::calc_xyz_reg_id( 'x', 0 );
+    const size_t y_id = reg_n::calc_xyz_reg_id( 'y', 0 );
+    auto xor_gate_it = std::find_if( gates.begin(), gates.end(), gate_n::find_input(
+        r.at( x_id ),
+        r.at( y_id ),
+        gate_n::OP::OP_XOR
+    ) );
+
+    // Find the gate with inputs x00 & y00 and an AND operation.
+    auto and_gate_it = std::find_if( gates.begin(), gates.end(), gate_n::find_input(
+        r.at( x_id ),
+        r.at( y_id ),
+        gate_n::OP::OP_AND
+    ) );
+
+    if( gates.end() == xor_gate_it || gates.end() == and_gate_it )
+    {
+        // This can't happen.
+        __debugbreak();
+    }
+
+    // Check the output register
+    std::shared_ptr<reg_n> c0{ nullptr };
+
+    std::shared_ptr<reg_n> g_out = xor_gate_it->second->get_out_reg();
+    const size_t z_id = reg_n::calc_xyz_reg_id( 'z', 0 );
+    const size_t z_out = g_out->get_id();
+    if( z_id == z_out )
+    {
+        c0 = and_gate_it->second->get_out_reg();
+    }
+    else
+    {
+        // Note the outputs on stage 0 have been swapped.
+        swaps.emplace_back( and_gate_it->second->get_out_reg()->get_id() );
+        swaps.emplace_back( z_out );
+
+        c0 = r.at( z_out );
+    }
+
+    return c0;
+}
+
+static std::shared_ptr<reg_n> validate_adder(
+    const std::map<size_t, std::shared_ptr<reg_n>>& r,
+    const std::map<size_t, std::shared_ptr<gate_n>>& gates,
+    const std::shared_ptr<reg_n> c_prev,
+    const size_t stage,
+    std::vector<size_t>& swaps
+)
+{
+    // Each adder has the following operations:
+    // gate0: x XOR y -> i0
+    // gate1: c_prev XOR i0 -> z
+    // gate2: x AND y -> i1
+    // gate3: c_prev AND i1 -> i2
+    // gate4: i1 OR i2 -> c
+
+    // Validate that all of the output registers are properly feeding the input
+    // chain of operations.
+    const size_t x_id = reg_n::calc_xyz_reg_id( 'x', stage );
+    const size_t y_id = reg_n::calc_xyz_reg_id( 'y', stage );
+    const size_t z_id = reg_n::calc_xyz_reg_id( 'z', stage );
+
+    std::shared_ptr<reg_n> z{ nullptr };
+    std::shared_ptr<reg_n> i0{ nullptr };
+    std::shared_ptr<reg_n> i1{ nullptr };
+    std::shared_ptr<reg_n> i2{ nullptr };
+    std::shared_ptr<reg_n> c{ nullptr };
+
+    std::vector<std::shared_ptr<reg_n>> this_swap;
+
+    const auto g0_it = std::find_if( gates.begin(), gates.end(), gate_n::find_input(
+        r.at( x_id ),
+        r.at( y_id ),
+        gate_n::OP::OP_XOR
+    ) );
+    i0 = g0_it->second->get_out_reg();
+
+    const auto g1_it = std::find_if( gates.begin(), gates.end(), gate_n::find_input(
+        c_prev,
+        i0,
+        gate_n::OP::OP_XOR
+    ) );
+    if( gates.end() != g1_it )
+    {
+        z = g1_it->second->get_out_reg();
+    }
+    else
+    {
+        // No z out that takes these inputs, find the z out gate. The current
+        // z-out register should be swapped with the register in the z-out gate
+        // that is not the previous carry register.
+        std::shared_ptr<gate_n> z_g = gates.at( z_id );
+        if( c_prev != z_g->get_a_reg() )
+        {
+            this_swap.emplace_back( z_g->get_a_reg() );
+            this_swap.emplace_back( i0 );
+            i0 = z_g->get_a_reg();
+        }
+        else
+        {
+            this_swap.emplace_back( z_g->get_b_reg() );
+            this_swap.emplace_back( i0 );
+            i0 = z_g->get_b_reg();
+        }
+
+        z = r.at( z_id );
+    }
+
+    const size_t z_out = z->get_id();
+    if( z_id != z_out )
+    {
+        // The z output has been swapped.
+        this_swap.emplace_back( r.at( z_id ) );
+        this_swap.emplace_back( z );
+    }
+
+    const auto g2_it = std::find_if( gates.begin(), gates.end(), gate_n::find_input(
+        r.at( x_id ),
+        r.at( y_id ),
+        gate_n::OP::OP_AND
+    ) );
+    if( gates.end() != g2_it )
+    {
+        i1 = g2_it->second->get_out_reg();
+        if( this_swap.size() )
+        {
+            if( i1 == this_swap.back() )
+            {
+                i1 = this_swap.front();
+            }
+            else if( i1 == this_swap.front() )
+            {
+                i1 = this_swap.back();
+            }
+        }
+    }
+
+    const auto g3_it = std::find_if( gates.begin(), gates.end(), gate_n::find_input(
+        c_prev,
+        i0,
+        gate_n::OP::OP_AND
+    ) );
+    if( gates.end() != g3_it )
+    {
+        i2 = g3_it->second->get_out_reg();
+        if( this_swap.size() )
+        {
+            if( i2 == this_swap.back() )
+            {
+                i2 = this_swap.front();
+            }
+            else if( i2 == this_swap.front() )
+            {
+                i2 = this_swap.back();
+            }
+        }
+    }
+
+    const auto c_it = std::find_if( gates.begin(), gates.end(), gate_n::find_input(
+        i1,
+        i2,
+        gate_n::OP::OP_OR
+    ) );
+    if( gates.end() != c_it )
+    {
+        c = c_it->second->get_out_reg();
+        if( this_swap.size() )
+        {
+            if( c == this_swap.back() )
+            {
+                c = this_swap.front();
+            }
+            else if( c == this_swap.front() )
+            {
+                c = this_swap.back();
+            }
+        }
+    }
+
+    for( const auto& swap : this_swap )
+    {
+        swaps.emplace_back( swap->get_id() );
+    }
+
+    return c;
+}
+
+static void validate_adders(
+    const std::map<size_t, std::shared_ptr<reg_n>>& r,
+    const std::map<size_t, std::shared_ptr<gate_n>>& gates,
+    const size_t max_stage,
+    std::vector<size_t>& swaps
+)
+{
+    // Validate each stage's adder logic, prime the validation with the stage 0
+    // carry register.
+    std::shared_ptr<reg_n> carry_prev = get_c0_reg( r, gates, swaps );
+    for( size_t stage = 1; stage < max_stage; ++stage )
+    {
+        carry_prev = validate_adder( r, gates, carry_prev, stage, swaps );
+    }
+}
+
 int main()
 {
     // Read input will create a full list of registers and resolve the values
@@ -374,4 +624,30 @@ int main()
     }
 
     std::cout << "The decimal output is " << std::to_string( output ) << "\n";
+
+    // Validate the adders.
+    std::vector<size_t> swaps;
+    validate_adders( r, gates, z_idx - 1, swaps );
+
+    // Convert the swap register ids to names
+    if( swaps.size() )
+    {
+        std::vector<std::string> swaps_s;
+        for( const size_t r_id : swaps )
+        {
+            swaps_s.emplace_back( r.at( r_id )->get_out_symbol() );
+        }
+
+        // Sort and output a comma separated list of all the swaps.
+        std::sort( swaps_s.begin(), swaps_s.end() );
+        for( size_t idx = 0; idx < swaps_s.size() - 1; ++idx )
+        {
+            std::cout << swaps_s[ idx ] << ",";
+        }
+        std::cout << swaps_s[ swaps_s.size() - 1 ] << std::endl;
+    }
+    else
+    {
+        std::cout << "No swaps found." << std::endl;
+    }
 }
