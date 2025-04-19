@@ -60,10 +60,9 @@ private:
 
     ComPtr<ID3D12Resource> m_depthStencilBuffer;
 
-    ComPtr<ID3D12PipelineState> m_pipelineStateObject;
-    ComPtr<ID3D12PipelineState> m_pipelineStateBackground;
-    ComPtr<ID3D12GraphicsCommandList> m_commandListObject;
-    ComPtr<ID3D12GraphicsCommandList> m_commandListBackground;
+    ComPtr<ID3D12PipelineState> m_psoSquare;
+    ComPtr<ID3D12PipelineState> m_psoBackground;
+    ComPtr<ID3D12GraphicsCommandList> m_commandList;
 
     UINT m_rtvDescriptorSize;
 

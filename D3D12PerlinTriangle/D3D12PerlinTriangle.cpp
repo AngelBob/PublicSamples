@@ -201,7 +201,7 @@ void D3D12PerlinTriangle::CreateObjectPSO()
     psoDesc.RTVFormats[ 0 ] = DXGI_FORMAT_R8G8B8A8_UNORM;
     psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
     psoDesc.SampleDesc.Count = 1;
-    ThrowIfFailed( m_device->CreateGraphicsPipelineState( &psoDesc, IID_PPV_ARGS( &m_pipelineStateObject ) ) );
+    ThrowIfFailed( m_device->CreateGraphicsPipelineState( &psoDesc, IID_PPV_ARGS( &m_psoSquare ) ) );
 }
 
 void D3D12PerlinTriangle::CreateBackgroundPSO()
@@ -266,7 +266,7 @@ void D3D12PerlinTriangle::CreateBackgroundPSO()
     psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
     psoDesc.SampleDesc.Count = 1;
 
-    ThrowIfFailed( m_device->CreateGraphicsPipelineState( &psoDesc, IID_PPV_ARGS( &m_pipelineStateBackground ) ) );
+    ThrowIfFailed( m_device->CreateGraphicsPipelineState( &psoDesc, IID_PPV_ARGS( &m_psoBackground ) ) );
 }
 
 // Load the sample assets.
@@ -378,13 +378,13 @@ void D3D12PerlinTriangle::LoadAssets()
         0,
         D3D12_COMMAND_LIST_TYPE_DIRECT,
         m_commandAllocator.Get(),
-        m_pipelineStateObject.Get(),
-        IID_PPV_ARGS( &m_commandListObject ) ) );
+        m_psoSquare.Get(),
+        IID_PPV_ARGS( &m_commandList ) ) );
 
     // Create the vertex buffer.
     {
         // Define the geometry for two squares.
-        Vertex triangleVertices[] =
+        const Vertex triangleVertices[] =
         {
             // Solid color square
             { { -0.25f, -0.25f * m_aspectRatio, 0.0f }, { 0.0f, 1.0f }, { 0.0f, 0.2f, 0.4f, 1.0f } },
@@ -478,8 +478,8 @@ void D3D12PerlinTriangle::LoadAssets()
         textureData.RowPitch = TextureWidth * TexturePixelSize;
         textureData.SlicePitch = textureData.RowPitch * TextureHeight;
 
-        UpdateSubresources( m_commandListObject.Get(), m_texture.Get(), textureUploadHeap.Get(), 0, 0, 1, &textureData );
-        m_commandListObject->ResourceBarrier(
+        UpdateSubresources( m_commandList.Get(), m_texture.Get(), textureUploadHeap.Get(), 0, 0, 1, &textureData );
+        m_commandList->ResourceBarrier(
             1,
             &CD3DX12_RESOURCE_BARRIER::Transition(
                 m_texture.Get(),
@@ -496,8 +496,8 @@ void D3D12PerlinTriangle::LoadAssets()
     }
 
     // Close the command list and execute it to begin the initial GPU setup.
-    ThrowIfFailed( m_commandListObject->Close() );
-    ID3D12CommandList* ppCommandLists[] = { m_commandListObject.Get() };
+    ThrowIfFailed( m_commandList->Close() );
+    ID3D12CommandList* ppCommandLists[] = { m_commandList.Get() };
     m_commandQueue->ExecuteCommandLists( _countof( ppCommandLists ), ppCommandLists );
 
     // Create synchronization objects and wait until assets have been uploaded to the GPU.
@@ -596,7 +596,7 @@ void D3D12PerlinTriangle::OnRender()
     PopulateCommandList();
 
     // Execute the command list.
-    ID3D12CommandList* ppCommandLists[] = { m_commandListObject.Get(), /*m_commandListBackground.Get()*/ };
+    ID3D12CommandList* ppCommandLists[] = { m_commandList.Get() };
     m_commandQueue->ExecuteCommandLists( _countof( ppCommandLists ), ppCommandLists );
 
     // Present the frame.
@@ -624,21 +624,20 @@ void D3D12PerlinTriangle::PopulateCommandList()
     // However, when ExecuteCommandList() is called on a particular command 
     // list, that command list can then be reset at any time and must be before 
     // re-recording.
-    ThrowIfFailed( m_commandListObject->Reset( m_commandAllocator.Get(), m_pipelineStateObject.Get() ) );
-    //ThrowIfFailed(m_commandListBackground->Reset(m_commandAllocator.Get(), m_pipelineStateBackground.Get()));
+    ThrowIfFailed( m_commandList->Reset( m_commandAllocator.Get(), m_psoSquare.Get() ) );
 
     // Set necessary state.
-    m_commandListObject->SetGraphicsRootSignature( m_rootSignature.Get() );
+    m_commandList->SetGraphicsRootSignature( m_rootSignature.Get() );
 
     ID3D12DescriptorHeap* ppHeaps[] = { m_srvHeap.Get() };
-    m_commandListObject->SetDescriptorHeaps( _countof( ppHeaps ), ppHeaps );
+    m_commandList->SetDescriptorHeaps( _countof( ppHeaps ), ppHeaps );
 
-    m_commandListObject->SetGraphicsRootDescriptorTable( 0, m_srvHeap->GetGPUDescriptorHandleForHeapStart() );
-    m_commandListObject->RSSetViewports( 1, &m_viewport );
-    m_commandListObject->RSSetScissorRects( 1, &m_scissorRect );
+    m_commandList->SetGraphicsRootDescriptorTable( 0, m_srvHeap->GetGPUDescriptorHandleForHeapStart() );
+    m_commandList->RSSetViewports( 1, &m_viewport );
+    m_commandList->RSSetScissorRects( 1, &m_scissorRect );
 
     // Indicate that the back buffer will be used as a render target.
-    m_commandListObject->ResourceBarrier(
+    m_commandList->ResourceBarrier(
         1,
         &CD3DX12_RESOURCE_BARRIER::Transition(
             m_renderTargets[ m_frameIndex ].Get(),
@@ -650,34 +649,34 @@ void D3D12PerlinTriangle::PopulateCommandList()
         m_frameIndex,
         m_rtvDescriptorSize );
     CD3DX12_CPU_DESCRIPTOR_HANDLE dsvHandle( m_dsvHeap->GetCPUDescriptorHandleForHeapStart() );
-    m_commandListObject->OMSetRenderTargets( 1, &rtvHandle, FALSE, &dsvHandle );
+    m_commandList->OMSetRenderTargets( 1, &rtvHandle, FALSE, &dsvHandle );
 
     // Record commands.
     const float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-    m_commandListObject->ClearRenderTargetView( rtvHandle, clearColor, 0, nullptr );
-    m_commandListObject->ClearDepthStencilView( dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr );
+    m_commandList->ClearRenderTargetView( rtvHandle, clearColor, 0, nullptr );
+    m_commandList->ClearDepthStencilView( dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr );
 
     // Set necessary state.
-    m_commandListObject->IASetPrimitiveTopology( D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP );
-    m_commandListObject->IASetVertexBuffers( 0, 1, &m_vertexBufferView );
+    m_commandList->IASetPrimitiveTopology( D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP );
+    m_commandList->IASetVertexBuffers( 0, 1, &m_vertexBufferView );
 
-    // Draw the object. <--- TODO: figure out Z order, background should be behind the object square.
-    m_commandListObject->SetPipelineState( m_pipelineStateObject.Get() );
-    m_commandListObject->DrawInstanced( 4, 1, 0, 0 );
+    // Draw the object.
+    m_commandList->SetPipelineState( m_psoSquare.Get() );
+    m_commandList->DrawInstanced( 4, 1, 0, 0 );
 
     // Draw the background.
-    m_commandListObject->SetPipelineState( m_pipelineStateBackground.Get() );
-    m_commandListObject->DrawInstanced( 4, 1, 4, 0 );
+    m_commandList->SetPipelineState( m_psoBackground.Get() );
+    m_commandList->DrawInstanced( 4, 1, 4, 0 );
 
     // Indicate that the back buffer will now be used to present.
-    m_commandListObject->ResourceBarrier(
+    m_commandList->ResourceBarrier(
         1,
         &CD3DX12_RESOURCE_BARRIER::Transition(
             m_renderTargets[ m_frameIndex ].Get(),
             D3D12_RESOURCE_STATE_RENDER_TARGET,
             D3D12_RESOURCE_STATE_PRESENT ) );
 
-    ThrowIfFailed( m_commandListObject->Close() );
+    ThrowIfFailed( m_commandList->Close() );
 }
 
 void D3D12PerlinTriangle::WaitForPreviousFrame()
