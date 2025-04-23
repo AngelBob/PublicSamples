@@ -41,7 +41,6 @@ private:
     struct Vertex
     {
         XMFLOAT3 position;
-        XMFLOAT2 uv;
         XMFLOAT4 color; // Color used for the solid color triangle.
     };
 

@@ -179,8 +179,7 @@ void D3D12PerlinTriangle::CreateObjectPSO()
     D3D12_INPUT_ELEMENT_DESC inputElementDescs[] =
     {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0,  0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-        { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,       0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-        { "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 20, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+        { "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
     };
 
     // Describe and create the graphics pipeline state object (PSO).
@@ -238,17 +237,8 @@ void D3D12PerlinTriangle::CreateBackgroundPSO()
         &pixelShader,
         nullptr ) );
 
-    // Define the vertex input layout.
-    D3D12_INPUT_ELEMENT_DESC inputElementDescs[] =
-    {
-        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0,  0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-        { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,       0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-        { "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 20, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
-    };
-
     // Describe and create the graphics pipeline state object (PSO).
     D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
-    psoDesc.InputLayout = { inputElementDescs, _countof( inputElementDescs ) };
     psoDesc.pRootSignature = m_rootSignature.Get();
     psoDesc.VS = CD3DX12_SHADER_BYTECODE( vertexShader.Get() );
     psoDesc.PS = CD3DX12_SHADER_BYTECODE( pixelShader.Get() );
@@ -387,16 +377,10 @@ void D3D12PerlinTriangle::LoadAssets()
         const Vertex triangleVertices[] =
         {
             // Solid color square
-            { { -0.25f, -0.25f * m_aspectRatio, 0.0f }, { 0.0f, 1.0f }, { 0.0f, 0.2f, 0.4f, 1.0f } },
-            { { -0.25f,  0.25f * m_aspectRatio, 0.0f }, { 0.0f, 0.0f }, { 0.0f, 0.2f, 0.4f, 1.0f } },
-            { {  0.25f, -0.25f * m_aspectRatio, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 0.2f, 0.4f, 1.0f } },
-            { {  0.25f,  0.25f * m_aspectRatio, 0.0f }, { 1.0f, 0.0f }, { 0.0f, 0.2f, 0.4f, 1.0f } },
-
-            // Background Perlin wash
-            { { -1.0f, -1.0f, 1.0f }, { 0.0f, 1.0f }, { 0.0f, 0.5f, 0.5f, 1.0f } },
-            { { -1.0f,  1.0f, 1.0f }, { 0.0f, 0.0f }, { 0.0f, 0.5f, 0.5f, 1.0f } },
-            { {  1.0f, -1.0f, 1.0f }, { 1.0f, 1.0f }, { 0.0f, 0.5f, 0.5f, 1.0f } },
-            { {  1.0f,  1.0f, 1.0f }, { 1.0f, 0.0f }, { 0.0f, 0.5f, 0.5f, 1.0f } },
+            { { -0.25f, -0.25f * m_aspectRatio, 0.0f }, { 0.0f, 0.2f, 0.4f, 1.0f } },
+            { { -0.25f,  0.25f * m_aspectRatio, 0.0f }, { 0.0f, 0.2f, 0.4f, 1.0f } },
+            { {  0.25f, -0.25f * m_aspectRatio, 0.0f }, { 0.0f, 0.2f, 0.4f, 1.0f } },
+            { {  0.25f,  0.25f * m_aspectRatio, 0.0f }, { 0.0f, 0.2f, 0.4f, 1.0f } },
         };
 
         const UINT vertexBufferSize = sizeof( triangleVertices );
@@ -652,21 +636,21 @@ void D3D12PerlinTriangle::PopulateCommandList()
     m_commandList->OMSetRenderTargets( 1, &rtvHandle, FALSE, &dsvHandle );
 
     // Record commands.
+    // Not specifically required to clear the RTV, but it is good practice.
     const float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
     m_commandList->ClearRenderTargetView( rtvHandle, clearColor, 0, nullptr );
     m_commandList->ClearDepthStencilView( dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr );
 
-    // Set necessary state.
+    // Set necessary state and draw the object.
     m_commandList->IASetPrimitiveTopology( D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP );
     m_commandList->IASetVertexBuffers( 0, 1, &m_vertexBufferView );
-
-    // Draw the object.
     m_commandList->SetPipelineState( m_psoSquare.Get() );
     m_commandList->DrawInstanced( 4, 1, 0, 0 );
 
-    // Draw the background.
+    // Set necessary state and draw the background.
+    m_commandList->IASetVertexBuffers( 0, 1, nullptr );
     m_commandList->SetPipelineState( m_psoBackground.Get() );
-    m_commandList->DrawInstanced( 4, 1, 4, 0 );
+    m_commandList->DrawInstanced( 3, 1, 0, 0 );
 
     // Indicate that the back buffer will now be used to present.
     m_commandList->ResourceBarrier(

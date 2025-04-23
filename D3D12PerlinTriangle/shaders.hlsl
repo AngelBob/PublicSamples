@@ -9,34 +9,52 @@
 //
 //*********************************************************
 
-struct PSInput
+//*********************************************************
+// Background Shaders
+// Draw the background as a single large triangle without a
+// vertex buffer.
+//*********************************************************
+struct PSBackgroundInput
 {
     float4 position : SV_POSITION;
     float2 uv : TEXCOORD;
-    float4 color : COLOR0;
 };
 
 Texture2D g_texture : register(t0);
 SamplerState g_sampler : register(s0);
 
-PSInput VSMainBackground(float4 position : POSITION, float4 uv : TEXCOORD)
+PSBackgroundInput VSMainBackground(in uint id : SV_VertexID)
 {
-    PSInput result;
+    //See: https://web.archive.org/web/20140719063725/http://www.altdev.co/2011/08/08/interesting-vertex-shader-trick/
+    PSBackgroundInput result;
 
-    result.position = position;
-    result.uv = uv;
+    result.uv.x = (id == 1) ?  2.0 :  0.0;
+    result.uv.y = (id == 2) ?  2.0 :  0.0;
+
+    result.position = float4(result.uv * float2(2.0, -2.0) + float2(-1.0, 1.0), 1.0, 1.0);
 
     return result;
 }
 
-float4 PSMainBackground(PSInput input) : SV_TARGET
+float4 PSMainBackground(PSBackgroundInput input) : SV_TARGET
 {
     return g_texture.Sample(g_sampler, input.uv);
 }
 
-PSInput VSMainObject(float4 position : POSITION, float4 color : COLOR)
+//*********************************************************
+// Foreground Shaders
+// Draw the foreground as an object with vertex defined
+// colors.
+//*********************************************************
+struct PSObjectInput
 {
-    PSInput result;
+    float4 position : SV_POSITION;
+    float4 color : COLOR0;
+};
+
+PSObjectInput VSMainObject(float4 position : POSITION, float4 color : COLOR)
+{
+    PSObjectInput result;
 
     result.position = position;
     result.color = color;
@@ -44,7 +62,7 @@ PSInput VSMainObject(float4 position : POSITION, float4 color : COLOR)
     return result;
 }
 
-float4 PSMainObject(PSInput input) : SV_TARGET
+float4 PSMainObject(PSObjectInput input) : SV_TARGET
 {
     return input.color;
 }
