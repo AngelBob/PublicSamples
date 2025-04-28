@@ -25,6 +25,12 @@ DXSample::DXSample(UINT width, UINT height, std::wstring name) :
     m_assetsPath = assetsPath;
 
     m_aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+
+    LARGE_INTEGER perfFreq = {};
+    QueryPerformanceFrequency( &perfFreq );
+    m_perfFreq = static_cast<double>( perfFreq.QuadPart ) / 1000.0f;
+
+    QueryPerformanceCounter( &m_startTime );
 }
 
 DXSample::~DXSample()
@@ -125,4 +131,17 @@ void DXSample::ParseCommandLineArgs(WCHAR* argv[], int argc)
             m_title = m_title + L" (WARP)";
         }
     }
+}
+
+float DXSample::GetElapsedTimeMs()
+{
+    LARGE_INTEGER currentTime = {};
+    QueryPerformanceCounter( &currentTime );
+
+    LARGE_INTEGER elapsedTime = {};
+    elapsedTime.QuadPart = currentTime.QuadPart - m_startTime.QuadPart;
+
+    double etd = static_cast<double>( elapsedTime.QuadPart );
+
+    return static_cast<float>( etd / m_perfFreq );
 }

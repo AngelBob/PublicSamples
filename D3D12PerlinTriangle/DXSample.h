@@ -46,6 +46,8 @@ protected:
 
     void SetCustomWindowText(LPCWSTR text);
 
+    float GetElapsedTimeMs();
+
     // Viewport dimensions.
     UINT m_width;
     UINT m_height;
@@ -60,4 +62,7 @@ private:
 
     // Window title.
     std::wstring m_title;
+
+    double m_perfFreq;
+    LARGE_INTEGER m_startTime;
 };

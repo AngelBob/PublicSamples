@@ -593,14 +593,22 @@ void D3D12PerlinTriangle::OnUpdate()
         CD3DX12_RANGE readRange( 0, 0 );
         ThrowIfFailed( m_vertexBuffer->Map( 0, &readRange, reinterpret_cast<void**>( &pVertexDataBegin ) ) );
 
+        // Update the vertex buffer with the new rotation angle.
+        static const float msPerSecond = 1000.0f; // milliseconds per second
+        static const float degreesPerSecond = 60.0f; // degrees per second
+        static const float radiansPerSecond = XM_PI / 180.0f * degreesPerSecond;
+
+        float theta = ( GetElapsedTimeMs() / msPerSecond ) * radiansPerSecond;
+        XMMATRIX rotationMatrixY = XMMatrixRotationY( theta );
         XMMATRIX translationMatrix = XMMatrixTranslation( 0.0f, 0.0f, 0.5f );
 
         for( size_t i = 0; i < m_triangleVertices.size(); i++ )
         {
-            // Translate along the Z-axis to keep it in the view frustum.
+            // Rotate the vertex around the Y-axis and translate along the
+            // Z-axis to keep it in the view frustum.
             XMVECTOR vertexVector = XMLoadFloat3( &m_triangleVertices[ i ].position );
-            XMVECTOR translatedVertex = XMVector3Transform( vertexVector, translationMatrix );
-            XMStoreFloat3( &pVertexDataBegin[ i ].position, translatedVertex );
+            XMVECTOR transformedVertex = XMVector3Transform( vertexVector, rotationMatrixY * translationMatrix );
+            XMStoreFloat3( &pVertexDataBegin[ i ].position, transformedVertex );
         }
 
         // Release the local copy of the vertex data.
