@@ -66,6 +66,9 @@ private:
     UINT m_rtvDescriptorSize;
 
     // App resources.
+    std::array<Vertex,12> m_triangleVertices;
+    const size_t m_vertexBufferSize;
+
     ComPtr<ID3D12Resource> m_vertexBuffer;
     D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
     ComPtr<ID3D12Resource> m_texture;

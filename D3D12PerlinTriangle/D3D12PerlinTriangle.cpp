@@ -17,7 +17,8 @@ D3D12PerlinTriangle::D3D12PerlinTriangle( UINT width, UINT height, std::wstring 
     m_frameIndex( 0 ),
     m_viewport( 0.0f, 0.0f, static_cast<float>( width ), static_cast<float>( height ) ),
     m_scissorRect( 0, 0, static_cast<LONG>( width ), static_cast<LONG>( height ) ),
-    m_rtvDescriptorSize( 0 )
+    m_rtvDescriptorSize( 0 ),
+    m_vertexBufferSize( m_triangleVertices.size() * sizeof( Vertex ) )
 {
 }
 
@@ -373,17 +374,31 @@ void D3D12PerlinTriangle::LoadAssets()
 
     // Create the vertex buffer.
     {
-        // Define the geometry for two squares.
-        const Vertex triangleVertices[] =
-        {
-            // Solid color square
-            { { -0.25f, -0.25f * m_aspectRatio, 0.0f }, { 0.0f, 0.2f, 0.4f, 1.0f } },
-            { { -0.25f,  0.25f * m_aspectRatio, 0.0f }, { 0.0f, 0.2f, 0.4f, 1.0f } },
-            { {  0.25f, -0.25f * m_aspectRatio, 0.0f }, { 0.0f, 0.2f, 0.4f, 1.0f } },
-            { {  0.25f,  0.25f * m_aspectRatio, 0.0f }, { 0.0f, 0.2f, 0.4f, 1.0f } },
-        };
+        // Define the geometry for a pyramid.
+        // Must use a tri list because each side of the pyramid will be rotated
+        // separately.
+        m_triangleVertices =
+        {{
+            // Front face
+            {{  0.0f,   0.25f * m_aspectRatio,  0.0f  }, { 1.0f, 0.0f, 0.0f, 1.0f }},
+            {{ -0.25f, -0.25f * m_aspectRatio,  0.25f }, { 0.0f, 0.0f, 1.0f, 1.0f }},
+            {{  0.25f, -0.25f * m_aspectRatio,  0.25f }, { 0.0f, 1.0f, 1.0f, 1.0f }},
 
-        const UINT vertexBufferSize = sizeof( triangleVertices );
+            // Right face
+            {{  0.0f,   0.25f * m_aspectRatio,  0.0f  }, { 1.0f, 0.0f, 0.0f, 1.0f }},
+            {{  0.25f, -0.25f * m_aspectRatio,  0.25f }, { 0.0f, 1.0f, 1.0f, 1.0f }},
+            {{  0.25f, -0.25f * m_aspectRatio, -0.25f }, { 0.0f, 1.0f, 0.0f, 1.0f }},
+
+            // Back face
+            {{  0.0f,   0.25f * m_aspectRatio,  0.0f  }, { 1.0f, 0.0f, 0.0f, 1.0f }},
+            {{  0.25f, -0.25f * m_aspectRatio, -0.25f }, { 0.0f, 1.0f, 0.0f, 1.0f }},
+            {{ -0.25f, -0.25f * m_aspectRatio, -0.25f }, { 0.0f, 1.0f, 1.0f, 1.0f }},
+
+            // Left face
+            {{  0.0f,   0.25f * m_aspectRatio,  0.0f  }, { 1.0f, 0.0f, 0.0f, 1.0f }},
+            {{ -0.25f, -0.25f * m_aspectRatio, -0.25f }, { 0.0f, 1.0f, 1.0f, 1.0f }},
+            {{ -0.25f, -0.25f * m_aspectRatio,  0.25f }, { 0.0f, 0.0f, 1.0f, 1.0f }},
+        }};
 
         // Note: using upload heaps to transfer static data like vert buffers is not 
         // recommended. Every time the GPU needs it, the upload heap will be marshalled 
@@ -392,7 +407,7 @@ void D3D12PerlinTriangle::LoadAssets()
         ThrowIfFailed( m_device->CreateCommittedResource(
             &CD3DX12_HEAP_PROPERTIES( D3D12_HEAP_TYPE_UPLOAD ),
             D3D12_HEAP_FLAG_NONE,
-            &CD3DX12_RESOURCE_DESC::Buffer( vertexBufferSize ),
+            &CD3DX12_RESOURCE_DESC::Buffer( m_vertexBufferSize ),
             D3D12_RESOURCE_STATE_GENERIC_READ,
             nullptr,
             IID_PPV_ARGS( &m_vertexBuffer ) ) );
@@ -401,13 +416,13 @@ void D3D12PerlinTriangle::LoadAssets()
         UINT8* pVertexDataBegin;
         CD3DX12_RANGE readRange( 0, 0 );        // We do not intend to read from this resource on the CPU.
         ThrowIfFailed( m_vertexBuffer->Map( 0, &readRange, reinterpret_cast<void**>( &pVertexDataBegin ) ) );
-        memcpy( pVertexDataBegin, triangleVertices, sizeof( triangleVertices ) );
+        memcpy( pVertexDataBegin, m_triangleVertices.data(), m_vertexBufferSize );
         m_vertexBuffer->Unmap( 0, nullptr );
 
         // Initialize the vertex buffer view.
         m_vertexBufferView.BufferLocation = m_vertexBuffer->GetGPUVirtualAddress();
         m_vertexBufferView.StrideInBytes = sizeof( Vertex );
-        m_vertexBufferView.SizeInBytes = vertexBufferSize;
+        m_vertexBufferView.SizeInBytes = static_cast<UINT>( m_vertexBufferSize );
     }
 
     // Note: ComPtr's are CPU objects but this resource needs to stay in scope until
@@ -571,6 +586,26 @@ std::vector<UINT8> D3D12PerlinTriangle::GeneratePerlinTextureData()
 // Update frame-based values.
 void D3D12PerlinTriangle::OnUpdate()
 {
+    // Update the vertex buffer to rotate the object.
+    {
+        // Get a pointer to the vertex buffer.
+        Vertex* pVertexDataBegin;
+        CD3DX12_RANGE readRange( 0, 0 );
+        ThrowIfFailed( m_vertexBuffer->Map( 0, &readRange, reinterpret_cast<void**>( &pVertexDataBegin ) ) );
+
+        XMMATRIX translationMatrix = XMMatrixTranslation( 0.0f, 0.0f, 0.5f );
+
+        for( size_t i = 0; i < m_triangleVertices.size(); i++ )
+        {
+            // Translate along the Z-axis to keep it in the view frustum.
+            XMVECTOR vertexVector = XMLoadFloat3( &m_triangleVertices[ i ].position );
+            XMVECTOR translatedVertex = XMVector3Transform( vertexVector, translationMatrix );
+            XMStoreFloat3( &pVertexDataBegin[ i ].position, translatedVertex );
+        }
+
+        // Release the local copy of the vertex data.
+        m_vertexBuffer->Unmap( 0, nullptr );
+    }
 }
 
 // Render the scene.
@@ -642,10 +677,10 @@ void D3D12PerlinTriangle::PopulateCommandList()
     m_commandList->ClearDepthStencilView( dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr );
 
     // Set necessary state and draw the object.
-    m_commandList->IASetPrimitiveTopology( D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP );
+    m_commandList->IASetPrimitiveTopology( D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
     m_commandList->IASetVertexBuffers( 0, 1, &m_vertexBufferView );
     m_commandList->SetPipelineState( m_psoSquare.Get() );
-    m_commandList->DrawInstanced( 4, 1, 0, 0 );
+    m_commandList->DrawInstanced( static_cast<UINT>( m_triangleVertices.size() ), 1, 0, 0);
 
     // Set necessary state and draw the background.
     m_commandList->IASetVertexBuffers( 0, 1, nullptr );
