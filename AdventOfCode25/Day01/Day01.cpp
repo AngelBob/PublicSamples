@@ -40,12 +40,23 @@ static size_t count_zeros( const std::list<std::pair<char, uint64_t>>& input )
     size_t zeros = 0;
     for( const auto& [ dir, count ] : input )
     {
+        // Part 2: Add one for each time the dial points at 0.
+        // Avoid double counting if the dial starts at 0.
+        bool can_point = ( 0 != position );
+
         // If the number of clicks is more than the number of lock numbers
         // take the modulus and move that number to find the next position.
         int64_t clicks = count;
         if( std::abs( clicks ) > combo_numbers )
         {
+            zeros += clicks / combo_numbers; // Dial crosses zero on wrap.
             clicks %= combo_numbers;
+            if( 0 == clicks && !can_point )
+            {
+                // Started and ended at 0, but will double count the end state
+                // in the logic below, so take one out now.
+                --zeros;
+            }
         }
 
         // Move the dial the appropriate number of clicks in the correct
@@ -64,10 +75,12 @@ static size_t count_zeros( const std::list<std::pair<char, uint64_t>>& input )
         if( 0 > position )
         {
             position += combo_numbers;
+            zeros += can_point ? 1 : 0; // Passed 0 if it didn't start there.
         }
         else if( combo_numbers < position )
         {
             position -= combo_numbers;
+            zeros += can_point ? 1 : 0; // Passed 0 if it didn't start there.
         }
 
         // Count the number of times the dial lands on zero.
