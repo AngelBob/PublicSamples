@@ -8,7 +8,8 @@
 
 #include "range.h"
 
-static bool read_input( std::list<range>& input )
+template<bool t>
+static bool read_input( std::list<range<t>>& input )
 {
     // Open the input file and read the data.
     // Step 1: open the input file.
@@ -29,7 +30,7 @@ static bool read_input( std::list<range>& input )
         file >> second;
         file >> separator;
 
-        input.push_back( range( first, second ) );
+        input.push_back( range<t>( first, second ) );
 
         if( file.eof() )
         {
@@ -43,18 +44,26 @@ static bool read_input( std::list<range>& input )
 
 int main()
 {
-    std::list<range> input;
-    if( !read_input( input ) )
+    std::list<range<false>> input1;
+    std::list<range<true>> input2;
+    if( !read_input( input1 ) ||
+        !read_input( input2 ) )
     {
         return -1;
     }
 
     uint64_t sum = 0;
-    for( const range& test : input )
+    for( const auto& test : input1 )
     {
         sum += test.total_invalid_entries();
     }
+    std::cout << "Total of invalid entries: " << sum << std::endl;
 
+    sum = 0;
+    for( const auto& test : input2 )
+    {
+        sum += test.total_invalid_entries();
+    }
     std::cout << "Total of invalid entries: " << sum << std::endl;
 
     return 0;
