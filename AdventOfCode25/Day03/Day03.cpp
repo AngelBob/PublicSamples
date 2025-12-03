@@ -2,8 +2,12 @@
 //
 #include <fstream>
 #include <iostream>
+#include <string>
+#include <vector>
 
-static bool read_input( void )
+#include "bank.h"
+
+static bool read_input( std::vector<bank>& input )
 {
     // Open the input file and read the data.
     // Step 1: open the input file.
@@ -11,6 +15,12 @@ static bool read_input( void )
     std::ifstream file( ".\\Data\\Input_test.txt" );
 
     // Step 2: read the line and create the input data.
+    while( !file.eof() )
+    {
+        std::string line;
+        std::getline( file, line );
+        input.emplace_back( line );
+    }
 
     // Step 3: return success or failure.
     return true;
@@ -18,8 +28,16 @@ static bool read_input( void )
 
 int main()
 {
-    if( !read_input() )
+    std::vector<bank> banks;
+    if( !read_input( banks ) )
     {
         return -1;
     }
+
+    uint64_t sum = 0;
+    for( const auto& bank : banks )
+    {
+        sum += bank.calculate_joltage( 2 );
+    }
+    std::cout << "The total joltage is: " << sum << std::endl;
 }
