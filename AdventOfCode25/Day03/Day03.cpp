@@ -40,4 +40,11 @@ int main()
         sum += bank.calculate_joltage( 2 );
     }
     std::cout << "The total joltage is: " << sum << std::endl;
+
+    sum = 0;
+    for( const auto& bank : banks )
+    {
+        sum += bank.calculate_joltage( 12 );
+    }
+    std::cout << "The total joltage is: " << sum << std::endl;
 }
