@@ -27,4 +27,12 @@
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="puzzle_map.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="directions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
 </Project>

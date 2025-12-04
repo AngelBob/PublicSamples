@@ -2,8 +2,12 @@
 //
 #include <fstream>
 #include <iostream>
+#include <string>
+#include <vector>
 
-static bool read_input( void )
+#include "puzzle_map.h"
+
+static bool read_input( puzzle_map& input )
 {
     // Open the input file and read the data.
     // Step 1: open the input file.
@@ -11,6 +15,17 @@ static bool read_input( void )
     std::ifstream file( ".\\Data\\Input_test.txt" );
 
     // Step 2: read the lines and create the input data.
+    while( !file.eof() )
+    {
+        std::string line;
+        std::getline( file, line );
+
+        if( !input.add_row( line ) )
+        {
+            // Not all rows have the same number of entries.
+            return false;
+        }
+    }
 
     // Step 3: return success or failure.
     return true;
@@ -18,10 +33,14 @@ static bool read_input( void )
 
 int main()
 {
-    if( !read_input() )
+    puzzle_map input;
+    if( !read_input( input ) )
     {
         return -1;
     }
+
+    size_t accessible_rolls = input.count_accessible_rolls();
+    std::cout << "There are " << accessible_rolls << " accessible rolls." << std::endl;
 
     return 0;
 }
