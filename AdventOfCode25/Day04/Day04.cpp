@@ -7,7 +7,8 @@
 
 #include "puzzle_map.h"
 
-static bool read_input( puzzle_map& input )
+template<bool t>
+static bool read_input( puzzle_map<t>& input )
 {
     // Open the input file and read the data.
     // Step 1: open the input file.
@@ -33,14 +34,19 @@ static bool read_input( puzzle_map& input )
 
 int main()
 {
-    puzzle_map input;
-    if( !read_input( input ) )
+    puzzle_map<false> input1;
+    puzzle_map<true> input2;
+    if( !read_input( input1 ) ||
+        !read_input( input2 ) )
     {
         return -1;
     }
 
-    size_t accessible_rolls = input.count_accessible_rolls();
+    size_t accessible_rolls = input1.count_accessible_rolls();
     std::cout << "There are " << accessible_rolls << " accessible rolls." << std::endl;
+
+    accessible_rolls = input2.count_accessible_rolls();
+    std::cout << "There are " << accessible_rolls << " accessible rolls with recursion." << std::endl;
 
     return 0;
 }

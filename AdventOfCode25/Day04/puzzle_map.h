@@ -2,6 +2,7 @@
 
 #include "directions.h"
 
+template<bool do_recursive>
 class puzzle_map
 {
     using maprow_t = std::vector<char>;
@@ -55,6 +56,23 @@ private:
         if( is_roll_accessible( x, y ) )
         {
             ++accessible;
+            if constexpr( do_recursive )
+            {
+                // Mark this roll as removed
+                m_map[ y ][ x ] = '.';
+
+                // recheck the neighbors that have previously been checked
+                accessible += check_grid( x - 1, y );
+                accessible += check_grid( x - 1, y - 1 );
+                accessible += check_grid( x, y - 1 );
+                accessible += check_grid( x + 1, y - 1 );
+
+                // check the rest of the neighbors
+                accessible += check_grid( x + 1, y );
+                accessible += check_grid( x + 1, y + 1 );
+                accessible += check_grid( x, y + 1 );
+                accessible += check_grid( x - 1, y + 1 );
+            }
         }
 
         return accessible;
