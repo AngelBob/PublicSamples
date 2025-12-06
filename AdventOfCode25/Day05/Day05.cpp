@@ -119,5 +119,14 @@ int main()
     std::cout << "There are " << count;
     std::cout << " fresh ingredients available." << std::endl;
 
+    // Count the total number of fresh ingredients.
+    count = 0;
+    for( const auto& range : input1 )
+    {
+        count += ( range.second - range.first + 1 );
+    }
+    std::cout << "The total number of fresh ingredients is " << count;
+    std::cout << "." << std::endl;
+
     return 0;
 }
