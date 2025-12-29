@@ -15,7 +15,7 @@ static bool read_input(
     // Open the input file and read the data.
     // Step 1: open the input file.
     // Assumes the input file is present in a sub-folder.
-    std::ifstream file( ".\\Data\\Input.txt" );
+    std::ifstream file( ".\\Data\\Input_test.txt" );
 
     // Step 2: read the lines and create the input data.
     bool have_start = false;
@@ -42,6 +42,7 @@ static bool read_input(
     return true;
 }
 
+template<bool is_many_worlds>
 static uint64_t traverse_tachyon_manifold(
     std::vector<std::string>& map,
     std::pair<int16_t, int16_t> head_xy
@@ -57,10 +58,13 @@ static uint64_t traverse_tachyon_manifold(
         return 0;
     }
 
-    // Check if this beam position has already been checked.
-    if( '|' == map[ head_xy.second ][ head_xy.first ] )
+    if constexpr( !is_many_worlds )
     {
-        return 0;
+        // Check if this beam position has already been checked.
+        if( '|' == map[ head_xy.second ][ head_xy.first ] )
+        {
+            return 0;
+        }
     }
 
     std::pair<int16_t, int16_t> key = std::make_pair( head_xy.first, head_xy.second );
@@ -76,15 +80,15 @@ static uint64_t traverse_tachyon_manifold(
     {
         // Beam has hit a splitter.
         splits  = 1;
-        splits += traverse_tachyon_manifold( map, std::make_pair( head_xy.first - 1, head_xy.second ) );
-        splits += traverse_tachyon_manifold( map, std::make_pair( head_xy.first + 1, head_xy.second ) );
+        splits += traverse_tachyon_manifold<is_many_worlds>( map, std::make_pair( head_xy.first - 1, head_xy.second ) );
+        splits += traverse_tachyon_manifold<is_many_worlds>( map, std::make_pair( head_xy.first + 1, head_xy.second ) );
     }
     else
     {
         // Mark this beam position as checked.
         map[ head_xy.second ][ head_xy.first ] = '|';
 
-        splits += traverse_tachyon_manifold( map, std::make_pair( head_xy.first, head_xy.second + 1 ) );
+        splits += traverse_tachyon_manifold<is_many_worlds>( map, std::make_pair( head_xy.first, head_xy.second + 1 ) );
     }
 
     cache[ key ] = splits;
@@ -101,6 +105,9 @@ int main()
         return -1;
     }
 
-    uint64_t splits = traverse_tachyon_manifold( input1, std::make_pair( input2, 0 ) );
+    uint64_t splits = traverse_tachyon_manifold<false>( input1, std::make_pair( input2, 0 ) );
     std::cout << "The beam is split " << splits << " times." << std::endl;
+
+    splits = traverse_tachyon_manifold<true>( input1, std::make_pair( input2, 0 ) );
+    std::cout << "The beam takes " << splits + 1 << " paths." << std::endl;
 }
