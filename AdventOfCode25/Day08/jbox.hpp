@@ -26,6 +26,11 @@ public:
         return ( x2 + y2 + z2 );
     }
 
+    const uint64_t get_x( void ) const
+    {
+        return std::get<0>( xyz );
+    }
+
 private:
     location xyz;
     size_t idx;

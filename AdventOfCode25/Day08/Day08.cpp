@@ -70,7 +70,7 @@ static void calculate_distances(
     }
 }
 
-static void make_connections(
+static uint64_t make_connections(
     const std::vector<std::shared_ptr<jbox>>& input,
     const distance_map& distances,
     const size_t max_connections,
@@ -79,6 +79,10 @@ static void make_connections(
 {
     // The distances map automatically sorts the jbox pairs by distance.
     distance_map::const_iterator pos = distances.begin();
+
+    // The last two connected nodes that linked everything.
+    uint64_t first_x = 0;
+    uint64_t second_x = 0;
 
     for( size_t i = 0; i < max_connections; ++i )
     {
@@ -137,11 +141,22 @@ static void make_connections(
                     nh.key() = nh.mapped().get_size();
                     circuits.insert( std::move( nh ) );
                 }
+
+                if( 1 == circuits.size() &&
+                    1 == circuits.count( input.size() ) )
+                {
+                    // All jboxes are now connected, exit.
+                    first_x = input[ n.first ].get()->get_x();
+                    second_x = input[ n.second ].get()->get_x();
+                    break;
+                }
             }
         }
 
         ++pos;
     }
+
+    return ( first_x * second_x );
 }
 
 int main()
@@ -178,4 +193,13 @@ int main()
     }
     std::cout << "The three largest circuits result is " << result;
     std::cout << " after " << stop_at << " rounds." << std::endl;
+
+    // Run it again to connect the rest of the inputs.
+    distance_map::iterator stop = distances.begin();
+    std::advance( stop, stop_at );
+    distances.erase( distances.begin(), stop );
+
+    uint64_t x_dist = make_connections( input, distances, distances.size(), circuits );
+    std::cout << "The X distance is " << x_dist;
+    std::cout << " after " << distances.size() + stop_at << " rounds." << std::endl;
 }
