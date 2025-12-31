@@ -135,6 +135,9 @@
     <Text Include="Data\Input.txt" />
     <Text Include="Data\Input_test.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="vec2.hpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
