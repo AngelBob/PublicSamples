@@ -68,6 +68,118 @@ static void calculate_areas(
     }
 }
 
+static bool check_segments_intersect(
+    const vec2& a,
+    const vec2& b,
+    const vec2& o,
+    const vec2& d,
+    const bool want_hard_intersect
+)
+{
+    vec2 ortho( -d.y, d.x );
+    vec2 a_to_o( o - a );
+    vec2 a_to_b( b - a );
+
+    double denom = a_to_b.dot( ortho );
+    if( 0.0 == denom )
+    {
+        // Ray and segment are parallel.
+        return false;
+    }
+
+    double t1 = a_to_b.cross( a_to_o ) / denom;
+    double t2 = a_to_o.dot( ortho ) / denom;
+
+    bool t1_passed = want_hard_intersect ?
+        ( 0.0 <= t1 ) && ( t1 <= 1.0 ) :
+        0.0 <= t1;
+
+    return t1_passed && ( 0.0 <= t2 ) && ( t2 <= 1.0 );
+}
+
+static bool validate_areas(
+    const std::vector<vec2>& input,
+    area_map_t& areas
+)
+{
+    area_map_t::iterator area = areas.begin();
+    while( areas.end() != area )
+    {
+        const auto& nodes = ( *area ).second;
+        const vec2& v1 = input[ nodes.first ];
+        const vec2& v2 = input[ nodes.second ];
+
+        // First, check if any of the four sides of the rectangle cross a
+        // polygon boundary.
+        std::array<vec2, 4> vertices{{
+            { std::min( v1.x, v2.x ) + 0.5, std::min( v1.y, v2.y ) + 0.5 },
+            { std::min( v1.x, v2.x ) + 0.5, std::max( v1.y, v2.y ) - 0.5 },
+            { std::max( v1.x, v2.x ) - 0.5, std::max( v1.y, v2.y ) - 0.5 },
+            { std::max( v1.x, v2.x ) - 0.5, std::min( v1.y, v2.y ) + 0.5 }
+        }};
+
+        bool is_valid = true;
+        for( size_t v1 = 0; is_valid && v1 < vertices.size(); ++v1 )
+        {
+            size_t v2 = ( v1 + 1 ) % vertices.size();
+
+            for( size_t i = 0; is_valid && i < input.size(); ++i )
+            {
+                size_t j = ( i + 1 ) % input.size();
+                if( check_segments_intersect(
+                    input[ i ], input[ j ],
+                    vertices[ v1 ], vertices[ v2 ] - vertices[ v1 ],
+                    true )
+                  )
+                {
+                    is_valid = false;
+                }
+            }
+        }
+
+        if( is_valid )
+        {
+            // Rectangle does not cross any boundaries of the polygon.
+            // Now do a ray cast and count how many boundaries are crossed.
+            // Since the rectangle is either fully enclosed by the polygon or
+            // fully outside, the ray can be cast in any direction.
+            vec2 o{ ( v1.x + v2.x ) / 2.0, ( v1.y + v2.y ) / 2.0 };
+            o.x += ( o.x == static_cast<int64_t>( o.x ) ) ? 0.5 : 0.0;
+            o.y += ( o.y == static_cast<int64_t>( o.y ) ) ? 0.5 : 0.0;
+
+            size_t intersections = 0;
+            for( size_t i = 0; is_valid && i < input.size(); ++i )
+            {
+                size_t j = ( i + 1 ) % input.size();
+                if( check_segments_intersect(
+                    input[ i ], input[ j ],
+                    o, { 0.0, -1.0 },
+                    false )
+                    )
+                {
+                    ++intersections;
+                }
+            }
+            if( 0 == intersections % 2 )
+            {
+                is_valid = false;
+            }
+        }
+
+        if( !is_valid )
+        {
+            area = areas.erase( area );
+        }
+        else
+        {
+            // Found the largest valid area.
+            return true;
+        }
+    }
+
+    return false;
+}
+
 int main()
 {
 #if 1
@@ -87,4 +199,15 @@ int main()
     std::cout << "The largest area is ";
     std::cout << static_cast<int64_t>( ( *areas.begin() ).first );
     std::cout << std::endl;
+
+    if( validate_areas( input, areas ) )
+    {
+        std::cout << "The largest valid area is ";
+        std::cout << static_cast<int64_t>( ( *areas.begin() ).first );
+        std::cout << std::endl;
+    }
+    else
+    {
+        std::cout << "No valid area found." << std::endl;
+    }
 }
