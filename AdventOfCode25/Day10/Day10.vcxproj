@@ -131,6 +131,10 @@
     <Text Include="Data\Input.txt" />
     <Text Include="Data\Input_test.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="combinationanator.hpp" />
+    <ClInclude Include="machine.hpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

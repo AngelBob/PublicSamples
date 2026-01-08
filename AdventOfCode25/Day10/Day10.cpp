@@ -4,8 +4,12 @@
 #include <fstream>
 #include <sstream>
 
+#include "machine.hpp"
+
 static bool read_input(
-    const std::string& filename )
+    const std::string& filename,
+    std::vector<machine>& input
+)
 {
     // Open the input file and read the data.
     // Step 1: open the input file.
@@ -13,10 +17,13 @@ static bool read_input(
     std::ifstream file( filename );
 
     // Step 2: read the lines and create the input data.
+    std::string token;
     while( !file.eof() )
     {
         std::string line;
         std::getline( file, line );
+
+        input.emplace_back( line );
     }
 
     // Step 3: return success or failure.
@@ -31,8 +38,16 @@ int main()
     static const std::string filename( ".\\Data\\Input.txt" );
 #endif
 
-    if( !read_input( filename ) )
+    std::vector<machine> machines;
+    if( !read_input( filename, machines ) )
     {
         return -1;
     }
+
+    size_t count = 0;
+    for( auto& m : machines )
+    {
+        count += m.set_lights();
+    }
+    std::cout << "Set the lights in " << count << " button presses." << std::endl;
 }
