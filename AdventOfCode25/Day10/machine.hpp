@@ -47,6 +47,17 @@ public:
         return 0;
     }
 
+    size_t set_joltage( void )
+    {
+        // Use tenthmascot's algorithm:
+        // https://www.reddit.com/r/adventofcode/comments/1pk87hl/2025_day_10_part_2_bifurcate_your_way_to_victory/
+
+        // Determine how the lights will look after proper joltage set up.
+        build_joltage_patterns();
+
+        return recurse_joltage( m_joltages );
+    }
+
 private:
     void parse_machine( const std::string& machine )
     {
@@ -133,10 +144,87 @@ private:
         }
     }
 
+    void build_joltage_patterns( void )
+    {
+        size_t joltage_size = m_joltages.size();
+        for( const auto& combo : m_bcombinations )
+        {
+            std::vector<int32_t> pattern( joltage_size, 0 );
+            for( const uint32_t idx : combo )
+            {
+                for( int i = 0; i < joltage_size; i++ )
+                {
+                    pattern[ i ] += m_buttons[ idx ][ i ];
+                }
+            }
+
+            if( m_joltage_patterns.find( pattern ) ==
+                m_joltage_patterns.end()
+              )
+            {
+                m_joltage_patterns[ pattern ] = combo.size();
+            }
+        }
+    }
+
+    size_t recurse_joltage( std::vector<int32_t>& joltages )
+    {
+        if( std::all_of( joltages.begin(), joltages.end(),
+                         []( int32_t i ) { return i == 0; } )
+          )
+        {
+            return 0;
+        }
+
+        if( 0 != m_joltage_cache[ joltages ] )
+        {
+            return m_joltage_cache[ joltages ];
+        }
+
+        size_t min_presses = std::numeric_limits<size_t>::max() >> 2;
+
+        // Find all of the combinations of button presses that result in this
+        // new light setting.
+        for( const auto& [ pattern, presses ] : m_joltage_patterns )
+        {
+            bool match = true;
+            for( int i = 0; i < pattern.size(); i++ )
+            {
+                if( !( ( pattern[ i ] <= joltages[ i ] ) &&
+                       ( pattern[ i ] % 2 == joltages[ i ] % 2 )
+                     )
+                  )
+                {
+                    match = false;
+                    break;
+                }
+            }
+
+            if( match )
+            {
+                std::vector<int32_t> j_new( joltages.size() );
+                for( size_t i = 0; i < j_new.size(); i++ )
+                {
+                    j_new[ i ] = ( joltages[ i ] - pattern[ i ] ) / 2;
+                }
+
+                min_presses = std::min( min_presses,
+                                        presses + ( 2 * recurse_joltage( j_new ) )
+                                      );
+            }
+        }
+
+        m_joltage_cache[ joltages ] = min_presses;
+
+        return min_presses;
+    }
+
     std::vector<uint32_t> m_lights;
 
     std::vector<std::vector<uint32_t>> m_buttons;
     combinationanator<uint32_t> m_bcombinations;
 
     std::vector<int32_t> m_joltages;
+    std::map<std::vector<int32_t>, size_t> m_joltage_patterns;
+    std::map<std::vector<int32_t>, size_t> m_joltage_cache;
 };

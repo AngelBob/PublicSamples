@@ -50,4 +50,11 @@ int main()
         count += m.set_lights();
     }
     std::cout << "Set the lights in " << count << " button presses." << std::endl;
+
+    count = 0;
+    for( auto& m : machines )
+    {
+        count += m.set_joltage();
+    }
+    std::cout << "Set the joltages in " << count << " button presses." << std::endl;
 }
