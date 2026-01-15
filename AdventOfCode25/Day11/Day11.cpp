@@ -81,7 +81,7 @@ static size_t build_paths(
     return exit_count;
 }
 
-//*
+/*
 #define TEST_DATA_PART_1
 /*/
 #define TEST_DATA_PART_2
@@ -89,9 +89,11 @@ static size_t build_paths(
 
 int main()
 {
-#if 1
+#if defined TEST_DATA_PART_1
     static const std::string filename( ".\\Data\\Input_test.txt" );
-#else
+#elif defined TEST_DATA_PART_2
+    static const std::string filename( ".\\Data\\Input_test2.txt" );
+#else /* Use real data */
     static const std::string filename( ".\\Data\\Input.txt" );
 #endif
 
@@ -105,4 +107,18 @@ int main()
     static const std::array<uint32_t, 2> part1_path = { 0x00756f79, 0x0074756f };
     size_t count = build_paths( input, part1_path[ 0 ], part1_path[ 1 ] );
     std::cout << "There are " << count << " possible paths." << std::endl;
+
+    static const std::array<uint32_t, 4> part2_path = {
+        0x00727673, /* rvs */
+        0x00746666, /* tff */
+        0x00636164, /* cad */
+        0x0074756f  /* tuo */
+    };
+    count = 1;
+    for( size_t idx = 0; idx < part2_path.size() - 1; ++idx )
+    {
+        cache.clear();
+        count *= build_paths( input, part2_path[ idx ], part2_path[ idx + 1 ] );
+    }
+    std::cout << "There are " << count << " paths through fft & dac." << std::endl;
 }

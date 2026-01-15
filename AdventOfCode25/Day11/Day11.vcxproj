@@ -129,6 +129,7 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="Data\Input.txt" />
+    <Text Include="Data\Input_test2.txt" />
     <Text Include="Data\Input_test.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
