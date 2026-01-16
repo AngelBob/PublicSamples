@@ -133,6 +133,10 @@
     <Text Include="Data\Input.txt" />
     <Text Include="Data\Input_test.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="layout.hpp" />
+    <ClInclude Include="shape.hpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
