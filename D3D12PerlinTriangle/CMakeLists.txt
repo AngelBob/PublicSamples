@@ -25,45 +25,48 @@ set(HEADERS
     stb_perlin.h
 )
 
-add_executable(D3D12PerlinTriangle ${SOURCES} ${HEADERS})
+if(WIN32)
+    # This is a pure Windows application.
+    add_executable(D3D12PerlinTriangle ${SOURCES} ${HEADERS})
 
-# Precompiled header
-target_precompile_headers(D3D12PerlinTriangle PRIVATE stdafx.h)
+    # Precompiled header
+    target_precompile_headers(D3D12PerlinTriangle PRIVATE stdafx.h)
 
-# Windows subsystem
-set_target_properties(D3D12PerlinTriangle PROPERTIES
-    LINKER_LANGUAGE CXX
-    WIN32_EXECUTABLE FALSE
-)
+    # Windows subsystem
+    set_target_properties(D3D12PerlinTriangle PROPERTIES
+        LINKER_LANGUAGE CXX
+        WIN32_EXECUTABLE FALSE
+    )
 
-# D3D12 libraries
-target_link_libraries(D3D12PerlinTriangle PRIVATE
-    d3d12.lib
-    dxgi.lib
-    d3dcompiler.lib
-    dxguid.lib
-)
+    # D3D12 libraries
+    target_link_libraries(D3D12PerlinTriangle PRIVATE
+        d3d12.lib
+        dxgi.lib
+        d3dcompiler.lib
+        dxguid.lib
+    )
 
-set_target_properties(D3D12PerlinTriangle PROPERTIES
-    LINK_FLAGS "/ENTRY:\"WinMainCRTStartup\""
-)
+    set_target_properties(D3D12PerlinTriangle PROPERTIES
+        LINK_FLAGS "/ENTRY:\"WinMainCRTStartup\""
+    )
 
-# Configuration settings
-target_compile_definitions(D3D12PerlinTriangle PRIVATE 
-    WIN32
-    _WINDOWS
-    _UNICODE
-    UNICODE
-    $<$<CONFIG:Debug>:_DEBUG>
-    $<$<CONFIG:Release>:NDEBUG>
-)
+    # Configuration settings
+    target_compile_definitions(D3D12PerlinTriangle PRIVATE
+        WIN32
+        _WINDOWS
+        _UNICODE
+        UNICODE
+        $<$<CONFIG:Debug>:_DEBUG>
+        $<$<CONFIG:Release>:NDEBUG>
+    )
 
-target_compile_options(D3D12PerlinTriangle PRIVATE 
-    $<$<CONFIG:Debug>:/Zi /Od /MDd>
-    $<$<CONFIG:Release>:/O2 /MD /GL>
-)
+    target_compile_options(D3D12PerlinTriangle PRIVATE
+        $<$<CONFIG:Debug>:/Zi /Od /MDd>
+        $<$<CONFIG:Release>:/O2 /MD /GL>
+    )
 
-target_link_options(D3D12PerlinTriangle PRIVATE
-    $<$<CONFIG:Debug>:/DEBUG /INCREMENTAL>
-    $<$<CONFIG:Release>:/LTCG /OPT:REF /OPT:ICF>
-)
+    target_link_options(D3D12PerlinTriangle PRIVATE
+        $<$<CONFIG:Debug>:/DEBUG /INCREMENTAL>
+        $<$<CONFIG:Release>:/LTCG /OPT:REF /OPT:ICF>
+    )
+endif()

@@ -29,7 +29,7 @@ public:
         size_t root = static_cast<size_t>( std::sqrt( size ) );
         if( ( root * root ) != size )
         {
-            throw( std::exception( "Invalid grid size!" ) );
+            throw( std::runtime_error( "Invalid grid size!" ) );
         }
 
         // Grid size ok, store the grid and box sizes.

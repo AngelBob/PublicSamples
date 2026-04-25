@@ -1,7 +1,7 @@
 // MostSignificantBit.cpp : This file contains the 'main' function. Program execution begins and ends there.
 // Efficient method of identifying the most significant bit of an integer type.
 // Returns -1 if no bits are set in the input value.
-
+#include <climits>
 #include <iostream>
 
 using ULONG = unsigned long;

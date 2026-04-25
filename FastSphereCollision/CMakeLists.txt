@@ -11,3 +11,7 @@ add_executable(FastSphereCollision FastSphereCollision.cpp)
 target_compile_definitions(FastSphereCollision PRIVATE $<$<CONFIG:Debug>:_DEBUG>$<$<CONFIG:Release>:NDEBUG>)
 target_compile_options(FastSphereCollision PRIVATE $<$<CONFIG:Debug>:/Zi /Od /MDd>$<$<CONFIG:Release>:/O2 /MD /GL>)
 target_link_options(FastSphereCollision PRIVATE $<$<CONFIG:Debug>:/DEBUG>$<$<CONFIG:Release>:/LTCG>)
+
+if(CMAKE_COMPILER_IS_GNUCC)
+    target_compile_options(FastSphereCollision PRIVATE -march=native)
+endif()

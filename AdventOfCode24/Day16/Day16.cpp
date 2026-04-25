@@ -1,9 +1,10 @@
 // Day16.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 #include <array>
-#include <climits>
+#include <cstdint>
 #include <fstream>
 #include <iostream>
+#include <limits>
 #include <list>
 #include <map>
 #include <queue>

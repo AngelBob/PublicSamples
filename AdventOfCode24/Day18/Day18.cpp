@@ -1,7 +1,9 @@
 // Day18.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 #include <array>
+#include <cassert>
 #include <cmath>
+#include <cstdint>
 #include <fstream>
 #include <iostream>
 #include <list>
@@ -104,7 +106,7 @@ static void make_map(
     // Check the map has an exit point
     if( '#' == map[ map_dimension - 1 ][ map_dimension - 1 ] )
     {
-        __debugbreak(); // Map is not solvable
+        assert( ("Map is not solvable", 1 == 0) ); // Map is not solvable
     }
 }
 

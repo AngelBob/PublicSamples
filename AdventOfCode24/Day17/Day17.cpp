@@ -1,6 +1,8 @@
 // Day17.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 #include <array>
+#include <cstdint>
+#include <cmath>
 #include <fstream>
 #include <iostream>
 #include <ranges>

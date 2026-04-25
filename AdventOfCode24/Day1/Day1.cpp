@@ -1,8 +1,10 @@
 // Day1_Part1.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 #include <assert.h>
+#include <fstream>
 #include <iostream>
 #include <list>
+#include <string>
 
 #ifdef _DEBUG
 void validate_lists( std::list<int32_t>& list1, std::list<int32_t>& list2 )
@@ -39,13 +41,7 @@ static bool read_input( std::list<int32_t>& list1, std::list<int32_t>& list2 )
     // Step 1: open the input file.
     // Assumes the input file is named "LocationIDs.csv" and
     // is present in the same folder as the executable.
-    FILE* file = nullptr;
-    errno_t err = fopen_s( &file, ".\\LocationIDs.csv", "r" );
-    if( !file )
-    {
-        std::cout << "Failed to open input file." << std::endl;
-        return false;
-    }
+    std::ifstream file( ".\\LocationIDs.csv" );
 
     // Step 2: read the data.
     // Integers in the file represent "location IDs".
@@ -54,15 +50,23 @@ static bool read_input( std::list<int32_t>& list1, std::list<int32_t>& list2 )
     // Build each list by reading the lines from the input file
     // and placing the first value into list1 and the second
     // into list 2.
-    int32_t first, second;
-    while( 2 == fscanf_s( file, "%u,%u", &first, &second ) )
+    std::string line;
+    while( std::getline( file, line ) )
     {
+        size_t comma_pos = line.find( ',' );
+        if( std::string::npos == comma_pos )
+        {
+            // Invalid line, skip it.
+            continue;
+        }
+
+        int32_t first = std::stoi( line.substr( 0, comma_pos ) );
+        int32_t second = std::stoi( line.substr( comma_pos + 1 ) );
+
         list1.emplace_back( first );
         list2.emplace_back( second );
     }
 
-    // Step 3: close the input file and return success.
-    fclose( file );
     return true;
 }
 

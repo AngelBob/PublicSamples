@@ -2,10 +2,14 @@
 //
 #include <algorithm>
 #include <array>
+#include <cmath>
+#include <cstdint>
+#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <list>
 #include <map>
+#include <memory>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -155,7 +159,7 @@ static void find_max_cue_sales(
 
         const size_t is_set_count = static_cast<size_t>( std::pow( 19, 4 ) );
         std::unique_ptr<bool[]> is_set = std::make_unique<bool[]>( is_set_count );
-        ::memset( is_set.get(), 0, is_set_count * sizeof( bool ) );
+        std::memset( is_set.get(), 0, is_set_count * sizeof( bool ) );
 
         for (size_t round = 0; round < 2000; ++round)
         {
@@ -221,7 +225,7 @@ int main()
 
     size_t cue_sales_count = static_cast<size_t>( std::pow( 19, 4 ) );
     std::unique_ptr<uint16_t[]> cue_sales = std::make_unique<uint16_t[]>( cue_sales_count );
-    ::memset( cue_sales.get(), 0, cue_sales_count * sizeof( uint16_t ) );
+    std::memset( cue_sales.get(), 0, cue_sales_count * sizeof( uint16_t ) );
 
     find_max_cue_sales( secrets, cue_sales.get(), secret_sum, max_sum );
     std::cout << "The sum of all secrets is: " << std::to_string( secret_sum ) << "\n";

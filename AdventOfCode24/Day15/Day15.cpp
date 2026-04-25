@@ -1,9 +1,11 @@
 // Day15.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 #include <array>
+#include <cstdint>
 #include <fstream>
 #include <iostream>
 #include <list>
+#include <memory>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -254,8 +256,6 @@ static bool read_input(
             case '<':
                 movements.emplace_back( object::WALK_DIR::WALK_WEST );
                 break;
-            default:
-                __debugbreak();
             }
         }
     }

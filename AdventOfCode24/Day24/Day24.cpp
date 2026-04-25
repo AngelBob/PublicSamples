@@ -2,10 +2,13 @@
 //
 #include <algorithm>
 #include <array>
+#include <cassert>
+#include <cstdint>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <map>
+#include <memory>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -48,7 +51,7 @@ public:
     {
         if( !set )
         {
-            __debugbreak();
+           assert( ("Register value not set", false) );
         }
 
         return val;
@@ -200,7 +203,7 @@ public:
         else
         {
             // Unknown operation
-            __debugbreak();
+            assert( ("Unknown operation", false) );
         }
 
         return resolved_op;
@@ -259,7 +262,7 @@ private:
         case OP::OP_ASSIGN:
             if( a_val != b_val )
             {
-                __debugbreak();
+                assert( ("Incompatible register values", false) );
             }
 
             o = a_val ? 1 : 0;
@@ -267,7 +270,7 @@ private:
 
         default:
             // Unknown operation
-            __debugbreak();
+            assert( ("Unknown operation", false) );
         }
 
         out->set_value( 0 == o ? false : true );
@@ -412,7 +415,7 @@ static std::shared_ptr<reg_n> get_c0_reg(
     if( gates.end() == xor_gate_it || gates.end() == and_gate_it )
     {
         // This can't happen.
-        __debugbreak();
+        assert( ("Invalid gate configuration", false) );
     }
 
     // Check the output register

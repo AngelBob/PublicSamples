@@ -4,8 +4,9 @@
 // 1)  Super easy factorial example
 // 2)  Much more interesting convert a spreadsheet column number into a column letter, e.g., 1 = A, 26 = Z, 27 = AA, etc.
 //     Note that spreadsheet columns are numbered from 1, not zero (zero-based indexing confuses the masses).
-
+#include <cstdint>
 #include <iostream>
+#include <climits>
 
 // 1) Super easy factorial
 template<int N>
@@ -238,11 +239,13 @@ int main()
     std::cout << "      1406: " << len << ", " << text << "\n\t";
 
     // What column is ULONG MAX?
+#if defined( _WIN32 )
     len = SpreadSheetColumnNameLength<ULONG_MAX>::length;
     result = SpreadSheetColumnName<ULONG_MAX>::result;
     text = reinterpret_cast< char * >( &result );
     std::cout << ULONG_MAX << ": " << len << ", " << text << "\n";
     std::cout << "\n====\n\n";
+#endif
 
     // 3) compile-time structure identification
     std::cout << "Compile-time structure ID:\n\t";

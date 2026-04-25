@@ -1,7 +1,9 @@
 // Day10.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
-#include <iostream>
+#include <cstdint>
 #include <fstream>
+#include <iostream>
+#include <limits>
 #include <sstream>
 
 #include "machine.hpp"

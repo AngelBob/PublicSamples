@@ -16,32 +16,32 @@ set(RESOURCES
     FakeGuard.rc
 )
 
-add_executable(FakeGuard ${SOURCES})
-
-# Add resource file (Windows only)
 if(WIN32)
+    # This is a pure Windows application.
+    add_executable(FakeGuard ${SOURCES})
+
     target_sources(FakeGuard PRIVATE ${RESOURCES})
+
+    set_target_properties(FakeGuard PROPERTIES
+        LINK_FLAGS "/ENTRY:\"wWinMainCRTStartup\""
+    )
+
+    # Configuration settings
+    target_compile_definitions(FakeGuard PRIVATE
+        WIN32
+        _UNICODE
+        UNICODE
+        $<$<CONFIG:Debug>:_DEBUG>
+        $<$<CONFIG:Release>:NDEBUG>
+    )
+
+    target_compile_options(FakeGuard PRIVATE
+        $<$<CONFIG:Debug>:/Zi /Od /MDd>
+        $<$<CONFIG:Release>:/O2 /MD /GL>
+    )
+
+    target_link_options(FakeGuard PRIVATE
+        $<$<CONFIG:Debug>:/DEBUG>
+        $<$<CONFIG:Release>:/LTCG>
+    )
 endif()
-
-set_target_properties(FakeGuard PROPERTIES
-    LINK_FLAGS "/ENTRY:\"wWinMainCRTStartup\""
-)
-
-# Configuration settings
-target_compile_definitions(FakeGuard PRIVATE 
-    WIN32
-    _UNICODE
-    UNICODE 
-    $<$<CONFIG:Debug>:_DEBUG>
-    $<$<CONFIG:Release>:NDEBUG>
-)
-
-target_compile_options(FakeGuard PRIVATE 
-    $<$<CONFIG:Debug>:/Zi /Od /MDd>
-    $<$<CONFIG:Release>:/O2 /MD /GL>
-)
-
-target_link_options(FakeGuard PRIVATE
-    $<$<CONFIG:Debug>:/DEBUG>
-    $<$<CONFIG:Release>:/LTCG>
-)

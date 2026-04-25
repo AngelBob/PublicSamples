@@ -3,13 +3,40 @@
 // a) SSE instructions to parallelize the distance calculation, or
 // b) normal serialized instructions, or
 // c) both to compare speed.
-
-#include <Windows.h>
-
+#include <cstring>
 #include <iostream>
 
 // Include the SSE intrinsic functions
-#include <intrin.h>
+#if defined( _MSC_VER )
+    #include <windows.h>
+    #include <intrin.h>
+    #define ALIGN(x) __declspec( align( x ) )
+#else
+    #include <x86intrin.h>
+    #define ALIGN(x) __attribute__( ( aligned( x ) ) )
+
+    typedef struct
+    {
+        long long QuadPart;
+    } LARGE_INTEGER;
+
+    void QueryPerformanceFrequency( LARGE_INTEGER *lpFrequency )
+    {
+        lpFrequency->QuadPart = 1;
+    }
+
+    void QueryPerformanceCounter( LARGE_INTEGER *lpPerformanceCount )
+    {
+        struct timespec ts;
+        if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0) {
+            // Handle error
+            lpPerformanceCount->QuadPart = 0;
+            return;
+        }
+
+        lpPerformanceCount->QuadPart = ts.tv_sec * 1000000.0 + ts.tv_nsec / 1000.0; // Convert to microseconds
+    }
+#endif
 
 //***  Various knobs that control the operation of this code. Changes require rebuild. ***//
 
@@ -17,7 +44,7 @@
     bool USE_SSE = true;                    // turn this off to use scalar math
 
     // Performance run settings.
-    static const bool PERF_RUN  = false;    // turn this on to check the performance (use Release build)
+    static const bool PERF_RUN  = true;    // turn this on to check the performance (use Release build)
     static const int ITERATIONS = 1000000;  // this is the number of collision tests to run
     static const int PAGE_COUNT = 1;        // the number of pages of random position data to generate (disconnects data allocation from iteration count)
 
@@ -28,7 +55,7 @@ static const int FLOAT_PER_OBJECT = 3;
 class Vec3
 {
 private:
-    __declspec( align( 16 ) ) float m_Comps[ 4 ];
+    ALIGN(16) float m_Comps[ 4 ];
     static const int m_CompsSize = sizeof( m_Comps ) / sizeof( m_Comps[ 0 ] );
 
 public:
@@ -157,7 +184,7 @@ void CollisionTimer( void )
             floatList[ idx ] = ( float( rand() ) / max ) * radius * 2;
         }
 
-        ::memcpy_s( pPosList + iter, sizeof( float ) * FLOAT_PER_OBJECT, floatList, sizeof( float ) * FLOAT_PER_OBJECT );
+        ::memcpy( pPosList + iter, floatList, sizeof( float ) * FLOAT_PER_OBJECT );
     }
 
     LARGE_INTEGER et, freq;
@@ -190,10 +217,11 @@ void CollisionTimer( void )
             }
         }
 
+#if defined( _MSC_VER )
         // Do fancy math to convert elapsed time to microseconds.
         et.QuadPart *= 1000000;
         et.QuadPart /= freq.QuadPart;
-
+#endif
         std::cout << "Time to iterate " << iter << " tests " << et.QuadPart;
 
         if( USE_SSE )

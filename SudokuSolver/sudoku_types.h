@@ -3,7 +3,8 @@
 #include <algorithm>
 #include <array>
 #include <bitset>
-#include <conio.h>
+//#include <conio.h>
+#include <exception>
 #include <fstream>
 #include <iomanip>
 #include <iostream>

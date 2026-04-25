@@ -1,6 +1,7 @@
 // Day23.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 #include <algorithm>
+#include <cstdint>
 #include <fstream>
 #include <iostream>
 #include <map>
