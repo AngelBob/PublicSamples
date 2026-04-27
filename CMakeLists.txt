@@ -11,6 +11,7 @@ set(SUBPROJECTS
     DiamondPrinter
     FakeGuard
     FastSphereCollision
+    InterviewProblems
     MemberHiding
     MostSignificantBit
     StlTypeTest
