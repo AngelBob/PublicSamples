@@ -1,33 +1,33 @@
 cmake_minimum_required(VERSION 3.15)
 project(AllProjects)
 
-# Collect all subproject names
-set(SUBPROJECTS
-    3DoorTest
-    AarnioSequence
-    AdventOfCode24
-    AdventOfCode25
-    D3D12PerlinTriangle
-    DiamondPrinter
-    FakeGuard
-    FastSphereCollision
-    InterviewProblems
-    MemberHiding
-    MostSignificantBit
-    StlTypeTest
-    SudokuSolver
-    TemplateMetaProgramming
-    TicTacToe
-    UniqueLockTest
-)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Add all subprojects
-foreach(SUBPROJECT ${SUBPROJECTS})
-    add_subdirectory(${SUBPROJECT})
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/_BUILD/bin/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/_BUILD/lib/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/_BUILD/obj/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>)
+
+# Collect all subproject names
+# Iterate and add only directories
+set(SUBPROJECT "")
+
+file(GLOB project_dirs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} [^_.]*)
+list(FILTER project_dirs EXCLUDE REGEX "^(TextAdventures)$")
+
+foreach(subdir ${project_dirs})
+    if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${subdir})
+        list(APPEND SUBPROJECTS ${subdir})
+    endif()
 endforeach()
 
-# Custom "clean" target for each subproject individually
+# Add all subprojects, default build settings, and custom clean targets
 foreach(SUBPROJECT ${SUBPROJECTS})
+    add_subdirectory(${SUBPROJECT})
+
     add_custom_target(clean_${SUBPROJECT}
         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/${SUBPROJECT} --target clean
         COMMENT "Cleaning ${SUBPROJECT}..."

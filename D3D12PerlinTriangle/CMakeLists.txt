@@ -1,12 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 project(D3D12PerlinTriangle CXX)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-# x64 only
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/x64/${CMAKE_CFG_INTDIR})
-
 # Source files
 set(SOURCES
     D3D12PerlinTriangle.cpp
@@ -25,6 +19,7 @@ set(HEADERS
     stb_perlin.h
 )
 
+# Only build on Windows
 if(WIN32)
     # This is a pure Windows application.
     add_executable(D3D12PerlinTriangle ${SOURCES} ${HEADERS})
@@ -56,17 +51,5 @@ if(WIN32)
         _WINDOWS
         _UNICODE
         UNICODE
-        $<$<CONFIG:Debug>:_DEBUG>
-        $<$<CONFIG:Release>:NDEBUG>
-    )
-
-    target_compile_options(D3D12PerlinTriangle PRIVATE
-        $<$<CONFIG:Debug>:/Zi /Od /MDd>
-        $<$<CONFIG:Release>:/O2 /MD /GL>
-    )
-
-    target_link_options(D3D12PerlinTriangle PRIVATE
-        $<$<CONFIG:Debug>:/DEBUG /INCREMENTAL>
-        $<$<CONFIG:Release>:/LTCG /OPT:REF /OPT:ICF>
     )
 endif()

@@ -1,19 +1,25 @@
 cmake_minimum_required(VERSION 3.15)
 project(AdventOfCode25 CXX)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(OLD_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+set(OLD_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
+set(OLD_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY})
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${PROJECT_NAME})
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/${PROJECT_NAME})
 
 # Build all days
-add_subdirectory(Day01)
-add_subdirectory(Day02)
-add_subdirectory(Day03)
-add_subdirectory(Day04)
-add_subdirectory(Day05)
-add_subdirectory(Day06)
-add_subdirectory(Day07)
-add_subdirectory(Day08)
-add_subdirectory(Day09)
-add_subdirectory(Day10)
-add_subdirectory(Day11)
-add_subdirectory(Day12)
+# List all items in current directory
+file(GLOB children RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *)
+
+# Iterate and add only directories
+foreach(subdir ${children})
+    if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${subdir})
+        add_subdirectory(${subdir})
+    endif()
+endforeach()
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OLD_RUNTIME_OUTPUT_DIRECTORY})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OLD_LIBRARY_OUTPUT_DIRECTORY})
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${OLD_ARCHIVE_OUTPUT_DIRECTORY})
