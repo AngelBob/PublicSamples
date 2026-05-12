@@ -16,7 +16,11 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/_BUILD/obj/$<$<CONFIG:Deb
 set(SUBPROJECT "")
 
 file(GLOB project_dirs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} [^_.]*)
-list(FILTER project_dirs EXCLUDE REGEX "^(TextAdventures)$")
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64")
+    list(FILTER project_dirs EXCLUDE REGEX "^(TextAdventures)$")
+else()
+    list(FILTER project_dirs EXCLUDE REGEX "^(TextAdventures|CUDASample)$")
+endif()
 
 foreach(subdir ${project_dirs})
     if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${subdir})
